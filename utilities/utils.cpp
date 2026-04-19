@@ -2,7 +2,7 @@
 #include <cstdlib>
 
 void Print(std::string msg) {
-    std::cout << msg << std::endl;
+    std::cout << "Graphx | " << msg << std::endl;
 }
 
 void Warn(std::string msg) {
