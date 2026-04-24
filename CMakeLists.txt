@@ -19,7 +19,7 @@ fetchcontent_makeavailable(glfw)
 add_library(glad STATIC dependencies/glad/glad.c)
 target_include_directories(glad PRIVATE .)
 
-add_library(Graphx STATIC core/window.cpp application/app.cpp utilities/utils.cpp)
+add_library(Graphx STATIC core/window.cpp application/app.cpp renderer/renderer.cpp utilities/utils.cpp)
 target_include_directories(Graphx PRIVATE .)
 target_link_libraries(Graphx PUBLIC glfw glad)
 

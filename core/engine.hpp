@@ -4,4 +4,5 @@
 
 #include <core/window.hpp>
 #include <application/app.hpp>
+#include <renderer/renderer.hpp>
 #include <utilities/utils.hpp>
