@@ -16,12 +16,20 @@ set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 
 fetchcontent_makeavailable(glfw)
 
+fetchcontent_declare(
+  glm
+  GIT_REPOSITORY https://github.com/g-truc/glm.git
+  GIT_TAG 1.0.3
+)
+
+fetchcontent_makeavailable(glm)
+
 add_library(glad STATIC dependencies/glad/glad.c)
 target_include_directories(glad PRIVATE .)
 
 add_library(Graphx STATIC core/window.cpp application/app.cpp renderer/renderer.cpp utilities/utils.cpp)
 target_include_directories(Graphx PRIVATE .)
-target_link_libraries(Graphx PUBLIC glfw glad)
+target_link_libraries(Graphx PUBLIC glfw glad glm::glm)
 
 add_executable(App workspace/main.cpp)
 target_include_directories(App PRIVATE .)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <renderer/buffer.hpp>
+#include <scene/scene.hpp>
 
 namespace graphx {
 
@@ -12,6 +13,8 @@ class Renderer {
 public:
     Renderer();
     ~Renderer();
+
+    void Render(Scene scene);
 private:
     
 };
