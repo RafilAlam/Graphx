@@ -1,5 +1,8 @@
 #pragma once
 
+#include <dependencies/glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include <renderer/buffer.hpp>
 #include <scene/scene.hpp>
 

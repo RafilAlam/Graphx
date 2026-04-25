@@ -10,6 +10,7 @@ namespace graphx {
 
 class Buffer {
 public:
+    Buffer(std::vector<unsigned int> Objects, int numObjects, size_t sizeofObject);
     Buffer(std::vector<float> Objects, int numObjects, size_t sizeofObject);
     ~Buffer();
     GLuint GetHandle();

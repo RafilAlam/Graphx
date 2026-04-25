@@ -2,6 +2,11 @@
 
 namespace graphx {
 
+    Buffer::Buffer(std::vector<unsigned int> Objects, int numObjects, size_t sizeofObject) : numobjects(numObjects) {
+        glCreateBuffers(1, &handle);
+        glNamedBufferStorage(handle, sizeofObject*numObjects, Objects.data(), GL_DYNAMIC_STORAGE_BIT);
+    }
+
     Buffer::Buffer(std::vector<float> Objects, int numObjects, size_t sizeofObject) : numobjects(numObjects) {
         glCreateBuffers(1, &handle);
         glNamedBufferStorage(handle, sizeofObject*numObjects, Objects.data(), GL_DYNAMIC_STORAGE_BIT);
