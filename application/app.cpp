@@ -1,30 +1,65 @@
 #include <application/app.hpp>
 #include <utilities/utils.hpp>
+#include <scene/components.hpp>
+#include <scene/mesh_factory.hpp>
+#include <assetmanager/assetmanager.hpp>
+
 #include <glfw/glfw3.h>
 
 namespace graphx {
 
-    Application::Application(GLFWwindow* windowhandle) : window_handle(windowhandle) {}
+Application::Application(GLFWwindow* windowhandle) : window_handle(windowhandle) {
+    world.component<Transform>();
+    world.component<Details>();
+    world.component<Mesh>();
 
-    void Application::Run() {
-        Print("Application Started!");
-        float lastTime = glfwGetTime();
+    SetupDemoScene();
+}
 
-        while (!glfwWindowShouldClose(window_handle)) {
-            float now = glfwGetTime();
-            float dt = now - lastTime;
-            lastTime = now;
+void Application::SetupDemoScene() {
+    flecs::entity triangle = world.entity("Triangle");
 
-            glfwPollEvents();
+    triangle.set<Transform>({});
+    triangle.set<Details>({{1.0f, 0.5f, 0.2f, 1.0f}});
 
-            //OnUpdate();
-            //OnRender();
+    std::vector<float> vertices = {
+        -0.5f, -0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f,
+         0.0f,  0.5f, 0.0f
+    };
+    std::vector<unsigned int> indices = {0, 1, 2};
 
-            glfwSwapBuffers(window_handle);
-        }
+    triangle.set<Mesh>(CreateMesh(std::move(vertices), std::move(indices)));
+}
 
-        Print("Application Stopped!");
-        glfwTerminate();
+void Application::Run() {
+    Print("Application Started!");
+    float lastTime = glfwGetTime();
+
+    while (!glfwWindowShouldClose(window_handle)) {
+        float now = glfwGetTime();
+        float dt = now - lastTime;
+        lastTime = now;
+
+        glfwPollEvents();
+
+        OnUpdate(dt);
+        OnRender();
+
+        glfwSwapBuffers(window_handle);
     }
+
+    Print("Application Stopped!");
+    glfwTerminate();
+}
+
+void Application::OnUpdate(float /*dt*/) {}
+
+void Application::OnRender() {
+    glClearColor(0.1f, 0.1f, 0.12f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    renderer.Render(world);
+}
 
 }

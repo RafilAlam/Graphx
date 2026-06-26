@@ -1,17 +1,26 @@
 #pragma once
+
 #include <core/window.hpp>
+#include <renderer/renderer.hpp>
+
+#include <flecs.h>
 
 namespace graphx {
 
 class Application {
 public:
-    GLFWwindow* window_handle;
-
     Application(GLFWwindow* windowhandle);
 
     void Run();
-    void OnUpdate();
+
+private:
+    void OnUpdate(float dt);
     void OnRender();
+    void SetupDemoScene();
+
+    GLFWwindow* window_handle;
+    flecs::world world;
+    Renderer renderer;
 };
 
 }

@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 4.1.0)
 project(Graphx LANGUAGES C CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 include(FetchContent)
 
 fetchcontent_declare(
@@ -24,12 +28,35 @@ fetchcontent_declare(
 
 fetchcontent_makeavailable(glm)
 
-add_library(glad STATIC dependencies/glad/glad.c)
-target_include_directories(glad PRIVATE .)
+fetchcontent_declare(
+  flecs
+  GIT_REPOSITORY https://github.com/SanderMertens/flecs.git
+  GIT_TAG v4.0.4
+  GIT_SHALLOW ON
+)
 
-add_library(Graphx STATIC core/window.cpp application/app.cpp renderer/renderer.cpp utilities/utils.cpp)
+fetchcontent_makeavailable(flecs)
+
+add_library(glad STATIC dependencies/glad/glad.c)
+target_include_directories(glad PUBLIC . dependencies)
+
+add_library(Graphx STATIC
+  core/window.cpp
+  application/app.cpp
+  assetmanager/assetmanager.cpp
+  scene/mesh_factory.cpp
+  renderer/renderer.cpp
+  renderer/buffer.cpp
+  renderer/vertexarray.cpp
+  renderer/shader.cpp
+  utilities/utils.cpp
+)
 target_include_directories(Graphx PRIVATE .)
-target_link_libraries(Graphx PUBLIC glfw glad glm::glm)
+target_link_libraries(Graphx PUBLIC glfw glad glm::glm flecs::flecs_static)
+
+if(WIN32 AND NOT MSVC)
+  target_link_libraries(Graphx PUBLIC ws2_32 dbghelp)
+endif()
 
 add_executable(App workspace/main.cpp)
 target_include_directories(App PRIVATE .)

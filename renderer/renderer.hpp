@@ -3,23 +3,21 @@
 #include <dependencies/glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <renderer/buffer.hpp>
-#include <scene/scene.hpp>
+#include <flecs.h>
+#include <memory>
 
 namespace graphx {
 
-struct Vertex {
-    float pos[3];
-};
+class Shader;
 
 class Renderer {
 public:
     Renderer();
     ~Renderer();
 
-    void Render(Scene scene);
+    void Render(flecs::world& world);
 private:
-    
+    std::unique_ptr<Shader> shader;
 };
 
 }

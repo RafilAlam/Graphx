@@ -17,12 +17,18 @@ struct Mesh {
     Buffer VBO;
     Buffer EBO;
     VertexArray VAO;
+
+    Mesh() = default;
+    Mesh(Mesh&&) = default;
+    Mesh& operator=(Mesh&&) = default;
+    Mesh(const Mesh&) = delete;
+    Mesh& operator=(const Mesh&) = delete;
 };
 
 class AssetManager {
 public:
     MeshHandle LoadMesh(std::vector<float> Vertices, std::vector<unsigned int> Indices);
-    Mesh GetMesh(MeshHandle Mesh);
+    const Mesh& GetMesh(MeshHandle handle) const;
 private:
     std::unordered_map<MeshHandle, Mesh> meshes;
     unsigned int meshcount {0};

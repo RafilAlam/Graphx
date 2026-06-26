@@ -2,7 +2,7 @@
 
 #include <dependencies/glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <renderer/renderer.hpp>
+#include <renderer/vertex.hpp>
 
 #include <cstddef>
 
@@ -10,11 +10,18 @@ namespace graphx {
 
 class VertexArray {
 public:
+    VertexArray();
     VertexArray(GLuint VBO, GLuint EBO);
     ~VertexArray();
-    GLuint GetHandle();
+
+    VertexArray(const VertexArray&) = delete;
+    VertexArray& operator=(const VertexArray&) = delete;
+    VertexArray(VertexArray&& other) noexcept;
+    VertexArray& operator=(VertexArray&& other) noexcept;
+
+    GLuint GetHandle() const;
 private:
-    GLuint handle;
+    GLuint handle = 0;
 };
 
 }
