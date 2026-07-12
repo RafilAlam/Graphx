@@ -1,5 +1,11 @@
-#include <engine/include/engine.hpp>
+#include <engine/include/app.hpp>
 
 int main() {
-    DebugPrint("Test Message!");
+    App app({
+        .WindowWidth = 500,
+        .WindowHeight = 500,
+        .WindowTitle = "MyApp"
+    });
+
+    app.Run();
 }

@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 4.1.0)
 project(Graphx LANGUAGES C CXX)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 include(FetchContent)
+
+find_package(OpenGL REQUIRED)
 
 fetchcontent_declare(
   glfw
@@ -27,9 +32,9 @@ fetchcontent_makeavailable(glm)
 add_library(glad STATIC dependencies/glad/glad.c)
 target_include_directories(glad PRIVATE .)
 
-add_library(Graphx STATIC engine/src/debug.cpp)
+add_library(Graphx STATIC engine/src/app.cpp engine/src/window.cpp engine/src/debug.cpp)
 target_include_directories(Graphx PRIVATE .)
-target_link_libraries(Graphx PUBLIC glfw glad glm::glm)
+target_link_libraries(Graphx PUBLIC OpenGL::GL glfw glad glm::glm)
 
 add_executable(App sandbox/main.cpp)
 target_include_directories(App PRIVATE .)
