@@ -27,10 +27,10 @@ fetchcontent_makeavailable(glm)
 add_library(glad STATIC dependencies/glad/glad.c)
 target_include_directories(glad PRIVATE .)
 
-add_library(Graphx STATIC core/window.cpp application/app.cpp renderer/renderer.cpp utilities/utils.cpp)
+add_library(Graphx STATIC engine/src/window.cpp)
 target_include_directories(Graphx PRIVATE .)
 target_link_libraries(Graphx PUBLIC glfw glad glm::glm)
 
-add_executable(App workspace/main.cpp)
+add_executable(App sandbox/main.cpp)
 target_include_directories(App PRIVATE .)
 target_link_libraries(App PRIVATE Graphx)
