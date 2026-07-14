@@ -1,6 +1,8 @@
 #include <engine/include/app.hpp>
 
-App::App(AppConfig config) : m_window(Window(config.windowWidth, config.windowHeight, config.windowTitle)) {}
+App::App(AppConfig config)
+ : m_window(Window(config.WindowWidth, config.WindowHeight, config.WindowTitle))
+ {}
 
 int App::Run() {
     DebugPrint("Running!");

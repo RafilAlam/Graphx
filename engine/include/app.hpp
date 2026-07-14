@@ -2,6 +2,7 @@
 
 #include <engine/include/window.hpp>
 #include <engine/include/debug.hpp>
+#include <glm/glm.hpp>
 
 struct AppConfig {
     int WindowWidth = 100;
