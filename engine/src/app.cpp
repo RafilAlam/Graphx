@@ -6,7 +6,12 @@ App::App(AppConfig config)
 
 int App::Run() {
     DebugPrint("Running!");
+
     while (!m_window.ShouldClose()) {
+        for (auto& layer : m_layers) {
+            layer->OnUpdate();
+        }
+
         glClear(GL_COLOR_BUFFER_BIT);
         m_window.SwapBuffers();
         glfwPollEvents();
@@ -16,4 +21,8 @@ int App::Run() {
     glfwTerminate();
     DebugPrint("Closed.");
     return 0;
+}
+
+int App::GetInput(int keycode) {
+    return glfwGetKey(m_window.GetHandle(), keycode);
 }

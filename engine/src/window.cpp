@@ -38,3 +38,7 @@ void Window::SwapBuffers() {
 bool Window::ShouldClose() {
     return glfwWindowShouldClose(m_handle);
 }
+
+GLFWwindow* Window::GetHandle() {
+    return m_handle;
+}

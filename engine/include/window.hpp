@@ -12,6 +12,7 @@ public:
     Window(int width, int height, std::string title);
     void SwapBuffers();
     bool ShouldClose();
+    GLFWwindow* GetHandle();
 private:
     GLFWwindow* m_handle;
 };
