@@ -32,7 +32,7 @@ fetchcontent_makeavailable(glm)
 add_library(glad STATIC dependencies/glad/glad.c)
 target_include_directories(glad PRIVATE .)
 
-add_library(Graphx STATIC engine/src/app.cpp engine/src/window.cpp engine/src/debug.cpp)
+add_library(Graphx STATIC engine/src/app.cpp engine/src/window.cpp engine/src/debug.cpp engine/src/scene.cpp engine/src/rendering/renderer.cpp engine/src/rendering/shader.cpp engine/src/rendering/mesh.cpp)
 target_include_directories(Graphx PRIVATE .)
 target_link_libraries(Graphx PUBLIC OpenGL::GL glfw glad glm::glm)
 

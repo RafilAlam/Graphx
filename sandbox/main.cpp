@@ -6,7 +6,13 @@ App app({
     .WindowTitle = "MyApp"
 });
 
-class MainLayer : public Layer {
+Mesh triangle({
+    -0.5f, -0.5f, 0.0f,
+     0.5f, -0.5f, 0.0f,
+     0.0f,  0.5f, 0.0f
+});
+
+class MainScript : public Script {
 public:
     void OnUpdate() override {
         if (!Fpressed and app.GetInput(GLFW_KEY_F) == GLFW_PRESS) {
@@ -23,8 +29,9 @@ private:
 };
 
 int main() {
+    Scene& scene = app.NewScene();
 
-    app.AddLayer<MainLayer>();
+    scene.AddScript<MainScript>();
 
     app.Run();
 }

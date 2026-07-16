@@ -2,17 +2,12 @@
 
 #include <engine/include/window.hpp>
 #include <engine/include/debug.hpp>
-#include <glm/glm.hpp>
-#include <functional>
-#include <concepts>
+#include <engine/include/scene.hpp>
+#include <engine/include/rendering/renderer.hpp>
+#include <engine/include/rendering/shader.hpp>
+#include <engine/include/rendering/mesh.hpp>
 #include <vector>
 #include <memory>
-
-class Layer {
-public:
-    virtual ~Layer() = default;
-    virtual void OnUpdate() = 0;
-};
 
 struct AppConfig {
     int WindowWidth = 100;
@@ -25,13 +20,10 @@ public:
     App(AppConfig config);
     int Run();
     int GetInput(int keycode);
-    template<typename T>
-    void AddLayer() {
-        m_layers.push_back(
-            std::make_unique<T>()
-        );
-    }
+    Scene& NewScene();
 private:
     Window m_window;
-    std::vector<std::unique_ptr<Layer>> m_layers;
+    Renderer m_renderer;
+    Scene m_scene;
+    unsigned int m_shaderprogram;
 };
