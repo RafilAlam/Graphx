@@ -2,7 +2,9 @@
 
 #include <engine/include/window.hpp>
 #include <engine/include/debug.hpp>
-#include <engine/include/scene.hpp>
+#include <engine/include/scene/scene.hpp>
+#include <engine/include/scene/object.hpp>
+#include <engine/include/rendering/assetmanager.hpp>
 #include <engine/include/rendering/renderer.hpp>
 #include <engine/include/rendering/shader.hpp>
 #include <engine/include/rendering/mesh.hpp>

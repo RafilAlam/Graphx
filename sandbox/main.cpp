@@ -6,11 +6,19 @@ App app({
     .WindowTitle = "MyApp"
 });
 
-Mesh triangle({
+AssetManager assetmanager;
+
+Mesh& triangle = assetmanager.NewMesh({
     -0.5f, -0.5f, 0.0f,
      0.5f, -0.5f, 0.0f,
      0.0f,  0.5f, 0.0f
 });
+
+Shader& baseshader = assetmanager.NewShader(ShaderConfig());
+
+Object mainobject(triangle, baseshader);
+
+Scene& scene = app.NewScene();
 
 class MainScript : public Script {
 public:
@@ -29,9 +37,8 @@ private:
 };
 
 int main() {
-    Scene& scene = app.NewScene();
-
     scene.AddScript<MainScript>();
+    scene.AddObject(mainobject);
 
     app.Run();
 }

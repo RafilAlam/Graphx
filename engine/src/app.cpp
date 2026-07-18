@@ -6,10 +6,12 @@ App::App(AppConfig config)
 
 int App::Run() {
     DebugPrint("Running!");
-
+    
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     while (!m_window.ShouldClose()) {
-        m_scene.Update();
         glClear(GL_COLOR_BUFFER_BIT);
+        m_renderer.Draw(m_scene.GetObjects());
+        m_scene.Update();
         m_window.SwapBuffers();
         glfwPollEvents();
     }

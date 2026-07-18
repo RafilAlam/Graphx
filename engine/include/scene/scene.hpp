@@ -1,9 +1,11 @@
 #pragma once
 
-#include <vector>
+#include <deque>
 #include <memory>
-#include <engine/include/script.hpp>
+#include <engine/include/scene/object.hpp>
+#include <engine/include/scene/script.hpp>
 #include <engine/include/rendering/mesh.hpp>
+
 
 class Scene {
 public:
@@ -15,15 +17,18 @@ public:
     Scene(Scene&&) noexcept = default;
     Scene& operator=(Scene&&) noexcept = default;
 
-    void AddMesh(Mesh mesh);
+    void AddObject(const Object& mesh);
     template<typename T>
     void AddScript() {
         m_scripts.push_back(
             std::make_unique<T>()
         );
     }
+
+    std::deque<Object>& GetObjects();
+
     void Update();
 private:
-    std::vector<Mesh> m_meshes;
-    std::vector<std::unique_ptr<Script>> m_scripts;
+    std::deque<Object> m_objects;
+    std::deque<std::unique_ptr<Script>> m_scripts;
 };

@@ -7,7 +7,7 @@
 class Mesh {
 public: 
     Mesh(std::vector<float> vertices);
-    unsigned int GetVAO();
+    unsigned int GetVAO() const;
 private:
     unsigned int m_vbo;
     unsigned int m_vao;

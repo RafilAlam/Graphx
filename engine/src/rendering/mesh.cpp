@@ -12,6 +12,6 @@ Mesh::Mesh(std::vector<float> vertices) {
     glEnableVertexAttribArray(0);
 }
 
-unsigned int Mesh::GetVAO() {
+unsigned int Mesh::GetVAO() const {
     return m_vao;
 }
