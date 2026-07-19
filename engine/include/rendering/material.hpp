@@ -7,7 +7,7 @@ class Material  {
 public:
     Material(Shader& shader);
     Shader& GetShader() const;
-    glm::vec4 baseColor = {1.0f, 1.0f, 1.0f, 1.0f};
+    glm::vec4 BaseColor = {1.0f, 1.0f, 1.0f, 1.0f};
 private:
     Shader* m_shader;
 };

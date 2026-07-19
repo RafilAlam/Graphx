@@ -16,12 +16,15 @@ Mesh& triangle = assetmanager.LoadMesh("triangle", {
 
 Shader& baseshader = assetmanager.LoadShaders("baseshader", "assets/engine/shaders/default.vert", "assets/engine/shaders/default.frag");
 Material& basematerial = assetmanager.LoadMaterial("basematerial", baseshader);
-Object mainobject(triangle, basematerial);
 
 Scene& scene = app.NewScene();
+Object& mainobject = scene.CreateObject(triangle, basematerial);
 
 class MainScript : public Script {
 public:
+    void OnStart() override {
+        mainobject.Position = {1.0f, 0.5f, 1.0f};
+    }
     void OnUpdate() override {
         if (!Fpressed and app.GetInput(GLFW_KEY_F) == GLFW_PRESS) {
             Fpressed = true;
@@ -38,7 +41,6 @@ private:
 
 int main() {
     scene.AddScript<MainScript>();
-    scene.AddObject(mainobject);
 
     app.Run();
 }

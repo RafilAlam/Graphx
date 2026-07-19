@@ -17,7 +17,7 @@ public:
     Scene(Scene&&) noexcept = default;
     Scene& operator=(Scene&&) noexcept = default;
 
-    void AddObject(const Object& mesh);
+    Object& CreateObject(const Mesh& mesh, const Material& material);
     template<typename T>
     void AddScript() {
         m_scripts.push_back(
@@ -27,6 +27,7 @@ public:
 
     std::deque<Object>& GetObjects();
 
+    void OnStart();
     void Update();
 private:
     std::deque<Object> m_objects;

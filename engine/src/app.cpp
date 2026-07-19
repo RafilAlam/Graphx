@@ -8,6 +8,8 @@ int App::Run() {
     DebugPrint("Running!");
     
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    m_scene.OnStart();
+
     while (!m_window.ShouldClose()) {
         glClear(GL_COLOR_BUFFER_BIT);
         m_renderer.Draw(m_scene.GetObjects());

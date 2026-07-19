@@ -4,10 +4,17 @@
 #include <engine/include/scene/object.hpp>
 #include <engine/include/rendering/uniformbuffer.hpp>
 #include <engine/include/rendering/mesh.hpp>
+
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 struct MaterialData {
     glm::vec4 Color;
+};
+
+struct ObjectData {
+    glm::mat4 Transform;
 };
 
 class Renderer {
@@ -16,6 +23,6 @@ public:
     void Draw(std::deque<Object>& objects);
     void Draw(Object object);
 private:
-    void UpdateData(const Material& material);
     UniformBuffer m_materialbuffer;
+    UniformBuffer m_objectbuffer;
 };

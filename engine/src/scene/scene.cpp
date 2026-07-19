@@ -1,11 +1,17 @@
 #include <engine/include/scene/scene.hpp>
 
-void Scene::AddObject(const Object& mesh) {
-    m_objects.push_back(mesh);
+Object& Scene::CreateObject(const Mesh& mesh, const Material& material) {
+    return m_objects.emplace_back(mesh, material);
 }
 
 std::deque<Object>& Scene::GetObjects() {
     return m_objects;
+}
+
+void Scene::OnStart() {
+    for (auto& script : m_scripts) {
+        script->OnStart();
+    }
 }
 
 void Scene::Update() {
