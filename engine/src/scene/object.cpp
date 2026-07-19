@@ -1,13 +1,13 @@
 #include <engine/include/scene/object.hpp>
 
-Object::Object(const Mesh& mesh, const Shader& shader)
- : m_mesh(&mesh), m_shader(&shader)
+Object::Object(const Mesh& mesh, const Material& material)
+ : m_mesh(&mesh), m_material(&material)
  {}
 
 const Mesh& Object::GetMesh() {
     return *m_mesh;
 };
 
-const Shader& Object::GetShader() {
-    return *m_shader;
+const Material& Object::GetMaterial() {
+    return *m_material;
 };

@@ -8,15 +8,15 @@ App app({
 
 AssetManager assetmanager;
 
-Mesh& triangle = assetmanager.NewMesh({
+Mesh& triangle = assetmanager.LoadMesh("triangle", {
     -0.5f, -0.5f, 0.0f,
      0.5f, -0.5f, 0.0f,
      0.0f,  0.5f, 0.0f
 });
 
-Shader& baseshader = assetmanager.NewShader(ShaderConfig());
-
-Object mainobject(triangle, baseshader);
+Shader& baseshader = assetmanager.LoadShaders("baseshader", "assets/engine/shaders/default.vert", "assets/engine/shaders/default.frag");
+Material& basematerial = assetmanager.LoadMaterial("basematerial", baseshader);
+Object mainobject(triangle, basematerial);
 
 Scene& scene = app.NewScene();
 

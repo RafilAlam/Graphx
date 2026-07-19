@@ -2,7 +2,7 @@
 
 App::App(AppConfig config)
  : m_window(Window(config.WindowWidth, config.WindowHeight, config.WindowTitle))
- {}
+{}
 
 int App::Run() {
     DebugPrint("Running!");

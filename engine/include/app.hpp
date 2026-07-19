@@ -8,6 +8,7 @@
 #include <engine/include/rendering/renderer.hpp>
 #include <engine/include/rendering/shader.hpp>
 #include <engine/include/rendering/mesh.hpp>
+#include <filesystem>
 #include <vector>
 #include <memory>
 
