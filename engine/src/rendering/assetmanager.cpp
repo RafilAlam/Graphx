@@ -1,6 +1,6 @@
 #include <engine/include/rendering/assetmanager.hpp>
 
-Mesh& AssetManager::LoadMesh(std::string name, std::vector<float> vertices) {
+Mesh& AssetManager::LoadMesh(std::string name, std::vector<Vertex> vertices) {
     if (m_meshes.contains(name)) {
         return m_meshes.at(name);
     } else {
@@ -18,11 +18,11 @@ Shader& AssetManager::LoadShaders(std::string name, std::string vertexsourcepath
     }
 }
 
-Material& AssetManager::LoadMaterial(std::string name, Shader& shader) {
+Material& AssetManager::LoadMaterial(std::string name, Shader& shader, Texture&& texture) {
     if (m_materials.contains(name)) {
         return m_materials.at(name);
     } else {
-        auto [it, inserted] = m_materials.try_emplace(name, Material(shader));
+        auto [it, inserted] = m_materials.try_emplace(name, Material(shader, texture));
         return it->second;
     }
 }

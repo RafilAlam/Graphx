@@ -9,13 +9,13 @@ App app({
 AssetManager assetmanager;
 
 Mesh& triangle = assetmanager.LoadMesh("triangle", {
-    -0.5f, -0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-     0.0f,  0.5f, 0.0f
+    Vertex{{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+    Vertex{{0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+    Vertex{{0.0f,  0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.5f, 1.0f}},
 });
 
 Shader& baseshader = assetmanager.LoadShaders("baseshader", "assets/engine/shaders/default.vert", "assets/engine/shaders/default.frag");
-Material& basematerial = assetmanager.LoadMaterial("basematerial", baseshader);
+Material& basematerial = assetmanager.LoadMaterial("basematerial", baseshader, Texture("assets/textures/container.jpg"));
 
 Scene& scene = app.NewScene();
 Object& mainobject = scene.CreateObject(triangle, basematerial);

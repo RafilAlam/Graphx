@@ -8,11 +8,13 @@ Renderer::Renderer()
 void Renderer::Draw(Object object) {
     const Material& material = object.GetMaterial();
 
-    m_materialbuffer.Upload(MaterialData{.Color = material.BaseColor});
+    m_materialbuffer.Upload(MaterialData{.Color = material.basecolor});
 
     glm::mat4 transform = glm::mat4(1.0f);
     transform = glm::translate(transform, object.Position);
     m_objectbuffer.Upload(ObjectData{.Transform = transform});
+
+    material.texture.BindTexture();
 
     glUseProgram(material.GetShader().GetProgram());
     glBindVertexArray(object.GetMesh().GetVAO());
