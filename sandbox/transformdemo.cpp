@@ -1,4 +1,5 @@
 #include <engine/include/app.hpp>
+#include <cmath>
 
 App app({
     .WindowWidth = 500,
@@ -22,21 +23,15 @@ Object& mainobject = scene.CreateObject(triangle, basematerial);
 
 class MainScript : public Script {
 public:
-    void OnStart() override {
-        mainobject.Position = {1.0f, 0.5f, 1.0f};
-    }
+    void OnStart() override {}
     void OnUpdate() override {
-        if (!Fpressed and app.GetInput(GLFW_KEY_F) == GLFW_PRESS) {
-            Fpressed = true;
-            DebugPrint("F Key Pressed!");
-        }
-        if (Fpressed and app.GetInput(GLFW_KEY_F) == GLFW_RELEASE) {
-            Fpressed = false;
-            DebugPrint("F Key Released!");
-        }
+        float sinvalue = std::sin(app.GetTime());
+        float cosvalue = std::cos(app.GetTime());
+        mainobject.transform.position = {0.1 * sinvalue, 0.0f, 0.0f};
+        mainobject.transform.SetRotation({0.0f, 0.0f, 10.0f * sinvalue});
+        mainobject.transform.scale = {0.1f * sinvalue + 1.0f, 0.2f * cosvalue + 1.0f, 0.0f};
     }
 private:
-    bool Fpressed = false;
 };
 
 int main() {

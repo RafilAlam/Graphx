@@ -21,7 +21,7 @@ class Renderer {
 public:
     Renderer();
     void Draw(std::deque<Object>& objects);
-    void Draw(Object object);
+    void Draw(const Object& object);
 private:
     UniformBuffer m_materialbuffer;
     UniformBuffer m_objectbuffer;

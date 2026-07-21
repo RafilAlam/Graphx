@@ -1,7 +1,8 @@
 #include <engine/include/app.hpp>
 
 App::App(AppConfig config)
- : m_window(Window(config.WindowWidth, config.WindowHeight, config.WindowTitle))
+ : m_window(Window(config.WindowWidth, config.WindowHeight, config.WindowTitle)),
+   m_startTime(std::chrono::steady_clock::now())
 {}
 
 int App::Run() {
@@ -31,4 +32,9 @@ int App::GetInput(int keycode) {
 Scene& App::NewScene() {
     m_scene = Scene{};
     return m_scene;
+}
+
+float App::GetTime() {
+    using namespace std::chrono;
+    return duration<float>(steady_clock::now() - m_startTime).count();
 }

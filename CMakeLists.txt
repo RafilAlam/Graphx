@@ -36,6 +36,14 @@ add_library(Graphx STATIC engine/src/app.cpp engine/src/window.cpp engine/src/de
 target_include_directories(Graphx PRIVATE .)
 target_link_libraries(Graphx PUBLIC OpenGL::GL glfw glad glm::glm)
 
-add_executable(App sandbox/main.cpp)
-target_include_directories(App PRIVATE .)
-target_link_libraries(App PRIVATE Graphx)
+add_executable(InputDemo sandbox/inputdemo.cpp)
+target_include_directories(InputDemo PRIVATE .)
+target_link_libraries(InputDemo PRIVATE Graphx)
+
+add_executable(TextureDemo sandbox/texturedemo.cpp)
+target_include_directories(TextureDemo PRIVATE .)
+target_link_libraries(TextureDemo PRIVATE Graphx)
+
+add_executable(TransformDemo sandbox/transformdemo.cpp)
+target_include_directories(TransformDemo PRIVATE .)
+target_link_libraries(TransformDemo PRIVATE Graphx)

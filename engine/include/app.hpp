@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <vector>
 #include <memory>
+#include <chrono>
 
 struct AppConfig {
     int WindowWidth = 100;
@@ -24,9 +25,11 @@ public:
     int Run();
     int GetInput(int keycode);
     Scene& NewScene();
+    float GetTime();
 private:
     Window m_window;
     Renderer m_renderer;
     Scene m_scene;
     unsigned int m_shaderprogram;
+    std::chrono::steady_clock::time_point m_startTime;
 };
