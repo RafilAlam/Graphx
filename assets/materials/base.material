@@ -1,0 +1,6 @@
+name: basematerial
+
+texture: assets/textures/container.jpg
+
+vertex_shader: assets/engine/shaders/default.vert
+fragment_shader: assets/engine/shaders/default.frag

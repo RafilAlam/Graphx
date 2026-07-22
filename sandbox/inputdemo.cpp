@@ -3,15 +3,19 @@
 App app({
     .WindowWidth = 500,
     .WindowHeight = 500,
-    .WindowTitle = "MyApp"
+    .WindowTitle = "InputDemo"
 });
 
 AssetManager assetmanager;
 
-Mesh& triangle = assetmanager.LoadMesh("triangle", {
+Mesh& triangle = assetmanager.LoadMesh("triangle", 
+{
     Vertex{{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
     Vertex{{0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
     Vertex{{0.0f,  0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.5f, 1.0f}},
+},
+{
+    Face{0, 1, 2}
 });
 
 Shader& baseshader = assetmanager.LoadShaders("baseshader", "assets/engine/shaders/default.vert", "assets/engine/shaders/default.frag");

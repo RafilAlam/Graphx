@@ -29,21 +29,49 @@ fetchcontent_declare(
 
 fetchcontent_makeavailable(glm)
 
+fetchcontent_declare(
+  assimp
+  GIT_REPOSITORY https://github.com/assimp/assimp.git
+  GIT_TAG v6.0.5
+)
+
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+
+fetchcontent_makeavailable(assimp)
+
+fetchcontent_declare(
+  ryml
+  GIT_REPOSITORY https://github.com/biojppm/rapidyaml.git
+  GIT_TAG v0.15.2
+)
+
+set(RYML_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(RYML_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
+set(RYML_BUILD_API OFF CACHE BOOL "" FORCE)
+set(RYML_INSTALL OFF CACHE BOOL "" FORCE)
+
+fetchcontent_makeavailable(ryml)
+
 add_library(glad STATIC dependencies/glad/glad.c)
 target_include_directories(glad PRIVATE .)
 
 add_library(Graphx STATIC engine/src/app.cpp engine/src/window.cpp engine/src/debug.cpp engine/src/utils.cpp engine/src/scene/scene.cpp engine/src/scene/object.cpp engine/src/rendering/renderer.cpp engine/src/rendering/uniformbuffer.cpp engine/src/rendering/assetmanager.cpp engine/src/rendering/material.cpp engine/src/rendering/texture.cpp engine/src/rendering/shader.cpp engine/src/rendering/mesh.cpp engine/src/stb_image.cpp)
 target_include_directories(Graphx PRIVATE .)
-target_link_libraries(Graphx PUBLIC OpenGL::GL glfw glad glm::glm)
+target_link_libraries(Graphx PUBLIC OpenGL::GL glfw glad glm::glm assimp ryml::ryml)
 
 add_executable(InputDemo sandbox/inputdemo.cpp)
 target_include_directories(InputDemo PRIVATE .)
 target_link_libraries(InputDemo PRIVATE Graphx)
 
-add_executable(TextureDemo sandbox/texturedemo.cpp)
-target_include_directories(TextureDemo PRIVATE .)
-target_link_libraries(TextureDemo PRIVATE Graphx)
-
 add_executable(TransformDemo sandbox/transformdemo.cpp)
 target_include_directories(TransformDemo PRIVATE .)
+target_link_options(TransformDemo PRIVATE
+    -static
+    -static-libgcc
+    -static-libstdc++
+)
 target_link_libraries(TransformDemo PRIVATE Graphx)
