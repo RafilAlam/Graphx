@@ -4,19 +4,13 @@
 App app({
     .WindowWidth = 500,
     .WindowHeight = 500,
-    .WindowTitle = "MyApp"
+    .WindowTitle = "TransformDemo"
 });
 
 AssetManager assetmanager;
 
-Mesh& triangle = assetmanager.LoadMesh("triangle", {
-    Vertex{{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-    Vertex{{0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-    Vertex{{0.0f,  0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.5f, 1.0f}},
-});
-
-Shader& baseshader = assetmanager.LoadShaders("baseshader", "assets/engine/shaders/default.vert", "assets/engine/shaders/default.frag");
-Material& basematerial = assetmanager.LoadMaterial("basematerial", baseshader, Texture("assets/textures/container.jpg"));
+Mesh& triangle = assetmanager.LoadMesh("assets/meshes/plane.obj");
+Material& basematerial = assetmanager.LoadMaterial("assets/materials/base.material");
 
 Scene& scene = app.NewScene();
 Object& mainobject = scene.CreateObject(triangle, basematerial);
@@ -29,7 +23,7 @@ public:
         float cosvalue = std::cos(app.GetTime());
         mainobject.transform.position = {0.1 * sinvalue, 0.0f, 0.0f};
         mainobject.transform.SetRotation({0.0f, 0.0f, 10.0f * sinvalue});
-        mainobject.transform.scale = {0.1f * sinvalue + 1.0f, 0.2f * cosvalue + 1.0f, 0.0f};
+        mainobject.transform.scale = {0.05f * sinvalue + 0.5f, 0.05f * cosvalue + 0.5f, 0.0f};
     }
 private:
 };

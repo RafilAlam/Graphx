@@ -7,6 +7,8 @@ Renderer::Renderer()
 
 void Renderer::Draw(const Object& object) {
     const Material& material = object.GetMaterial();
+    const Shader& shader = material.GetShader();
+    const Mesh& mesh = object.GetMesh();
 
     m_materialbuffer.Upload(MaterialData{.Color = material.basecolor});
 
@@ -18,9 +20,9 @@ void Renderer::Draw(const Object& object) {
 
     material.texture.BindTexture();
 
-    glUseProgram(material.GetShader().GetProgram());
-    glBindVertexArray(object.GetMesh().GetVAO());
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glUseProgram(shader.GetProgram());
+    glBindVertexArray(mesh.GetVAO());
+    glDrawElements(GL_TRIANGLES, mesh.GetIndexCount(), GL_UNSIGNED_INT, nullptr);
 }
 
 void Renderer::Draw(std::deque<Object>& objects) {

@@ -4,7 +4,14 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <vector>
+#include <iostream>
 #include <stddef.h>
+
+struct Face {
+    unsigned int a;
+    unsigned int b;
+    unsigned int c;
+};
 
 struct Vertex {
     glm::vec3 Position;
@@ -14,9 +21,13 @@ struct Vertex {
 
 class Mesh {
 public: 
-    Mesh(std::vector<Vertex> vertexdata);
-    unsigned int GetVAO() const;
+    Mesh(std::vector<Vertex> vertexdata, std::vector<Face> facedata);
+    GLuint GetVAO() const;
+    GLuint GetVBO() const;
+    unsigned int GetIndexCount() const;
 private:
-    unsigned int m_vbo;
-    unsigned int m_vao;
+    unsigned int m_indexcount;
+    GLuint m_vbo;
+    GLuint m_ebo;
+    GLuint m_vao;
 };

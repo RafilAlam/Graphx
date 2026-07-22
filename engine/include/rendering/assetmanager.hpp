@@ -4,17 +4,27 @@
 #include <engine/include/rendering/shader.hpp>
 #include <engine/include/rendering/mesh.hpp>
 #include <engine/include/rendering/texture.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <ryml.hpp>
+#include <ryml_std.hpp>
+#include <engine/include/utils.hpp>
 #include <memory>
 #include <string>
+#include <deque>
 #include <unordered_map>
 
 class AssetManager {
 public:
     AssetManager() = default;
-    Mesh& LoadMesh(std::string name, std::vector<Vertex> vertices);
+    Mesh& LoadMesh(std::string name, std::vector<Vertex> vertices, std::vector<Face> faces);
+    Mesh& LoadMesh(std::string filepath);
+  
     Shader& LoadShaders(std::string name, std::string vertexsourcepath, std::string fragmentsourcepath);
+  
     Material& LoadMaterial(std::string name, Shader& shader, Texture&& texture);
-    Shader& LoadShaderPreset(std::string name);
+    Material& LoadMaterial(std::string filepath);
 private:
     std::unordered_map<std::string, Material> m_materials;
     std::unordered_map<std::string, Shader> m_shaders;
