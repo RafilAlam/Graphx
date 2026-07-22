@@ -59,7 +59,13 @@ fetchcontent_makeavailable(ryml)
 add_library(glad STATIC dependencies/glad/glad.c)
 target_include_directories(glad PRIVATE .)
 
-add_library(Graphx STATIC engine/src/app.cpp engine/src/window.cpp engine/src/debug.cpp engine/src/utils.cpp engine/src/scene/scene.cpp engine/src/scene/object.cpp engine/src/rendering/renderer.cpp engine/src/rendering/uniformbuffer.cpp engine/src/rendering/assetmanager.cpp engine/src/rendering/material.cpp engine/src/rendering/texture.cpp engine/src/rendering/shader.cpp engine/src/rendering/mesh.cpp engine/src/stb_image.cpp)
+add_library(Graphx STATIC
+ graphics/src/app.cpp graphics/src/window.cpp graphics/src/debug.cpp graphics/src/utils.cpp graphics/src/stb_image.cpp
+ graphics/src/scene/scene.cpp graphics/src/scene/object.cpp
+ graphics/src/rendering/renderer.cpp graphics/src/rendering/uniformbuffer.cpp graphics/src/rendering/assetmanager.cpp graphics/src/rendering/material.cpp graphics/src/rendering/texture.cpp graphics/src/rendering/shader.cpp graphics/src/rendering/mesh.cpp
+ 
+ physics/src/integrator.cpp physics/src/rigidbody.cpp
+)
 target_include_directories(Graphx PRIVATE .)
 target_link_libraries(Graphx PUBLIC OpenGL::GL glfw glad glm::glm assimp ryml::ryml)
 

@@ -1,4 +1,5 @@
-#include <engine/include/app.hpp>
+#include <graphics/include/app.hpp>
+#include <physics/include/integrator.hpp>
 #include <cmath>
 
 App app({
@@ -7,25 +8,38 @@ App app({
     .WindowTitle = "TransformDemo"
 });
 
+EulerIntegrator integrator;
 AssetManager assetmanager;
 
-Mesh& triangle = assetmanager.LoadMesh("assets/meshes/plane.obj");
-Material& basematerial = assetmanager.LoadMaterial("assets/materials/base.material");
+
+RigidBody body{1.0f};
+Mesh& plane = assetmanager.LoadMesh("assets/meshes/circle.obj");
+Material& basematerial = assetmanager.LoadMaterial("assets/materials/base.mat");
 
 Scene& scene = app.NewScene();
-Object& mainobject = scene.CreateObject(triangle, basematerial);
+Object& mainobject = scene.CreateObject(plane, basematerial);
 
 class MainScript : public Script {
 public:
     void OnStart() override {}
     void OnUpdate() override {
-        float sinvalue = std::sin(app.GetTime());
-        float cosvalue = std::cos(app.GetTime());
-        mainobject.transform.position = {0.1 * sinvalue, 0.0f, 0.0f};
-        mainobject.transform.SetRotation({0.0f, 0.0f, 10.0f * sinvalue});
-        mainobject.transform.scale = {0.05f * sinvalue + 0.5f, 0.05f * cosvalue + 0.5f, 0.0f};
+        float dt = app.GetTime() - lastTime;
+
+        if (!Fpressed and app.GetInput(GLFW_KEY_F) == GLFW_PRESS) {
+            Fpressed = true;
+            body.ApplyImpulse({0.00001f, 0.0f, 0.0f});
+        }
+
+        if (Fpressed and app.GetInput(GLFW_KEY_F) == GLFW_RELEASE) {
+            Fpressed = false;
+        }
+
+        integrator.Integrate(body, dt);
+        mainobject.transform.position = body.position;
     }
 private:
+    float lastTime;
+    bool Fpressed{false};
 };
 
 int main() {

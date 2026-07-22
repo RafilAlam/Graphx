@@ -1,4 +1,4 @@
-#include <engine/include/app.hpp>
+#include <graphics/include/app.hpp>
 
 App app({
     .WindowWidth = 500,
@@ -18,7 +18,7 @@ Mesh& triangle = assetmanager.LoadMesh("triangle",
     Face{0, 1, 2}
 });
 
-Shader& baseshader = assetmanager.LoadShaders("baseshader", "assets/engine/shaders/default.vert", "assets/engine/shaders/default.frag");
+Shader& baseshader = assetmanager.LoadShaders("baseshader", "assets/graphics/shaders/default.vert", "assets/graphics/shaders/default.frag");
 Material& basematerial = assetmanager.LoadMaterial("basematerial", baseshader, Texture("assets/textures/container.jpg"));
 
 Scene& scene = app.NewScene();
