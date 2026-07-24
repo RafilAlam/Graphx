@@ -17,6 +17,5 @@ void Scene::OnStart() {
 void Scene::Update() {
     for (auto& script : m_scripts) {
         script->OnUpdate();
-        script->OnRender();
     }
 }

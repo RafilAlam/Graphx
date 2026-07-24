@@ -1,5 +1,5 @@
 #include <graphics/include/app.hpp>
-#include <physics/include/integrator.hpp>
+#include <physics/include/physicsworld.hpp>
 #include <cmath>
 
 App app({
@@ -7,14 +7,12 @@ App app({
     .WindowHeight = 500,
     .WindowTitle = "TransformDemo"
 });
-
-EulerIntegrator integrator;
+PhysicsWorld physicsworld;
 AssetManager assetmanager;
 
-
-RigidBody body{1.0f};
 Mesh& plane = assetmanager.LoadMesh("assets/meshes/circle.obj");
 Material& basematerial = assetmanager.LoadMaterial("assets/materials/base.mat");
+RigidBody& body = physicsworld.CreateRigidBody(1.0f);
 
 Scene& scene = app.NewScene();
 Object& mainobject = scene.CreateObject(plane, basematerial);
@@ -27,15 +25,16 @@ public:
 
         if (!Fpressed and app.GetInput(GLFW_KEY_F) == GLFW_PRESS) {
             Fpressed = true;
-            body.ApplyImpulse({0.00001f, 0.0f, 0.0f});
+            body.ApplyForce({0.001f, 0.0f, 0.0f});
         }
 
         if (Fpressed and app.GetInput(GLFW_KEY_F) == GLFW_RELEASE) {
             Fpressed = false;
         }
 
-        integrator.Integrate(body, dt);
-        mainobject.transform.position = body.position;
+        physicsworld.Step(dt);
+        mainobject.transform.position = {body.position.x, body.position.y, 5.0f};
+        mainobject.transform.scale = {100.0f, 100.0f, 0.0f};
     }
 private:
     float lastTime;

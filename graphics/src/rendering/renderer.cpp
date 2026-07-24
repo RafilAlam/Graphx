@@ -12,11 +12,16 @@ void Renderer::Draw(const Object& object) {
 
     m_materialbuffer.Upload(MaterialData{.Color = material.basecolor});
 
-    glm::mat4 transform = glm::mat4(1.0f);
-    transform = glm::translate(transform, object.transform.position);
-    transform *= glm::mat4_cast(object.transform.rotation);
-    transform = glm::scale(transform, object.transform.scale);
-    m_objectbuffer.Upload(ObjectData{.Transform = transform});
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, object.transform.position);
+    model *= glm::mat4_cast(object.transform.rotation);
+    model = glm::scale(model, object.transform.scale);
+
+    glm::mat4 view = glm::mat4(1.0f);
+
+    glm::mat4 projection = glm::orthoLH(-300.0f, 300.0f, -300.0f, 300.0f, 0.1f, 100.0f);
+
+    m_objectbuffer.Upload(ObjectData{.Transform = projection * view * model});
 
     material.texture.BindTexture();
 
