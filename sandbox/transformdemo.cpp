@@ -24,6 +24,8 @@ public:
     void OnStart() override {
         bodyA.position = {-300.0f, 0.0f, 5.0f};
         bodyB.position = {300.0f, 0.0f, 5.0f};
+        objectA.transform.scale = {100.0f, 100.0f, 0.0f};
+        objectB.transform.scale = {100.0f, 100.0f, 0.0f};
     }
     void OnUpdate() override {
         float dt = app.GetTime() - lastTime;
@@ -41,10 +43,7 @@ public:
 
         physicsworld.Step(dt);
         objectA.transform.position = {bodyA.position.x, bodyA.position.y, 5.0f};
-        objectA.transform.scale = {100.0f, 100.0f, 0.0f};
-
         objectB.transform.position = {bodyB.position.x, bodyB.position.y, 5.0f};
-        objectB.transform.scale = {100.0f, 100.0f, 0.0f};
     }
 private:
     float lastTime;
