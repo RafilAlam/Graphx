@@ -11,10 +11,19 @@ int App::Run() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     m_scene.OnStart();
 
+    float lastFrame = GetTime();
+    float currentFrame;
+
     while (!m_window.ShouldClose()) {
+        currentFrame = GetTime();
+        dt = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
         glClear(GL_COLOR_BUFFER_BIT);
-        m_scene.Update();
-        m_renderer.Draw(m_scene.GetObjects());
+
+        m_scene.Update(dt);
+        m_renderer.Draw(m_scene.objects);
+
         m_window.SwapBuffers();
         glfwPollEvents();
     }
@@ -31,6 +40,11 @@ int App::GetInput(int keycode) {
 
 Scene& App::NewScene() {
     m_scene = Scene{};
+    return m_scene;
+}
+
+Scene& App::NewScene(AssetManager& assetmanager, std::string filepath) {
+    m_scene = Scene{assetmanager, filepath};
     return m_scene;
 }
 

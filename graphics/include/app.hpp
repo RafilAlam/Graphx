@@ -25,7 +25,9 @@ public:
     int Run();
     int GetInput(int keycode);
     Scene& NewScene();
+    Scene& NewScene(AssetManager& assetmanager, std::string filepath);
     float GetTime();
+    float dt{0.0f};
 private:
     Window m_window;
     Renderer m_renderer;

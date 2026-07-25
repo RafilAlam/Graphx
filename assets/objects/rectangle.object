@@ -1,4 +1,0 @@
-name: rectangle
-
-mesh: assets/meshes/rectangle.obj
-material: assets/materials/concrete.mat

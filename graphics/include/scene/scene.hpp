@@ -3,8 +3,8 @@
 #include <graphics/include/scene/object.hpp>
 #include <graphics/include/scene/script.hpp>
 #include <graphics/include/rendering/assetmanager.hpp>
-#include <graphics/include/rendering/mesh.hpp>
 #include <graphics/include/utils.hpp>
+#include <physics/include/physicsworld.hpp>
 #include <ryml_std.hpp>
 #include <ryml.hpp>
 #include <memory>
@@ -13,6 +13,7 @@
 class Scene {
 public:
     Scene() = default;
+    Scene(AssetManager& assetmanager, std::string filepath);
     
     Scene(const Scene&) = delete;
     Scene& operator=(const Scene&) = delete;
@@ -20,8 +21,8 @@ public:
     Scene(Scene&&) noexcept = default;
     Scene& operator=(Scene&&) noexcept = default;
 
-    Object& CreateObject(const Mesh& mesh, const Material& material);
-    Object& CreateObject(AssetManager& assetmanager, std::string filepath);
+    Object& CreateObject(std::string name, const Mesh& mesh, const Material& material);
+    Object& CreateObject(std::string name, const Mesh& mesh, const Material& material, RigidBody& rigidbody);
 
     template<typename T>
     void AddScript() {
@@ -30,11 +31,11 @@ public:
         );
     }
 
-    std::deque<Object>& GetObjects();
+    std::deque<Object> objects;
+    PhysicsWorld physicsworld;
 
     void OnStart();
-    void Update();
+    void Update(float deltaTime);
 private:
-    std::deque<Object> m_objects;
     std::deque<std::unique_ptr<Script>> m_scripts;
 };

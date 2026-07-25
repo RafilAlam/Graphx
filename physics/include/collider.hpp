@@ -2,11 +2,15 @@
 
 #include <glm/glm.hpp>
 
-enum ColliderType {
+enum class ColliderType {
     Rectangle,
     Circle,
     Count
 };
+
+constexpr int ToIndex(ColliderType type) {
+    return static_cast<int>(type);
+}
 
 struct Collider {
     ColliderType type;

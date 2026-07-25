@@ -2,9 +2,9 @@
 #include <iostream>
 
 CollisionSolver::CollisionSolver() {
-    Dispatch[ColliderType::Circle][ColliderType::Circle] = CircleCircleCheck;
-    Dispatch[ColliderType::Rectangle][ColliderType::Circle] = RectangleCircleCheck;
-    Dispatch[ColliderType::Circle][ColliderType::Rectangle] = [](RigidBody& A, RigidBody& B){
+    Dispatch[ToIndex(ColliderType::Circle)][ToIndex(ColliderType::Circle)] = CircleCircleCheck;
+    Dispatch[ToIndex(ColliderType::Rectangle)][ToIndex(ColliderType::Circle)] = RectangleCircleCheck;
+    Dispatch[ToIndex(ColliderType::Circle)][ToIndex(ColliderType::Rectangle)] = [](RigidBody& A, RigidBody& B){
         Contact contact = RectangleCircleCheck(B, A);
         std::swap(contact.A, contact.B);
         contact.manifold.normal *= -1.0f;

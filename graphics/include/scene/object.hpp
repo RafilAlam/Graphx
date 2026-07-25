@@ -3,6 +3,7 @@
 #include <graphics/include/rendering/material.hpp>
 #include <graphics/include/rendering/mesh.hpp>
 #include <graphics/include/rendering/shader.hpp>
+#include <physics/include/rigidbody.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -19,10 +20,13 @@ struct Transform {
 
 class Object {
 public:
-    Object(const Mesh& mesh, const Material& material);
+    Object(std::string name, const Mesh& mesh, const Material& material);
+    Object(std::string name, const Mesh& mesh, const Material& material, RigidBody& rigidbody);
     const Mesh& GetMesh() const;
     const Material& GetMaterial() const;
     Transform transform;
+    RigidBody* rigidbody{nullptr};
+    std::string name;
 private:
     const Mesh* m_mesh;
     const Material* m_material;

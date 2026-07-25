@@ -1,0 +1,17 @@
+Objects:
+    - Name: Rectangle
+      Mesh: assets/meshes/rectangle.obj
+      Material: assets/materials/concrete.mat
+      Mass: 1.0
+      ColliderType: Rectangle
+      HalfExtents:
+        x: 100.0
+        y: 100.0
+    
+    - Name: Circle
+      Mesh: assets/meshes/circle.obj
+      Material: assets/materials/container.mat
+      Mass: 1.0
+      ColliderType: Circle
+      Radius: 100.0
+        

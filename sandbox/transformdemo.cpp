@@ -1,49 +1,37 @@
 #include <graphics/include/app.hpp>
 #include <physics/include/physicsworld.hpp>
 #include <cmath>
+#include <iostream>
 
 App app({
     .WindowWidth = 500,
     .WindowHeight = 500,
     .WindowTitle = "TransformDemo"
 });
-PhysicsWorld physicsworld;
 AssetManager assetmanager;
 
-Collider rectanglecollider{.type = ColliderType::Rectangle, .rectangle{.halfExtents = glm::vec3{100.0f, 100.0f, 0.0f}}};
-Collider circlecollider{.type = ColliderType::Circle, .circle{.radius = 100.0f}};
-RigidBody& bodyA = physicsworld.CreateRigidBody(1.0f, circlecollider);
-RigidBody& bodyB = physicsworld.CreateRigidBody(1.0f, rectanglecollider);
-
-Scene& scene = app.NewScene();
-Object& objectA = scene.CreateObject(assetmanager, "assets/objects/circle.object");
-Object& objectB = scene.CreateObject(assetmanager, "assets/objects/rectangle.object");
+Scene& scene = app.NewScene(assetmanager, "assets/demoscene.scene");
+Object& Rectangle = scene.objects[0];
+Object& Ball = scene.objects[1];
 
 class MainScript : public Script {
 public:
     void OnStart() override {
-        bodyA.position = {-300.0f, 0.0f, 5.0f};
-        bodyB.position = {300.0f, 0.0f, 5.0f};
-        objectA.transform.scale = {100.0f, 100.0f, 0.0f};
-        objectB.transform.scale = {100.0f, 100.0f, 0.0f};
+        Rectangle.rigidbody->position = {200.0f, 0.0f, 5.0f};
+        Ball.rigidbody->position = {-200.0f, 0.0f, 5.0f};
+        Ball.transform.scale = {100.0f, 100.0f, 0.0f};
+        Rectangle.transform.scale = {100.0f, 100.0f, 0.0f};
     }
     void OnUpdate() override {
-        float dt = app.GetTime() - lastTime;
-        lastTime = app.GetTime();
 
         if (!Fpressed and app.GetInput(GLFW_KEY_F) == GLFW_PRESS) {
             Fpressed = true;
-            bodyA.ApplyImpulse({100.0f, 0.0f, 0.0f});
-            bodyB.ApplyImpulse({-100.0f, 0.0f, 0.0f});
+            Ball.rigidbody->ApplyImpulse({100.0f, 0.0f, 0.0f});
         }
 
         if (Fpressed and app.GetInput(GLFW_KEY_F) == GLFW_RELEASE) {
             Fpressed = false;
         }
-
-        physicsworld.Step(dt);
-        objectA.transform.position = {bodyA.position.x, bodyA.position.y, 5.0f};
-        objectB.transform.position = {bodyB.position.x, bodyB.position.y, 5.0f};
     }
 private:
     float lastTime;

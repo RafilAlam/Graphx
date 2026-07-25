@@ -12,7 +12,7 @@ void PhysicsWorld::Step(float deltaTime) {
 
     for (int i = 0; i < m_rigidbodies.size(); ++i) {
         for (int j = i + 1; j < m_rigidbodies.size(); ++j) {
-            Contact contact = m_collisionsolver.Dispatch[m_rigidbodies[i].collider.type][m_rigidbodies[j].collider.type](m_rigidbodies[i], m_rigidbodies[j]);
+            Contact contact = m_collisionsolver.Dispatch[ToIndex(m_rigidbodies[i].collider.type)][ToIndex(m_rigidbodies[j].collider.type)](m_rigidbodies[i], m_rigidbodies[j]);
             m_collisionsolver.Resolve(contact);
             if (contact.manifold.colliding) {
                 std::cout << "Collision Detected!" << '\n';
