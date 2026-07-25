@@ -1,0 +1,4 @@
+name: circle
+
+mesh: assets/meshes/circle.obj
+material: assets/materials/container.mat

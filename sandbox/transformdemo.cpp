@@ -10,19 +10,14 @@ App app({
 PhysicsWorld physicsworld;
 AssetManager assetmanager;
 
-Mesh& rectangle = assetmanager.LoadMesh("assets/meshes/plane.obj");
-Mesh& circle = assetmanager.LoadMesh("assets/meshes/circle.obj");
-Material& containermaterial = assetmanager.LoadMaterial("assets/materials/container.mat");
-Material& concretematerial = assetmanager.LoadMaterial("assets/materials/concrete.mat");
-
 Collider rectanglecollider{.type = ColliderType::Rectangle, .rectangle{.halfExtents = glm::vec3{100.0f, 100.0f, 0.0f}}};
 Collider circlecollider{.type = ColliderType::Circle, .circle{.radius = 100.0f}};
 RigidBody& bodyA = physicsworld.CreateRigidBody(1.0f, circlecollider);
 RigidBody& bodyB = physicsworld.CreateRigidBody(1.0f, rectanglecollider);
 
 Scene& scene = app.NewScene();
-Object& objectA = scene.CreateObject(circle, containermaterial);
-Object& objectB = scene.CreateObject(rectangle, concretematerial);
+Object& objectA = scene.CreateObject(assetmanager, "assets/objects/circle.object");
+Object& objectB = scene.CreateObject(assetmanager, "assets/objects/rectangle.object");
 
 class MainScript : public Script {
 public:

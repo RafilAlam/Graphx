@@ -1,11 +1,14 @@
 #pragma once
 
-#include <deque>
-#include <memory>
 #include <graphics/include/scene/object.hpp>
 #include <graphics/include/scene/script.hpp>
+#include <graphics/include/rendering/assetmanager.hpp>
 #include <graphics/include/rendering/mesh.hpp>
-
+#include <graphics/include/utils.hpp>
+#include <ryml_std.hpp>
+#include <ryml.hpp>
+#include <memory>
+#include <deque>
 
 class Scene {
 public:
@@ -18,6 +21,8 @@ public:
     Scene& operator=(Scene&&) noexcept = default;
 
     Object& CreateObject(const Mesh& mesh, const Material& material);
+    Object& CreateObject(AssetManager& assetmanager, std::string filepath);
+
     template<typename T>
     void AddScript() {
         m_scripts.push_back(
