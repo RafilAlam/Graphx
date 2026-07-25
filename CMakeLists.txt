@@ -64,14 +64,10 @@ add_library(Graphx STATIC
  graphics/src/scene/scene.cpp graphics/src/scene/object.cpp
  graphics/src/rendering/renderer.cpp graphics/src/rendering/uniformbuffer.cpp graphics/src/rendering/assetmanager.cpp graphics/src/rendering/material.cpp graphics/src/rendering/texture.cpp graphics/src/rendering/shader.cpp graphics/src/rendering/mesh.cpp
  
- physics/src/physicsworld.cpp physics/src/integrator.cpp physics/src/rigidbody.cpp
+ physics/src/physicsworld.cpp physics/src/integrator.cpp physics/src/rigidbody.cpp physics/src/collisionsolver.cpp
 )
 target_include_directories(Graphx PRIVATE .)
 target_link_libraries(Graphx PUBLIC OpenGL::GL glfw glad glm::glm assimp ryml::ryml)
-
-add_executable(InputDemo sandbox/inputdemo.cpp)
-target_include_directories(InputDemo PRIVATE .)
-target_link_libraries(InputDemo PRIVATE Graphx)
 
 add_executable(TransformDemo sandbox/transformdemo.cpp)
 target_include_directories(TransformDemo PRIVATE .)

@@ -10,12 +10,16 @@ App app({
 PhysicsWorld physicsworld;
 AssetManager assetmanager;
 
-Mesh& plane = assetmanager.LoadMesh("assets/meshes/circle.obj");
-Material& basematerial = assetmanager.LoadMaterial("assets/materials/base.mat");
-RigidBody& body = physicsworld.CreateRigidBody(1.0f);
+Mesh& circle = assetmanager.LoadMesh("assets/meshes/circle.obj");
+Material& containermaterial = assetmanager.LoadMaterial("assets/materials/container.mat");
+Material& concretematerial = assetmanager.LoadMaterial("assets/materials/concrete.mat");
+Collider collider{.type = ColliderType::Circle, .circle{.radius = 100.0f}};
+RigidBody& bodyA = physicsworld.CreateRigidBody(1.0f, collider);
+RigidBody& bodyB = physicsworld.CreateRigidBody(1.0f, collider);
 
 Scene& scene = app.NewScene();
-Object& mainobject = scene.CreateObject(plane, basematerial);
+Object& objectA = scene.CreateObject(circle, concretematerial);
+Object& objectB = scene.CreateObject(circle, concretematerial);
 
 class MainScript : public Script {
 public:
@@ -25,16 +29,22 @@ public:
 
         if (!Fpressed and app.GetInput(GLFW_KEY_F) == GLFW_PRESS) {
             Fpressed = true;
-            body.ApplyForce({0.001f, 0.0f, 0.0f});
+            bodyA.ApplyForce({0.001f, 0.0f, 0.0f});
         }
 
         if (Fpressed and app.GetInput(GLFW_KEY_F) == GLFW_RELEASE) {
             Fpressed = false;
         }
 
+        bodyA.position = {0.0f, 0.0f, 5.0f};
+        bodyB.position = {300.0f, 0.0f, 5.0f};
+
         physicsworld.Step(dt);
-        mainobject.transform.position = {body.position.x, body.position.y, 5.0f};
-        mainobject.transform.scale = {100.0f, 100.0f, 0.0f};
+        objectA.transform.position = bodyA.position;
+        objectA.transform.scale = {100.0f, 100.0f, 0.0f};
+
+        objectB.transform.position = bodyB.position;
+        objectB.transform.scale = {100.0f, 100.0f, 0.0f};
     }
 private:
     float lastTime;

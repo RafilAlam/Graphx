@@ -1,0 +1,6 @@
+name: basematerial
+
+texture: assets/textures/concrete.jpg
+
+vertex_shader: assets/engine/shaders/default.vert
+fragment_shader: assets/engine/shaders/default.frag
