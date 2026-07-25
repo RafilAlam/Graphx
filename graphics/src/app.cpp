@@ -13,8 +13,8 @@ int App::Run() {
 
     while (!m_window.ShouldClose()) {
         glClear(GL_COLOR_BUFFER_BIT);
-        m_renderer.Draw(m_scene.GetObjects());
         m_scene.Update();
+        m_renderer.Draw(m_scene.GetObjects());
         m_window.SwapBuffers();
         glfwPollEvents();
     }

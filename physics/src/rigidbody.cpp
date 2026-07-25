@@ -1,6 +1,6 @@
 #include <physics/include/rigidbody.hpp>
 
-RigidBody::RigidBody(float mass, Collider& collider) : mass(mass), m_inversemass(1/mass), collider(collider) {}
+RigidBody::RigidBody(float mass, Collider& collider) : mass(mass), m_inversemass(1.0f/mass), collider(collider) {}
 
 void RigidBody::ApplyImpulse(glm::vec3 impulsevector) {
     velocity += impulsevector * m_inversemass;

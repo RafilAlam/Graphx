@@ -10,13 +10,14 @@ struct CollisionManifold {
 };
 
 struct Contact {
-    RigidBody& A;
-    RigidBody& B;
+    RigidBody* A;
+    RigidBody* B;
 
     CollisionManifold manifold;
 };
 
-Contact CircleCircleCheck(RigidBody&, RigidBody&);
+Contact CircleCircleCheck(RigidBody& A, RigidBody& B);
+Contact RectangleCircleCheck(RigidBody& A, RigidBody& B);
 
 class CollisionSolver {
 public:
@@ -25,5 +26,5 @@ public:
     using CollisionFn = Contact(*)(RigidBody&, RigidBody&);
     CollisionFn Dispatch[static_cast<int>(ColliderType::Count)][static_cast<int>(ColliderType::Count)];
 
-    void Resolve(Contact contact);
+    void Resolve(Contact& contact);
 };

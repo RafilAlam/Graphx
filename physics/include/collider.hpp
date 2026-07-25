@@ -13,7 +13,7 @@ struct Collider {
 
     union {
         struct {
-            glm::vec2 halfExtents;
+            glm::vec3 halfExtents;
         } rectangle;
 
         struct {
