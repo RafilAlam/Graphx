@@ -1,6 +1,7 @@
 #pragma once
 
-#include <physics/include/rigidbody.hpp>
+
+#include <graphics/include/scene/object.hpp>
 #include <glm/glm.hpp>
 
 struct CollisionManifold {
@@ -10,20 +11,21 @@ struct CollisionManifold {
 };
 
 struct Contact {
-    RigidBody* A;
-    RigidBody* B;
+    Object& A;
+    Object& B;
 
     CollisionManifold manifold;
 };
 
-Contact CircleCircleCheck(RigidBody& A, RigidBody& B);
+Contact CircleCircleCheck(Object& A, Object& B);
 Contact RectangleCircleCheck(RigidBody& A, RigidBody& B);
+Contact PolygonPolygonCheck(Object& A, Object& B);
 
 class CollisionSolver {
 public:
     CollisionSolver();
     
-    using CollisionFn = Contact(*)(RigidBody&, RigidBody&);
+    using CollisionFn = Contact(*)(Object&, Object&);
     CollisionFn Dispatch[static_cast<int>(ColliderType::Count)][static_cast<int>(ColliderType::Count)];
 
     void Resolve(Contact& contact);

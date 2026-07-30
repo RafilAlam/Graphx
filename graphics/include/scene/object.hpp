@@ -22,10 +22,12 @@ class Object {
 public:
     Object(std::string name, const Mesh& mesh, const Material& material);
     Object(std::string name, const Mesh& mesh, const Material& material, RigidBody& rigidbody);
+    Object(std::string name, const Mesh& mesh, const Material& material, RigidBody& rigidbody, Collider& collider);
     const Mesh& GetMesh() const;
     const Material& GetMaterial() const;
     Transform transform;
-    RigidBody* rigidbody{nullptr};
+    std::unique_ptr<RigidBody> rigidbody;
+    std::unique_ptr<Collider> collider;
     std::string name;
 private:
     const Mesh* m_mesh;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <physics/include/rigidbody.hpp>
+#include <graphics/include/scene/object.hpp>
 
 class BaseIntegrator {
 public:

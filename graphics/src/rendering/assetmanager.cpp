@@ -46,10 +46,12 @@ Mesh& AssetManager::LoadMesh(std::string filepath) {
 
     std::string name = mesh->mName.C_Str();
     if (m_meshes.contains(name)) {
-        DebugPrint(std::string("Mesh was overwritten by assetmanager: " + name));
+        DebugPrint(std::string("Cached Mesh reused by Asset Manager: " + name));
+        return m_meshes.at(name);
+    } else {
+        DebugPrint(std::string("Mesh created by Asset Manager: " + name));
+        return LoadMesh(mesh->mName.C_Str(), vertices, faces);
     }
-
-    return LoadMesh(mesh->mName.C_Str(), vertices, faces);
 }
 
 Shader& AssetManager::LoadShaders(std::string name, std::string vertexsourcepath, std::string fragmentsourcepath) {

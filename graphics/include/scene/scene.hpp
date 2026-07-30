@@ -23,6 +23,7 @@ public:
 
     Object& CreateObject(std::string name, const Mesh& mesh, const Material& material);
     Object& CreateObject(std::string name, const Mesh& mesh, const Material& material, RigidBody& rigidbody);
+    Object& CreateObject(std::string name, const Mesh& mesh, const Material& material, RigidBody& rigidbody, Collider& collider);
 
     template<typename T>
     void AddScript() {

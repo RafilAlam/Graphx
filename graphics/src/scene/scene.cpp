@@ -34,17 +34,17 @@ Scene::Scene(AssetManager& assetmanager, std::string filepath) {
 
             const Mesh& mesh = assetmanager.LoadMesh(meshpath);
             const Material& material = assetmanager.LoadMaterial(materialpath);
-            Collider collider{.type = ColliderType::Rectangle, .rectangle = {.halfExtents = {x, y, z}}};
-            RigidBody& rigidbody = physicsworld.CreateRigidBody(mass, collider);
-            CreateObject(name, mesh, material, rigidbody);
+            Collider collider{ColliderType::Polygon, PolygonData::Rectangle()};
+            RigidBody rigidbody{mass};
+            CreateObject(name, mesh, material, rigidbody, collider);
 
         } else if (collidertype == "Circle") {
             object["Radius"] >> x;
             const Mesh& mesh = assetmanager.LoadMesh(meshpath);
             const Material& material = assetmanager.LoadMaterial(materialpath);
-            Collider collider{.type = ColliderType::Circle, .circle = {.radius = x}};
-            RigidBody& rigidbody = physicsworld.CreateRigidBody(mass, collider);
-            CreateObject(name, mesh, material, rigidbody);
+            Collider collider{ColliderType::Circle, CircleData{.radius = x}};
+            RigidBody rigidbody{mass};
+            CreateObject(name, mesh, material, rigidbody, collider);
         }
     }
 }
@@ -57,6 +57,10 @@ Object& Scene::CreateObject(std::string name, const Mesh& mesh, const Material& 
     return objects.emplace_back(name, mesh, material, rigidbody);
 }
 
+Object& Scene::CreateObject(std::string name, const Mesh& mesh, const Material& material, RigidBody& rigidbody, Collider& collider) {
+    return objects.emplace_back(name, mesh, material, rigidbody, collider);
+}
+
 void Scene::OnStart() {
     for (auto& script : m_scripts) {
         script->OnStart();
@@ -67,7 +71,7 @@ void Scene::Update(float deltaTime) {
     for (auto& script : m_scripts) {
         script->OnUpdate();
     }
-    physicsworld.Step(deltaTime);
+    physicsworld.Step(objects, deltaTime);
     for (auto& object : objects) {
         if (object.rigidbody != nullptr) {
             object.transform.position = object.rigidbody->position;

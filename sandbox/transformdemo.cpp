@@ -34,7 +34,6 @@ public:
         }
     }
 private:
-    float lastTime;
     bool Fpressed{false};
 };
 
