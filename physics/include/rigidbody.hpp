@@ -16,6 +16,7 @@ public:
 
     glm::vec3 position{0.0f};
     glm::vec3 velocity{0.0f};
+    glm::vec3 angularvelocity{0.0f};
     float mass{1.0f};
 
 private:

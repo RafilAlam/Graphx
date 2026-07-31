@@ -11,22 +11,28 @@ App app({
 AssetManager assetmanager;
 
 Scene& scene = app.NewScene(assetmanager, "assets/demoscene.scene");
-Object& Rectangle = scene.objects[0];
-Object& Ball = scene.objects[1];
+Object& RectangleA = scene.objects[0];
+Object& RectangleB = scene.objects[1];
+Object& Ground = scene.objects[2];
 
 class MainScript : public Script {
 public:
     void OnStart() override {
-        Rectangle.rigidbody->position = {200.0f, 0.0f, 5.0f};
-        Ball.rigidbody->position = {-200.0f, 0.0f, 5.0f};
-        Ball.transform.scale = {100.0f, 100.0f, 0.0f};
-        Rectangle.transform.scale = {100.0f, 100.0f, 0.0f};
+        RectangleA.rigidbody->position = {200.0f, 50.0f, 5.0f};
+        RectangleA.transform.scale = {100.0f, 100.0f, 0.0f};
+
+        RectangleB.rigidbody->position = {-200.0f, 0.0f, 5.0f};
+        RectangleB.transform.scale = {100.0f, 100.0f, 0.0f};
+
+        Ground.rigidbody->position = {0.0f, -200.0f, 5.0f};
+        Ground.transform.scale = {500.0f, 50.0f, 0.0f};
     }
     void OnUpdate() override {
 
         if (!Fpressed and app.GetInput(GLFW_KEY_F) == GLFW_PRESS) {
             Fpressed = true;
-            Ball.rigidbody->ApplyImpulse({100.0f, 0.0f, 0.0f});
+            RectangleB.rigidbody->ApplyImpulse({0.0f, -100.0f, 0.0f});
+            std::cout << Ground.rigidbody->GetInverseMass();
         }
 
         if (Fpressed and app.GetInput(GLFW_KEY_F) == GLFW_RELEASE) {

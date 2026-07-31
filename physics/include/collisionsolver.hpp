@@ -8,6 +8,7 @@ struct CollisionManifold {
     bool colliding{false};
     glm::vec3 normal{0.0f};
     float penetrationDepth{0.0f};
+    glm::vec3 contactPoint{0.0f};
 };
 
 struct Contact {

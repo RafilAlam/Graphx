@@ -20,7 +20,8 @@ Scene::Scene(AssetManager& assetmanager, std::string filepath) {
         object["Name"] >> name;
         object["Mesh"] >> meshpath;
         object["Material"] >> materialpath;
-        object["Mass"] >> mass;
+        if (object.has_child("Mass"))
+            object["Mass"] >> mass;
         object["ColliderType"] >> collidertype;
         if (collidertype == "Rectangle") {
             ryml::NodeRef halfextents = object["HalfExtents"];
