@@ -14,6 +14,10 @@ glm::vec3 RigidBody::GetAccumulatedForce() {
     return m_accumulatedforce;
 }
 
+void RigidBody::ClearAccumulatedForce() {
+    m_accumulatedforce = glm::vec3(0.0f);
+}
+
 float RigidBody::GetInverseMass() {
     return m_inversemass;
 }

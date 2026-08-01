@@ -20,7 +20,7 @@ public:
 
     void UpdateCollider(Object& object);
 
-    float gravity{-1.81f};
+    float gravity{-981.0f};
 
 private:
     std::unique_ptr<BaseIntegrator> m_integrator{std::make_unique<EulerIntegrator>()};
