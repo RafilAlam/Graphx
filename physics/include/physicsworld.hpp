@@ -20,6 +20,8 @@ public:
 
     void UpdateCollider(Object& object);
 
+    float gravity{-1.81f};
+
 private:
     std::unique_ptr<BaseIntegrator> m_integrator{std::make_unique<EulerIntegrator>()};
     CollisionSolver m_collisionsolver;

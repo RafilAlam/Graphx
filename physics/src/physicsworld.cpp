@@ -11,21 +11,27 @@ void PhysicsWorld::UpdateCollider(Object& object) {
 }
 
 void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
+    std::vector<Contact> contacts;
     for (int i = 0; i < objects.size(); ++i) {
         Object& objectA = objects[i];
-        if (objectA.rigidbody)
+        if (objectA.rigidbody) {
+            objectA.rigidbody->ApplyForce({0, objectA.rigidbody->mass * gravity, 0});
             m_integrator->Integrate(*objectA.rigidbody, deltaTime);
+        }
         if (objectA.collider) {
             UpdateCollider(objectA);
 
             for (int j = i + 1; j < objects.size(); ++j) {
                 Object& objectB = objects[j];
-                Contact contact = m_collisionsolver.Dispatch[ToIndex(objectA.collider->type)][ToIndex(objectB.collider->type)](objectA, objectB);
-                m_collisionsolver.Resolve(contact);
-                if (contact.manifold.colliding) {
+                contacts.emplace_back(m_collisionsolver.Dispatch[ToIndex(objectA.collider->type)][ToIndex(objectB.collider->type)](objectA, objectB));
+                if (contacts.back().manifold.colliding) {
                     std::cout << "Collision Detected!" << '\n';
                 }
             }
         }
+    }
+    for (int k=0; k<8; ++k) {
+        for (auto& contact : contacts)
+            m_collisionsolver.Resolve(contact);
     }
 }
