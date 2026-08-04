@@ -16,6 +16,11 @@ struct Contact {
     Object& B;
 
     CollisionManifold manifold;
+
+    float accumulatedimpulse{0.0f};
+    float K;
+    float bias;
+    float gamma;
 };
 
 Contact CircleCircleCheck(Object& A, Object& B);
@@ -29,5 +34,6 @@ public:
     using CollisionFn = Contact(*)(Object&, Object&);
     CollisionFn Dispatch[static_cast<int>(ColliderType::Count)][static_cast<int>(ColliderType::Count)];
 
+    void PreStep(Contact& contact, float deltaTime);
     void Resolve(Contact& contact);
 };

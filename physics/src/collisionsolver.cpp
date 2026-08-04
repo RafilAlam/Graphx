@@ -100,12 +100,24 @@ CollisionSolver::CollisionSolver() {
     };
 }*/
 
+void CollisionSolver::PreStep(Contact& contact, float deltaTime) {
+    contact.K = contact.A.rigidbody->GetInverseMass() + contact.B.rigidbody->GetInverseMass();
+}
+
+// Soft Constraints Resolver
 void CollisionSolver::Resolve(Contact& contact) {
     glm::vec3 relativevelocity = contact.B.rigidbody->velocity - contact.A.rigidbody->velocity;
-    if (!contact.manifold.colliding or glm::dot(relativevelocity, contact.manifold.normal) > 0)
+    if (!contact.manifold.colliding) {
+        std::cout << "Aborted" << '\n';
         return;
+    }
 
-    float impulse = (-1 * (1 + 1) * (glm::dot(relativevelocity, contact.manifold.normal))) / (contact.A.rigidbody->GetInverseMass() + contact.B.rigidbody->GetInverseMass());
-    contact.A.rigidbody->ApplyImpulse(impulse * -contact.manifold.normal);
-    contact.B.rigidbody->ApplyImpulse(impulse * contact.manifold.normal);
+    float restitution = 0.4f;
+    float vn = glm::dot(relativevelocity, contact.manifold.normal);
+    
+    float deltaimpulse = (-1.0f * (1.0f + restitution) * vn) / (contact.K);
+    std::cout << deltaimpulse << '\n';
+
+    contact.A.rigidbody->ApplyImpulse(deltaimpulse * -contact.manifold.normal);
+    contact.B.rigidbody->ApplyImpulse(deltaimpulse * contact.manifold.normal);
 }
