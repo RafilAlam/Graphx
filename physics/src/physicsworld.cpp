@@ -13,13 +13,14 @@ void PhysicsWorld::UpdateCollider(Object& object) {
 void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
     std::vector<Contact> contacts;
 
-    // Apply Gravity & Integrate
+    // Apply Gravity & Integrate Velocities
     for (auto& object : objects) {
         if (!object.rigidbody)
             continue;
 
         object.rigidbody->ApplyForce({0, object.rigidbody->mass * gravity, 0});
-        m_integrator->Integrate(*object.rigidbody, deltaTime);
+        m_integrator->IntegrateVelocity(*object.rigidbody, deltaTime);
+        object.rigidbody->ClearAccumulatedForce();
     }
 
     // Update Collider World Coords
@@ -57,11 +58,11 @@ void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
         }
     }
 
-    // Clear Force Accumulators
+    // Integrate Positions
     for (auto& object: objects) {
         if (!object.rigidbody)
             continue;
 
-        object.rigidbody->ClearAccumulatedForce();
+        m_integrator->IntegratePosition(*object.rigidbody, deltaTime);
     }
 }

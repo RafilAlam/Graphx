@@ -107,13 +107,13 @@ void CollisionSolver::PreStep(Contact& contact, float deltaTime) {
 // Soft Constraints Resolver
 void CollisionSolver::Resolve(Contact& contact) {
     glm::vec3 relativevelocity = contact.B.rigidbody->velocity - contact.A.rigidbody->velocity;
-    if (!contact.manifold.colliding) {
+    float restitution = 0.4f;
+    float vn = glm::dot(relativevelocity, contact.manifold.normal);
+
+    if (!contact.manifold.colliding or vn > 0.0f) {
         std::cout << "Aborted" << '\n';
         return;
     }
-
-    float restitution = 0.4f;
-    float vn = glm::dot(relativevelocity, contact.manifold.normal);
     
     float deltaimpulse = (-1.0f * (1.0f + restitution) * vn) / (contact.K);
     std::cout << deltaimpulse << '\n';
