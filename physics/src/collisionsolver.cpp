@@ -20,8 +20,15 @@ Contact CircleCircleCheck(Object& A, Object& B) {
 Contact PolygonPolygonCheck(Object& A, Object& B) {
     std::vector<glm::vec3> axesA = A.collider->getAxes();
     std::vector<glm::vec3> axesB = B.collider->getAxes();
+    std::vector<Face> facesA = A.collider->getFaces();
+    std::vector<Face> facesB = B.collider->getFaces();
+
     float minoverlap = FLT_MAX;
     glm::vec3 smallestaxis;
+    Collider* incidentCollider;
+    Face incidentFace;
+    Face referenceFace;
+
     for (int i = 0; i < axesA.size(); ++i) {
         Projection p1 = A.collider->project(axesA[i]);
         Projection p2 = B.collider->project(axesA[i]);
@@ -36,6 +43,8 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
         } else if (overlap < minoverlap) {
             minoverlap = overlap;
             smallestaxis = axesA[i];
+            referenceFace = facesA[i];
+            incidentCollider = &*B.collider;
         }
     }
     for (int i = 0; i < axesB.size(); ++i) {
@@ -52,8 +61,12 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
         } else if (overlap < minoverlap) {
             minoverlap = overlap;
             smallestaxis = axesB[i];
+            referenceFace = facesB[i];
+            incidentCollider = &*A.collider;
         }
     }
+
+    incidentFace = incidentCollider->getIncidentFace(smallestaxis);
 
     if (glm::dot(B.transform.position - A.transform.position, smallestaxis) < 0.0f) {
         smallestaxis = -smallestaxis;
@@ -65,7 +78,8 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
         {
         .colliding = true,
         .normal = smallestaxis,
-        .penetrationDepth = minoverlap
+        .penetrationDepth = minoverlap,
+        .contactPoint = referenceFace.getIntersection(incidentFace)
         }
     };
 }

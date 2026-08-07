@@ -28,6 +28,19 @@ struct Projection {
     }
 };
 
+struct Face {
+    glm::vec3 p1;
+    glm::vec3 p2;
+
+    glm::vec3 getIntersection(Face& incidentFace) {
+        glm::vec3 numVec = glm::cross(incidentFace.p1 - p1, incidentFace.p2 - incidentFace.p1);
+        glm::vec3 denVec = glm::cross(p2 - p1, incidentFace.p2 - incidentFace.p1);
+        float scale = glm::dot(numVec, denVec) / glm::dot(denVec, denVec);
+        
+        return p1 + (p2 - p1) * scale;
+    }
+};
+
 struct CircleData {
     float radius;
 };
@@ -56,15 +69,26 @@ struct Collider {
     ColliderType type;
     std::variant<CircleData, PolygonData> shapedata;
     
+    std::vector<Face> getFaces() {
+        const std::vector<glm::vec3>& vertices = std::get<PolygonData>(shapedata).worldvertices;
+        std::vector<Face> faces(vertices.size());
+        for (size_t i=0; i<vertices.size(); ++i) {
+            glm::vec3 p1 = vertices[i];
+            glm::vec3 p2 = vertices[i + 1 == vertices.size() ? 0 : i + 1];
+            faces[i] = {p1, p2};
+        }
+        return faces;
+    }
+
     std::vector<glm::vec3> getAxes() {
         const std::vector<glm::vec3>& vertices = std::get<PolygonData>(shapedata).worldvertices;
         std::vector<glm::vec3> axes(vertices.size());
         for (size_t i=0; i<vertices.size(); ++i) {
             glm::vec3 p1 = vertices[i];
             glm::vec3 p2 = vertices[i + 1 == vertices.size() ? 0 : i + 1];
-            glm::vec3 edge = p2 - p1;
-            edge = {edge.y, -edge.x, 0.0f};
-            axes[i] = glm::normalize(edge);
+            glm::vec3 face = p2 - p1;
+            face = {face.y, -face.x, 0.0f};
+            axes[i] = glm::normalize(face);
         }
         return axes;
     }
@@ -82,5 +106,25 @@ struct Collider {
             }
         }
         return {min, max};
+    }
+
+    Face getIncidentFace(glm::vec3 referenceNormal) {
+        const std::vector<glm::vec3>& vertices = std::get<PolygonData>(shapedata).worldvertices;
+        float mindot = FLT_MAX;
+        Face incidentFace;
+        for (size_t i; i < vertices.size(); ++i) {
+            glm::vec3 p1 = vertices[i];
+            glm::vec3 p2 = vertices[i+1==vertices.size() ? 0 : i+1];
+            glm::vec3 face = p2 - p1;
+            face = {face.y, -face.x, 0.0f};
+            float d = glm::dot(glm::normalize(face), referenceNormal);
+
+            if (d < mindot) {
+                mindot = d;
+                incidentFace = {p1, p2};
+            }
+        }
+
+        return incidentFace;
     }
 };
