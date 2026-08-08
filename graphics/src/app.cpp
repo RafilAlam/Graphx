@@ -23,6 +23,7 @@ int App::Run() {
 
         m_scene.Update(dt);
         m_renderer.Draw(m_scene.objects);
+        debugrenderer.Draw();
 
         m_window.SwapBuffers();
         glfwPollEvents();

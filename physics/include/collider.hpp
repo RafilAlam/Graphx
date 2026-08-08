@@ -28,11 +28,11 @@ struct Projection {
     }
 };
 
-struct Face {
+struct ColliderFace {
     glm::vec3 p1;
     glm::vec3 p2;
 
-    glm::vec3 getIntersection(Face& incidentFace) {
+    glm::vec3 getIntersection(ColliderFace& incidentFace) {
         glm::vec3 numVec = glm::cross(incidentFace.p1 - p1, incidentFace.p2 - incidentFace.p1);
         glm::vec3 denVec = glm::cross(p2 - p1, incidentFace.p2 - incidentFace.p1);
         float scale = glm::dot(numVec, denVec) / glm::dot(denVec, denVec);
@@ -69,9 +69,9 @@ struct Collider {
     ColliderType type;
     std::variant<CircleData, PolygonData> shapedata;
     
-    std::vector<Face> getFaces() {
+    std::vector<ColliderFace> getFaces() {
         const std::vector<glm::vec3>& vertices = std::get<PolygonData>(shapedata).worldvertices;
-        std::vector<Face> faces(vertices.size());
+        std::vector<ColliderFace> faces(vertices.size());
         for (size_t i=0; i<vertices.size(); ++i) {
             glm::vec3 p1 = vertices[i];
             glm::vec3 p2 = vertices[i + 1 == vertices.size() ? 0 : i + 1];
@@ -108,10 +108,10 @@ struct Collider {
         return {min, max};
     }
 
-    Face getIncidentFace(glm::vec3 referenceNormal) {
+    ColliderFace getIncidentFace(glm::vec3 referenceNormal) {
         const std::vector<glm::vec3>& vertices = std::get<PolygonData>(shapedata).worldvertices;
         float mindot = FLT_MAX;
-        Face incidentFace;
+        ColliderFace incidentFace;
         for (size_t i; i < vertices.size(); ++i) {
             glm::vec3 p1 = vertices[i];
             glm::vec3 p2 = vertices[i+1==vertices.size() ? 0 : i+1];

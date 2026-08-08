@@ -26,6 +26,14 @@ public:
 
         Ground.rigidbody->position = {0.0f, -200.0f, 5.0f};
         Ground.transform.scale = {500.0f, 50.0f, 0.0f};
+
+        glPointSize(10.0f);
+        app.debugrenderer.AddPoint({
+            .position = {200.0f, 0.0f, 5.0f}
+        });
+        app.debugrenderer.AddPoint({
+            .position = {-200.0f, 0.0f, 5.0f}
+        });
     }
     void OnUpdate() override {
 

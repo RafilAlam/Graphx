@@ -20,14 +20,14 @@ Contact CircleCircleCheck(Object& A, Object& B) {
 Contact PolygonPolygonCheck(Object& A, Object& B) {
     std::vector<glm::vec3> axesA = A.collider->getAxes();
     std::vector<glm::vec3> axesB = B.collider->getAxes();
-    std::vector<Face> facesA = A.collider->getFaces();
-    std::vector<Face> facesB = B.collider->getFaces();
+    std::vector<ColliderFace> facesA = A.collider->getFaces();
+    std::vector<ColliderFace> facesB = B.collider->getFaces();
 
     float minoverlap = FLT_MAX;
     glm::vec3 smallestaxis;
     Collider* incidentCollider;
-    Face incidentFace;
-    Face referenceFace;
+    ColliderFace incidentFace;
+    ColliderFace referenceFace;
 
     for (int i = 0; i < axesA.size(); ++i) {
         Projection p1 = A.collider->project(axesA[i]);

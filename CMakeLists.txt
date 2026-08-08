@@ -62,7 +62,7 @@ target_include_directories(glad PRIVATE .)
 add_library(Graphx STATIC
  graphics/src/app.cpp graphics/src/window.cpp graphics/src/debug.cpp graphics/src/utils.cpp graphics/src/stb_image.cpp
  graphics/src/scene/scene.cpp graphics/src/scene/object.cpp
- graphics/src/rendering/renderer.cpp graphics/src/rendering/uniformbuffer.cpp graphics/src/rendering/assetmanager.cpp graphics/src/rendering/material.cpp graphics/src/rendering/texture.cpp graphics/src/rendering/shader.cpp graphics/src/rendering/mesh.cpp
+ graphics/src/rendering/renderer.cpp graphics/src/rendering/debugrenderer.cpp graphics/src/rendering/uniformbuffer.cpp graphics/src/rendering/assetmanager.cpp graphics/src/rendering/material.cpp graphics/src/rendering/texture.cpp graphics/src/rendering/shader.cpp graphics/src/rendering/mesh.cpp
  
  physics/src/physicsworld.cpp physics/src/integrator.cpp physics/src/rigidbody.cpp physics/src/collisionsolver.cpp
 )

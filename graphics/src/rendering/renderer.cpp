@@ -10,7 +10,7 @@ void Renderer::Draw(const Object& object) {
     const Shader& shader = material.GetShader();
     const Mesh& mesh = object.GetMesh();
 
-    m_materialbuffer.Upload(MaterialData{.Color = material.basecolor});
+    glUseProgram(shader.GetProgram());
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, object.transform.position);
@@ -22,12 +22,14 @@ void Renderer::Draw(const Object& object) {
     glm::mat4 projection = glm::orthoLH(-300.0f, 300.0f, -300.0f, 300.0f, 0.1f, 100.0f);
 
     m_objectbuffer.Upload(ObjectData{.Transform = projection * view * model});
+    m_materialbuffer.Upload(MaterialData{.Color = material.basecolor});
 
     material.texture.BindTexture();
-
-    glUseProgram(shader.GetProgram());
     glBindVertexArray(mesh.GetVAO());
+
     glDrawElements(GL_TRIANGLES, mesh.GetIndexCount(), GL_UNSIGNED_INT, nullptr);
+
+    glBindVertexArray(0);
 }
 
 void Renderer::Draw(std::deque<Object>& objects) {

@@ -4,6 +4,7 @@
 #include <graphics/include/scene/object.hpp>
 #include <graphics/include/rendering/uniformbuffer.hpp>
 #include <graphics/include/rendering/mesh.hpp>
+#include <graphics/include/debug.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

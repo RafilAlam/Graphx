@@ -1,16 +1,22 @@
 #include <graphics/include/rendering/shader.hpp>
 
 Shader::Shader(std::string vertexsourcepath, std::string fragmentsourcepath) {
-    DebugPrint("Loading Shaders...");
-
     std::string vertexsource = LoadTextFile(vertexsourcepath);
     std::string fragmentsource = LoadTextFile(fragmentsourcepath);
-
     const char* charvertexsource = vertexsource.data();
     const char* charfragmentsource = fragmentsource.data();
+    Init(charvertexsource, charfragmentsource);
+}
+
+Shader::Shader(const char* vertexsource, const char* fragmentsource) {
+    Init(vertexsource, fragmentsource);
+}
+
+void Shader::Init(const char* vertexsource, const char* fragmentsource) {
+    DebugPrint("Loading Shaders...");
 
     unsigned int vertexshader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexshader, 1, &charvertexsource, NULL);
+    glShaderSource(vertexshader, 1, &vertexsource, NULL);
     glCompileShader(vertexshader);
 
     int success;
@@ -22,7 +28,7 @@ Shader::Shader(std::string vertexsourcepath, std::string fragmentsourcepath) {
     }
 
     unsigned int fragmentshader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentshader, 1, &charfragmentsource, NULL);
+    glShaderSource(fragmentshader, 1, &fragmentsource, NULL);
     glCompileShader(fragmentshader);
 
     glGetShaderiv(fragmentshader, GL_COMPILE_STATUS, &success);
