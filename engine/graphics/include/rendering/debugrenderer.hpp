@@ -10,7 +10,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 struct DebugPoint {
-    glm::vec3 position{1.0f, 0.0f, 0.0f};
+    glm::vec3 position{0.0f, 0.0f, 0.0f};
     glm::vec3 color{1.0f, 1.0f, 1.0f};
 };
 
@@ -20,6 +20,9 @@ public:
     void AddPoint(DebugPoint point);
     void Draw();
     void DrawPoints();
+
+    DebugRenderer(const DebugRenderer&) = delete;
+    DebugRenderer& operator=(const DebugRenderer&) = delete;
 private:
     Shader m_coreshader;
     GLuint m_vertexbuffer;

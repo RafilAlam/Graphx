@@ -3,7 +3,9 @@
 App::App(AppConfig config)
  : m_window(Window(config.WindowWidth, config.WindowHeight, config.WindowTitle)),
    m_startTime(std::chrono::steady_clock::now())
-{}
+{
+    Services::Set<DebugRenderer>(m_debugrenderer);
+}
 
 int App::Run() {
     DebugPrint("Running!");
@@ -23,7 +25,7 @@ int App::Run() {
 
         m_scene.Update(dt);
         m_renderer.Draw(m_scene.objects);
-        debugrenderer.Draw();
+        m_debugrenderer.Draw();
 
         m_window.SwapBuffers();
         glfwPollEvents();

@@ -1,5 +1,4 @@
 #include <engine/physics/include/physicsworld.hpp>
-#include <iostream>
 
 void PhysicsWorld::UpdateCollider(Object& object) {
     std::vector<glm::vec3>& localvertices = std::get<PolygonData>(object.collider->shapedata).localvertices;

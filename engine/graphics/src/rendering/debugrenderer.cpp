@@ -32,6 +32,8 @@ void main()
 DebugRenderer::DebugRenderer()
  : m_coreshader(Shader(corevshader, corefshader))
 {
+    glPointSize(1.0f);
+
     glGenBuffers(1, &m_vertexbuffer);
     glGenVertexArrays(1, &m_vertexarray);
 }

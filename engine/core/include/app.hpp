@@ -1,6 +1,7 @@
 #pragma once
 
 #include <engine/core/include/window.hpp>
+#include <engine/core/include/services.hpp>
 #include <engine/core/include/debug.hpp>
 #include <engine/graphics/include/scene/scene.hpp>
 #include <engine/graphics/include/scene/object.hpp>
@@ -24,6 +25,7 @@ class App {
 private:
     Window m_window;
     Renderer m_renderer;
+    DebugRenderer m_debugrenderer;
     Scene m_scene;
     unsigned int m_shaderprogram;
     std::chrono::steady_clock::time_point m_startTime;
@@ -35,5 +37,4 @@ public:
     Scene& NewScene(AssetManager& assetmanager, std::string filepath);
     float GetTime();
     float dt{0.0f};
-    DebugRenderer debugrenderer;
 };
