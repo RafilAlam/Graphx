@@ -99,7 +99,7 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
         .colliding = true,
         .normal = smallestaxis,
         .penetrationDepth = minoverlap,
-        .contactPoint = ClipSegment(incidentFace, referenceFace.p1, smallestaxis)
+        .contactPoints = {ClipSegment(incidentFace, referenceFace.p1, smallestaxis), ClipSegment(incidentFace, referenceFace.p2, smallestaxis)}
         }
     };
 }

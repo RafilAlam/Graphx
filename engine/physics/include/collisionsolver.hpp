@@ -3,12 +3,13 @@
 
 #include <engine/graphics/include/scene/object.hpp>
 #include <glm/glm.hpp>
+#include <vector>
 
 struct CollisionManifold {
     bool colliding{false};
     glm::vec3 normal{0.0f};
     float penetrationDepth{0.0f};
-    glm::vec3 contactPoint{0.0f};
+    std::vector<glm::vec3> contactPoints;
 };
 
 struct Contact {
