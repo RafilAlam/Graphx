@@ -60,11 +60,11 @@ add_library(glad STATIC dependencies/glad/glad.c)
 target_include_directories(glad PRIVATE .)
 
 add_library(Graphx STATIC
- graphics/src/app.cpp graphics/src/window.cpp graphics/src/debug.cpp graphics/src/utils.cpp graphics/src/stb_image.cpp
- graphics/src/scene/scene.cpp graphics/src/scene/object.cpp
- graphics/src/rendering/renderer.cpp graphics/src/rendering/debugrenderer.cpp graphics/src/rendering/uniformbuffer.cpp graphics/src/rendering/assetmanager.cpp graphics/src/rendering/material.cpp graphics/src/rendering/texture.cpp graphics/src/rendering/shader.cpp graphics/src/rendering/mesh.cpp
+ engine/core/src/app.cpp engine/core/src/window.cpp engine/core/src/debug.cpp engine/core/src/utils.cpp engine/graphics/src/stb_image.cpp
+ engine/graphics/src/scene/scene.cpp engine/graphics/src/scene/object.cpp
+ engine/graphics/src/rendering/renderer.cpp engine/graphics/src/rendering/debugrenderer.cpp engine/graphics/src/rendering/uniformbuffer.cpp engine/graphics/src/rendering/assetmanager.cpp engine/graphics/src/rendering/material.cpp engine/graphics/src/rendering/texture.cpp engine/graphics/src/rendering/shader.cpp engine/graphics/src/rendering/mesh.cpp
  
- physics/src/physicsworld.cpp physics/src/integrator.cpp physics/src/rigidbody.cpp physics/src/collisionsolver.cpp
+ engine/physics/src/physicsworld.cpp engine/physics/src/integrator.cpp engine/physics/src/rigidbody.cpp engine/physics/src/collisionsolver.cpp
 )
 target_include_directories(Graphx PRIVATE .)
 target_link_libraries(Graphx PUBLIC OpenGL::GL glfw glad glm::glm assimp ryml::ryml)
