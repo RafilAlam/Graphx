@@ -1,4 +1,5 @@
 #include <engine/physics/include/physicsworld.hpp>
+#include <engine/core/include/services.hpp>
 
 void PhysicsWorld::UpdateCollider(Object& object) {
     std::vector<glm::vec3>& localvertices = std::get<PolygonData>(object.collider->shapedata).localvertices;
@@ -42,9 +43,13 @@ void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
                 continue;
 
             Contact contact = m_collisionsolver.Dispatch[ToIndex(objectA.collider->type)][ToIndex(objectB.collider->type)](objectA, objectB);
+            Services::Get<DebugRenderer>().AddPoint({
+                .position = glm::vec3(contact.manifold.contactPoint.x, contact.manifold.contactPoint.y, 5.0f),
+                .color = {1.0f, 0.0f, 0.0f}
+            });
             if (contact.manifold.colliding) {
                 contacts.emplace_back(std::move(contact));
-                std::cout << "Collision Detected!" << '\n';
+                //std::cout << "Collision Detected!" << '\n';
             }
         }
     }

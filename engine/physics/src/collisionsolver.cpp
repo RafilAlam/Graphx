@@ -1,6 +1,25 @@
 #include <engine/physics/include/collisionsolver.hpp>
 #include <iostream>
 
+float Cross2D(glm::vec3 a, glm::vec3 b) {
+    return a.x * b.y - a.y * b.x;
+}
+
+glm::vec3 ClipSegment(ColliderFace& incidentFace, glm::vec3 clippoint, glm::vec3 clipnormal) {
+    glm::vec3 incidentface = incidentFace.p2 - incidentFace.p1;
+    float denominator = Cross2D(clipnormal, incidentface);
+
+    if (std::abs(denominator) < 1e-6f) {
+        return {};
+    }
+
+    glm::vec3 qMinusP = incidentFace.p1 - clippoint;
+
+    float t = Cross2D(qMinusP, incidentface) / denominator;
+    
+    return clippoint + t * clipnormal;
+}
+
 Contact CircleCircleCheck(Object& A, Object& B) {
     glm::vec3 AtoB = B.transform.position - A.transform.position;
     float distance = glm::length(AtoB);
@@ -68,6 +87,7 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
 
     incidentFace = incidentCollider->getIncidentFace(smallestaxis);
 
+
     if (glm::dot(B.transform.position - A.transform.position, smallestaxis) < 0.0f) {
         smallestaxis = -smallestaxis;
     }
@@ -79,7 +99,7 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
         .colliding = true,
         .normal = smallestaxis,
         .penetrationDepth = minoverlap,
-        .contactPoint = referenceFace.getIntersection(incidentFace)
+        .contactPoint = ClipSegment(incidentFace, referenceFace.p1, smallestaxis)
         }
     };
 }
@@ -125,12 +145,11 @@ void CollisionSolver::Resolve(Contact& contact) {
     float vn = glm::dot(relativevelocity, contact.manifold.normal);
 
     if (!contact.manifold.colliding or vn > 0.0f) {
-        std::cout << "Aborted" << '\n';
         return;
     }
     
     float deltaimpulse = (-1.0f * (1.0f + restitution) * vn) / (contact.K);
-    std::cout << deltaimpulse << '\n';
+    //std::cout << deltaimpulse << '\n';
 
     contact.A.rigidbody->ApplyImpulse(deltaimpulse * -contact.manifold.normal);
     contact.B.rigidbody->ApplyImpulse(deltaimpulse * contact.manifold.normal);

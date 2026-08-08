@@ -1,6 +1,8 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <cmath>
+#include <iostream>
 #include <algorithm>
 #include <variant>
 #include <memory>
@@ -31,15 +33,11 @@ struct Projection {
 struct ColliderFace {
     glm::vec3 p1;
     glm::vec3 p2;
-
-    glm::vec3 getIntersection(ColliderFace& incidentFace) {
-        glm::vec3 numVec = glm::cross(incidentFace.p1 - p1, incidentFace.p2 - incidentFace.p1);
-        glm::vec3 denVec = glm::cross(p2 - p1, incidentFace.p2 - incidentFace.p1);
-        float scale = glm::dot(numVec, denVec) / glm::dot(denVec, denVec);
-        
-        return p1 + (p2 - p1) * scale;
-    }
 };
+
+float Cross2D(glm::vec3 a, glm::vec3 b);
+
+glm::vec3 ClipSegment(ColliderFace& incidentFace, glm::vec3 clippoint, glm::vec3 clipnormal);
 
 struct CircleData {
     float radius;
@@ -112,12 +110,14 @@ struct Collider {
         const std::vector<glm::vec3>& vertices = std::get<PolygonData>(shapedata).worldvertices;
         float mindot = FLT_MAX;
         ColliderFace incidentFace;
-        for (size_t i; i < vertices.size(); ++i) {
+        for (size_t i=0; i < vertices.size(); ++i) {
             glm::vec3 p1 = vertices[i];
             glm::vec3 p2 = vertices[i+1==vertices.size() ? 0 : i+1];
             glm::vec3 face = p2 - p1;
-            face = {face.y, -face.x, 0.0f};
-            float d = glm::dot(glm::normalize(face), referenceNormal);
+            glm::vec3 incidentNormal = {face.y, -face.x, 0.0f};
+            incidentNormal = glm::normalize(incidentNormal);
+
+            float d = glm::dot(incidentNormal, referenceNormal);
 
             if (d < mindot) {
                 mindot = d;

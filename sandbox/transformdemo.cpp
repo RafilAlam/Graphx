@@ -9,7 +9,6 @@ App app({
     .WindowTitle = "TransformDemo"
 });
 AssetManager assetmanager;
-DebugRenderer& debugrenderer = Services::Get<DebugRenderer>();
 
 Scene& scene = app.NewScene(assetmanager, "assets/demoscene.scene");
 Object& RectangleA = scene.objects[0];

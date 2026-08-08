@@ -32,7 +32,7 @@ void main()
 DebugRenderer::DebugRenderer()
  : m_coreshader(Shader(corevshader, corefshader))
 {
-    glPointSize(1.0f);
+    glPointSize(10.0f);
 
     glGenBuffers(1, &m_vertexbuffer);
     glGenVertexArrays(1, &m_vertexarray);
@@ -57,6 +57,7 @@ void DebugRenderer::DrawPoints() {
     glEnableVertexAttribArray(1);
 
     glDrawArrays(GL_POINTS, 0, m_points.size());
+    m_points.clear();
 }
 
 void DebugRenderer::Draw() {
