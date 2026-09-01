@@ -23,6 +23,6 @@ Objects:
       Mass: 0.0
       ColliderType: Rectangle
       HalfExtents:
-        x: 100.0
-        y: 100.0
+        x: 500.0
+        y: 50.0
         

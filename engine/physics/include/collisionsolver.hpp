@@ -1,9 +1,12 @@
 #pragma once
 
-
 #include <engine/graphics/include/scene/object.hpp>
+#include <engine/core/include/utils.hpp>
 #include <glm/glm.hpp>
+#include <algorithm>
 #include <vector>
+
+bool ClipSegmentToLine(std::vector<glm::vec3>& incidentFace, const glm::vec3& clipnormal, float offset);
 
 struct CollisionManifold {
     bool colliding{false};
@@ -17,11 +20,7 @@ struct Contact {
     Object& B;
 
     CollisionManifold manifold;
-
-    float accumulatedimpulse{0.0f};
-    float K;
-    float bias;
-    float gamma;
+    float accumulatedimpulses[2];
 };
 
 Contact CircleCircleCheck(Object& A, Object& B);

@@ -36,15 +36,16 @@ Scene::Scene(AssetManager& assetmanager, std::string filepath) {
             const Mesh& mesh = assetmanager.LoadMesh(meshpath);
             const Material& material = assetmanager.LoadMaterial(materialpath);
             Collider collider{ColliderType::Polygon, PolygonData::Rectangle()};
-            RigidBody rigidbody{mass};
-            CreateObject(name, mesh, material, rigidbody, collider);
+            RigidBody rigidbody{mass, {x, y, z}};
+            Object& object = CreateObject(name, mesh, material, rigidbody, collider);
+            object.transform.scale = {x, y, z};
 
         } else if (collidertype == "Circle") {
             object["Radius"] >> x;
             const Mesh& mesh = assetmanager.LoadMesh(meshpath);
             const Material& material = assetmanager.LoadMaterial(materialpath);
             Collider collider{ColliderType::Circle, CircleData{.radius = x}};
-            RigidBody rigidbody{mass};
+            RigidBody rigidbody{mass, {x, y, z}};
             CreateObject(name, mesh, material, rigidbody, collider);
         }
     }
@@ -76,6 +77,7 @@ void Scene::Update(float deltaTime) {
     for (auto& object : objects) {
         if (object.rigidbody != nullptr) {
             object.transform.position = object.rigidbody->position;
+            object.transform.rotation = object.rigidbody->rotation;
         }
     }
 }

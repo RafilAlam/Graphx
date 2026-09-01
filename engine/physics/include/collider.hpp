@@ -30,15 +30,6 @@ struct Projection {
     }
 };
 
-struct ColliderFace {
-    glm::vec3 p1;
-    glm::vec3 p2;
-};
-
-float Cross2D(glm::vec3 a, glm::vec3 b);
-
-glm::vec3 ClipSegment(ColliderFace& incidentFace, glm::vec3 clippoint, glm::vec3 clipnormal);
-
 struct CircleData {
     float radius;
 };
@@ -67,9 +58,9 @@ struct Collider {
     ColliderType type;
     std::variant<CircleData, PolygonData> shapedata;
     
-    std::vector<ColliderFace> getFaces() {
+    std::vector<std::vector<glm::vec3>> getEdges() {
         const std::vector<glm::vec3>& vertices = std::get<PolygonData>(shapedata).worldvertices;
-        std::vector<ColliderFace> faces(vertices.size());
+        std::vector<std::vector<glm::vec3>> faces(vertices.size());
         for (size_t i=0; i<vertices.size(); ++i) {
             glm::vec3 p1 = vertices[i];
             glm::vec3 p2 = vertices[i + 1 == vertices.size() ? 0 : i + 1];
@@ -78,7 +69,7 @@ struct Collider {
         return faces;
     }
 
-    std::vector<glm::vec3> getAxes() {
+    std::vector<glm::vec3> getNormals() {
         const std::vector<glm::vec3>& vertices = std::get<PolygonData>(shapedata).worldvertices;
         std::vector<glm::vec3> axes(vertices.size());
         for (size_t i=0; i<vertices.size(); ++i) {
@@ -106,18 +97,40 @@ struct Collider {
         return {min, max};
     }
 
-    ColliderFace getIncidentFace(glm::vec3 referenceNormal) {
+    std::vector<glm::vec3> getReferenceFace(glm::vec3 referenceNormal) {
         const std::vector<glm::vec3>& vertices = std::get<PolygonData>(shapedata).worldvertices;
-        float mindot = FLT_MAX;
-        ColliderFace incidentFace;
+        float maxdot = -FLT_MAX;
+        std::vector<glm::vec3> referenceFace;
         for (size_t i=0; i < vertices.size(); ++i) {
             glm::vec3 p1 = vertices[i];
             glm::vec3 p2 = vertices[i+1==vertices.size() ? 0 : i+1];
             glm::vec3 face = p2 - p1;
-            glm::vec3 incidentNormal = {face.y, -face.x, 0.0f};
-            incidentNormal = glm::normalize(incidentNormal);
+            glm::vec3 Normal = {-face.y, face.x, 0.0f};
+            Normal = glm::normalize(Normal);
 
-            float d = glm::dot(incidentNormal, referenceNormal);
+            float d = glm::dot(Normal, referenceNormal);
+
+            if (d > maxdot) {
+                maxdot = d;
+                referenceFace = {p1, p2};
+            }
+        }
+
+        return referenceFace;
+    }
+
+    std::vector<glm::vec3> getIncidentFace(glm::vec3 referenceNormal) {
+        const std::vector<glm::vec3>& vertices = std::get<PolygonData>(shapedata).worldvertices;
+        float mindot = FLT_MAX;
+        std::vector<glm::vec3> incidentFace;
+        for (size_t i=0; i < vertices.size(); ++i) {
+            glm::vec3 p1 = vertices[i];
+            glm::vec3 p2 = vertices[i+1==vertices.size() ? 0 : i+1];
+            glm::vec3 face = p2 - p1;
+            glm::vec3 Normal = {-face.y, face.x, 0.0f};
+            Normal = glm::normalize(Normal);
+
+            float d = glm::dot(Normal, referenceNormal);
 
             if (d < mindot) {
                 mindot = d;

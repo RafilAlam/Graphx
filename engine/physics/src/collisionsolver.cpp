@@ -1,23 +1,27 @@
 #include <engine/physics/include/collisionsolver.hpp>
+#include <engine/core/include/services.hpp>
 #include <iostream>
 
-float Cross2D(glm::vec3 a, glm::vec3 b) {
-    return a.x * b.y - a.y * b.x;
-}
+bool ClipSegmentToLine(std::vector<glm::vec3>& points, const glm::vec3& normal, float offset) {
+    std::vector<glm::vec3> result;
 
-glm::vec3 ClipSegment(ColliderFace& incidentFace, glm::vec3 clippoint, glm::vec3 clipnormal) {
-    glm::vec3 incidentface = incidentFace.p2 - incidentFace.p1;
-    float denominator = Cross2D(clipnormal, incidentface);
+    float d1 = glm::dot(normal, points[0]) - offset;
+    float d2 = glm::dot(normal, points[1]) - offset;
 
-    if (std::abs(denominator) < 1e-6f) {
-        return {};
+    if (d1 >= 0.0f)
+        result.push_back(points[0]);
+    if (d2 >= 0.0f)
+        result.push_back(points[1]);
+
+    if ((d1 < 0.0f && d2 > 0.0f) || (d1 > 0.0f && d2 < 0.0f)) {
+        float t = d1 / (d1 - d2);
+
+        result.push_back(points[0] + t * (points[1] - points[0]));
     }
 
-    glm::vec3 qMinusP = incidentFace.p1 - clippoint;
+    points = result;
 
-    float t = Cross2D(qMinusP, incidentface) / denominator;
-    
-    return clippoint + t * clipnormal;
+    return points.size() >= 2;
 }
 
 Contact CircleCircleCheck(Object& A, Object& B) {
@@ -37,22 +41,22 @@ Contact CircleCircleCheck(Object& A, Object& B) {
 }
 
 Contact PolygonPolygonCheck(Object& A, Object& B) {
-    std::vector<glm::vec3> axesA = A.collider->getAxes();
-    std::vector<glm::vec3> axesB = B.collider->getAxes();
-    std::vector<ColliderFace> facesA = A.collider->getFaces();
-    std::vector<ColliderFace> facesB = B.collider->getFaces();
+    std::vector<glm::vec3> normalsA = A.collider->getNormals();
+    std::vector<glm::vec3> normalsB = B.collider->getNormals();
+    std::vector<std::vector<glm::vec3>> edgesA = A.collider->getEdges();
+    std::vector<std::vector<glm::vec3>> edgesB = B.collider->getEdges();
 
-    float minoverlap = FLT_MAX;
     glm::vec3 smallestaxis;
+    float minoverlap = FLT_MAX;
+    Collider* referenceCollider;
     Collider* incidentCollider;
-    ColliderFace incidentFace;
-    ColliderFace referenceFace;
+    std::vector<glm::vec3> referenceEdge;
+    std::vector<glm::vec3> incidentEdge;
 
-    for (int i = 0; i < axesA.size(); ++i) {
-        Projection p1 = A.collider->project(axesA[i]);
-        Projection p2 = B.collider->project(axesA[i]);
+    for (size_t i = 0; i < normalsA.size(); ++i) {
+        Projection p1 = A.collider->project(normalsA[i]);
+        Projection p2 = B.collider->project(normalsA[i]);
         float overlap = p1.getOverlap(p2);
-        //std::cout << overlap << '\n';
         if (overlap == 0.0f) {
             return {
                 A,
@@ -61,16 +65,15 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
             };
         } else if (overlap < minoverlap) {
             minoverlap = overlap;
-            smallestaxis = axesA[i];
-            referenceFace = facesA[i];
+            smallestaxis = normalsA[i];
+            referenceCollider = &*A.collider;
             incidentCollider = &*B.collider;
         }
     }
-    for (int i = 0; i < axesB.size(); ++i) {
-        Projection p1 = A.collider->project(axesB[i]);
-        Projection p2 = B.collider->project(axesB[i]);
+    for (size_t i = 0; i < normalsB.size(); ++i) {
+        Projection p1 = A.collider->project(normalsB[i]);
+        Projection p2 = B.collider->project(normalsB[i]);
         float overlap = p1.getOverlap(p2);
-        //std::cout << overlap << '\n';
         if (overlap == 0.0f) {
             return {
                 A,
@@ -79,17 +82,49 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
             };
         } else if (overlap < minoverlap) {
             minoverlap = overlap;
-            smallestaxis = axesB[i];
-            referenceFace = facesB[i];
+            smallestaxis = normalsB[i];
+            referenceCollider = &*B.collider;
             incidentCollider = &*A.collider;
         }
     }
 
-    incidentFace = incidentCollider->getIncidentFace(smallestaxis);
-
-
     if (glm::dot(B.transform.position - A.transform.position, smallestaxis) < 0.0f) {
         smallestaxis = -smallestaxis;
+        std::swap(referenceCollider, incidentCollider);
+    }
+
+    referenceEdge = referenceCollider->getReferenceFace(smallestaxis);
+    incidentEdge = incidentCollider->getIncidentFace(smallestaxis);
+
+    glm::vec3 refDirection = glm::normalize(referenceEdge[1] - referenceEdge[0]);
+    float offset1 = glm::dot(refDirection, referenceEdge[0]);
+    float offset2 = glm::dot(-refDirection, referenceEdge[1]);
+    float refOffset = glm::dot(-smallestaxis, referenceEdge[0]);
+
+    std::cout << smallestaxis.y << '\n';
+    
+    std::vector<glm::vec3> clippedpoints = incidentEdge;
+    std::vector<glm::vec3> contactpoints;
+    if (ClipSegmentToLine(clippedpoints, refDirection, offset1)
+        && ClipSegmentToLine(clippedpoints, -refDirection, offset2))
+            for (const auto& point : clippedpoints) {
+                float separation = glm::dot(-smallestaxis, point) - refOffset;
+                if (separation <= 0)
+                    contactpoints.push_back(point);
+            }
+    
+    for (auto& point : referenceEdge) {
+        Services::Get<DebugRenderer>().AddPoint({
+            .position = point,
+            .color = {0.0f, 1.0f, 0.0f}
+        });
+    }
+
+    for (auto& point : clippedpoints) {
+        Services::Get<DebugRenderer>().AddPoint({
+            .position = point,
+            .color = {1.0f, 0.0f, 0.0f}
+        });
     }
 
     return {
@@ -99,7 +134,7 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
         .colliding = true,
         .normal = smallestaxis,
         .penetrationDepth = minoverlap,
-        .contactPoints = {ClipSegment(incidentFace, referenceFace.p1, smallestaxis), ClipSegment(incidentFace, referenceFace.p2, smallestaxis)}
+        .contactPoints = contactpoints
         }
     };
 }
@@ -135,22 +170,43 @@ CollisionSolver::CollisionSolver() {
 }*/
 
 void CollisionSolver::PreStep(Contact& contact, float deltaTime) {
-    contact.K = contact.A.rigidbody->GetInverseMass() + contact.B.rigidbody->GetInverseMass();
+    //contact.K = contact.A.rigidbody->GetInverseMass() + contact.B.rigidbody->GetInverseMass();
 }
 
-// Soft Constraints Resolver
 void CollisionSolver::Resolve(Contact& contact) {
-    glm::vec3 relativevelocity = contact.B.rigidbody->velocity - contact.A.rigidbody->velocity;
-    float restitution = 0.4f;
-    float vn = glm::dot(relativevelocity, contact.manifold.normal);
-
-    if (!contact.manifold.colliding or vn > 0.0f) {
+    if (!contact.manifold.colliding)
         return;
-    }
-    
-    float deltaimpulse = (-1.0f * (1.0f + restitution) * vn) / (contact.K);
-    //std::cout << deltaimpulse << '\n';
 
-    contact.A.rigidbody->ApplyImpulse(deltaimpulse * -contact.manifold.normal);
-    contact.B.rigidbody->ApplyImpulse(deltaimpulse * contact.manifold.normal);
+    for (size_t i = 0; i < contact.manifold.contactPoints.size(); ++i) {
+        glm::vec3& contactpoint = contact.manifold.contactPoints[i];
+        glm::vec3 relativevelocity = contact.B.rigidbody->GetPointVelocity(contactpoint) - contact.A.rigidbody->GetPointVelocity(contactpoint);
+        float restitution = 0.0f;
+        float vn = glm::dot(relativevelocity, contact.manifold.normal);
+
+        if (vn > 0.0f)
+            continue;
+        
+        if (vn < -10.0f) {
+            restitution = 0.4f;
+        }
+
+        float ArmA = Cross2D(contactpoint - contact.A.rigidbody->position, contact.manifold.normal);
+        float ArmB = Cross2D(contactpoint - contact.B.rigidbody->position, contact.manifold.normal);
+        float K = 
+            contact.A.rigidbody->GetInverseMass()
+            + contact.B.rigidbody->GetInverseMass()
+            + ArmA * ArmA * contact.A.rigidbody->GetInverseInertia()
+            + ArmB * ArmB * contact.B.rigidbody->GetInverseInertia();
+
+        float deltaj = -(1.0f + restitution) * vn / (K);
+        float oldj = contact.accumulatedimpulses[i];
+        float newj = std::max(0.0f, deltaj + oldj);
+        deltaj = newj - oldj;
+
+        glm::vec3 impulse = deltaj * contact.manifold.normal;
+        contact.A.rigidbody->ApplyImpulseAtPosition(-impulse , contactpoint);
+        contact.B.rigidbody->ApplyImpulseAtPosition(impulse, contactpoint);
+
+        contact.accumulatedimpulses[i] = newj;
+    }
 }
