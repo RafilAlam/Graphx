@@ -54,7 +54,6 @@ void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
                             }
                         }
                     }
-                    std::cout << newContact.manifold.contactPoints.size() << '\n';
                     storedContact->second.manifold = std::move(newContact.manifold);
                 } else {
                     contacts.erase(ShapePair(&newContact.A, &newContact.B));

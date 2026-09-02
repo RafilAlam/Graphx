@@ -40,5 +40,5 @@ public:
     void Update(float deltaTime);
 private:
     std::deque<std::unique_ptr<Script>> m_scripts;
-    
+    float m_physicstimestep = 1/120.0f;
 };

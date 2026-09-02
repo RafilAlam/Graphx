@@ -73,7 +73,7 @@ void Scene::Update(float deltaTime) {
     for (auto& script : m_scripts) {
         script->OnUpdate();
     }
-    physicsworld.Step(objects, deltaTime);
+    physicsworld.Step(objects, m_physicstimestep);
     for (auto& object : objects) {
         if (object.rigidbody != nullptr) {
             object.transform.position = object.rigidbody->position;
