@@ -15,7 +15,6 @@ void PhysicsWorld::UpdateCollider(Object& object) {
 }
 
 void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
-    std::vector<Contact> contacts;
 
     // Apply Gravity & Integrate Velocities
     for (auto& object : objects) {
@@ -43,9 +42,25 @@ void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
             Object& objectB = objects[j];
             if (!objectB.collider)
                 continue;
-            Contact contact = m_collisionsolver.Dispatch[ToIndex(objectA.collider->type)][ToIndex(objectB.collider->type)](objectA, objectB);
-            if (contact.manifold.colliding) {
-                contacts.emplace_back(std::move(contact));
+            Contact newContact = m_collisionsolver.Dispatch[ToIndex(objectA.collider->type)][ToIndex(objectB.collider->type)](objectA, objectB);
+            auto storedContact = contacts.find({&newContact.A, &newContact.B});
+            if (storedContact != contacts.end()) {
+                if (newContact.manifold.colliding) {
+                    for (auto& newPoint : newContact.manifold.contactPoints) {
+                        for (auto& storedPoint : storedContact->second.manifold.contactPoints) {
+                            if (newPoint.id == storedPoint.id) {
+                                newPoint.normalImpulse = storedPoint.normalImpulse;
+                                break;
+                            }
+                        }
+                    }
+                    std::cout << newContact.manifold.contactPoints.size() << '\n';
+                    storedContact->second.manifold = std::move(newContact.manifold);
+                } else {
+                    contacts.erase(ShapePair(&newContact.A, &newContact.B));
+                }
+            } else if (newContact.manifold.colliding) {
+                contacts.emplace(ShapePair(&newContact.A, &newContact.B), std::move(newContact));
             }
         }
     }
@@ -53,8 +68,8 @@ void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
     // Iterative Solving
     for (int k=0; k<8; ++k) {
         for (auto& contact : contacts) {
-            m_collisionsolver.PreStep(contact, deltaTime);
-            m_collisionsolver.Resolve(contact);
+            m_collisionsolver.PreStep(contact.second, deltaTime);
+            m_collisionsolver.Resolve(contact.second);
         }
     }
 

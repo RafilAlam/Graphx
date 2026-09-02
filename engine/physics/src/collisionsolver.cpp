@@ -2,21 +2,25 @@
 #include <engine/core/include/services.hpp>
 #include <iostream>
 
-bool ClipSegmentToLine(std::vector<glm::vec3>& points, const glm::vec3& normal, float offset) {
-    std::vector<glm::vec3> result;
-
-    float d1 = glm::dot(normal, points[0]) - offset;
-    float d2 = glm::dot(normal, points[1]) - offset;
+bool ClipSegmentToLine(std::vector<ContactPoint>& points, const glm::vec3& normal, float offset) {
+    std::vector<ContactPoint> result;
+    
+    float d1 = glm::dot(normal, points[0].position) - offset;
+    float d2 = glm::dot(normal, points[1].position) - offset;
 
     if (d1 >= 0.0f)
-        result.push_back(points[0]);
+        result.emplace_back(points[0]);
     if (d2 >= 0.0f)
-        result.push_back(points[1]);
+        result.emplace_back(points[1]);
 
-    if ((d1 < 0.0f && d2 > 0.0f) || (d1 > 0.0f && d2 < 0.0f)) {
+    if (d1 < 0.0f && d2 >= 0.0f) {
         float t = d1 / (d1 - d2);
 
-        result.push_back(points[0] + t * (points[1] - points[0]));
+        result.emplace_back(points[0].id, points[0].position + t * (points[1].position - points[0].position));
+    } else if (d1 >= 0.0f && d2 < 0.0f) {
+        float t = d1 / (d1 - d2);
+
+        result.emplace_back(points[1].id, points[0].position + t * (points[1].position - points[0].position));
     }
 
     points = result;
@@ -52,6 +56,7 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
     Collider* incidentCollider;
     std::vector<glm::vec3> referenceEdge;
     std::vector<glm::vec3> incidentEdge;
+    size_t referenceIt;
 
     for (size_t i = 0; i < normalsA.size(); ++i) {
         Projection p1 = A.collider->project(normalsA[i]);
@@ -68,6 +73,7 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
             smallestaxis = normalsA[i];
             referenceCollider = &*A.collider;
             incidentCollider = &*B.collider;
+            referenceIt = i;
         }
     }
     for (size_t i = 0; i < normalsB.size(); ++i) {
@@ -85,6 +91,7 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
             smallestaxis = normalsB[i];
             referenceCollider = &*B.collider;
             incidentCollider = &*A.collider;
+            referenceIt = i;
         }
     }
 
@@ -100,15 +107,16 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
     float offset1 = glm::dot(refDirection, referenceEdge[0]);
     float offset2 = glm::dot(-refDirection, referenceEdge[1]);
     float refOffset = glm::dot(-smallestaxis, referenceEdge[0]);
-
-    std::cout << smallestaxis.y << '\n';
     
-    std::vector<glm::vec3> clippedpoints = incidentEdge;
-    std::vector<glm::vec3> contactpoints;
+    std::vector<ContactPoint> clippedpoints = {
+        ContactPoint(ContactID(referenceIt, 0), incidentEdge[0]),
+        ContactPoint(ContactID(referenceIt, 1), incidentEdge[1])
+    };
+    std::vector<ContactPoint> contactpoints;
     if (ClipSegmentToLine(clippedpoints, refDirection, offset1)
         && ClipSegmentToLine(clippedpoints, -refDirection, offset2))
             for (const auto& point : clippedpoints) {
-                float separation = glm::dot(-smallestaxis, point) - refOffset;
+                float separation = glm::dot(-smallestaxis, point.position) - refOffset;
                 if (separation <= 0)
                     contactpoints.push_back(point);
             }
@@ -122,7 +130,7 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
 
     for (auto& point : clippedpoints) {
         Services::Get<DebugRenderer>().AddPoint({
-            .position = point,
+            .position = point.position,
             .color = {1.0f, 0.0f, 0.0f}
         });
     }
@@ -178,8 +186,8 @@ void CollisionSolver::Resolve(Contact& contact) {
         return;
 
     for (size_t i = 0; i < contact.manifold.contactPoints.size(); ++i) {
-        glm::vec3& contactpoint = contact.manifold.contactPoints[i];
-        glm::vec3 relativevelocity = contact.B.rigidbody->GetPointVelocity(contactpoint) - contact.A.rigidbody->GetPointVelocity(contactpoint);
+        ContactPoint& contactpoint = contact.manifold.contactPoints[i];
+        glm::vec3 relativevelocity = contact.B.rigidbody->GetPointVelocity(contactpoint.position) - contact.A.rigidbody->GetPointVelocity(contactpoint.position);
         float restitution = 0.0f;
         float vn = glm::dot(relativevelocity, contact.manifold.normal);
 
@@ -190,8 +198,8 @@ void CollisionSolver::Resolve(Contact& contact) {
             restitution = 0.4f;
         }
 
-        float ArmA = Cross2D(contactpoint - contact.A.rigidbody->position, contact.manifold.normal);
-        float ArmB = Cross2D(contactpoint - contact.B.rigidbody->position, contact.manifold.normal);
+        float ArmA = Cross2D(contactpoint.position - contact.A.rigidbody->position, contact.manifold.normal);
+        float ArmB = Cross2D(contactpoint.position - contact.B.rigidbody->position, contact.manifold.normal);
         float K = 
             contact.A.rigidbody->GetInverseMass()
             + contact.B.rigidbody->GetInverseMass()
@@ -199,14 +207,14 @@ void CollisionSolver::Resolve(Contact& contact) {
             + ArmB * ArmB * contact.B.rigidbody->GetInverseInertia();
 
         float deltaj = -(1.0f + restitution) * vn / (K);
-        float oldj = contact.accumulatedimpulses[i];
+        float oldj = contactpoint.normalImpulse;
         float newj = std::max(0.0f, deltaj + oldj);
         deltaj = newj - oldj;
 
         glm::vec3 impulse = deltaj * contact.manifold.normal;
-        contact.A.rigidbody->ApplyImpulseAtPosition(-impulse , contactpoint);
-        contact.B.rigidbody->ApplyImpulseAtPosition(impulse, contactpoint);
+        contact.A.rigidbody->ApplyImpulseAtPosition(-impulse , contactpoint.position);
+        contact.B.rigidbody->ApplyImpulseAtPosition(impulse, contactpoint.position);
 
-        contact.accumulatedimpulses[i] = newj;
+        contactpoint.normalImpulse = newj;
     }
 }
