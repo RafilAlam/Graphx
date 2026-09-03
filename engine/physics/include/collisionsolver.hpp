@@ -16,13 +16,13 @@ struct ContactID {
 struct ContactPoint {
     ContactID id;
     glm::vec3 position;
+    float penetrationDepth;
     float normalImpulse;
 };
 
 struct CollisionManifold {
     bool colliding{false};
     glm::vec3 normal{0.0f};
-    float penetrationDepth{0.0f};
     std::vector<ContactPoint> contactPoints;
 };
 

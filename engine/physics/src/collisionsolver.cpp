@@ -39,7 +39,7 @@ Contact CircleCircleCheck(Object& A, Object& B) {
         {
         .colliding = distance < combinedradius,
         .normal = glm::normalize(AtoB),
-        .penetrationDepth = (combinedradius - distance) * 0.5f
+        //.penetrationDepth = (combinedradius - distance) * 0.5f
         }
     };
 }
@@ -115,10 +115,10 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
     std::vector<ContactPoint> contactpoints;
     if (ClipSegmentToLine(clippedpoints, refDirection, offset1)
         && ClipSegmentToLine(clippedpoints, -refDirection, offset2))
-            for (const auto& point : clippedpoints) {
-                float separation = glm::dot(-smallestaxis, point.position) - refOffset;
-                if (separation <= 0)
-                    contactpoints.push_back(point);
+            for (auto& point : clippedpoints) {
+                point.penetrationDepth = glm::dot(-smallestaxis, point.position) - refOffset;
+                if (point.penetrationDepth <= 0)
+                    contactpoints.emplace_back(std::move(point));
             }
     
     for (auto& point : referenceEdge) {
@@ -128,7 +128,7 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
         });
     }
 
-    for (auto& point : clippedpoints) {
+    for (auto& point : contactpoints) {
         Services::Get<DebugRenderer>().AddPoint({
             .position = point.position,
             .color = {1.0f, 0.0f, 0.0f}
@@ -141,7 +141,6 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
         {
         .colliding = true,
         .normal = smallestaxis,
-        .penetrationDepth = minoverlap,
         .contactPoints = contactpoints
         }
     };
