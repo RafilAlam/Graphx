@@ -2,9 +2,11 @@
 
 #include <engine/graphics/include/scene/object.hpp>
 #include <engine/core/include/utils.hpp>
+#include <engine/core/include/services.hpp>
 #include <glm/glm.hpp>
 #include <algorithm>
 #include <vector>
+#include <cmath>
 
 struct ContactID {
     size_t referenceIt;
@@ -39,6 +41,8 @@ Contact CircleCircleCheck(Object& A, Object& B);
 Contact RectangleCircleCheck(RigidBody& A, RigidBody& B);
 Contact PolygonPolygonCheck(Object& A, Object& B);
 
+float PositionCorrection(Contact& contact, ContactPoint& contactpoint, float deltaTime);
+
 class CollisionSolver {
 public:
     CollisionSolver();
@@ -47,5 +51,5 @@ public:
     CollisionFn Dispatch[static_cast<int>(ColliderType::Count)][static_cast<int>(ColliderType::Count)];
 
     void PreStep(Contact& contact, float deltaTime);
-    void Resolve(Contact& contact);
+    void Resolve(Contact& contact, float deltaTime);
 };

@@ -23,18 +23,17 @@ public:
         Ground.rigidbody->position = {0.0f, -200.0f, 5.0f};
     }
     void OnUpdate() override {
-
-        if (!Fpressed and app.GetInput(GLFW_KEY_F) == GLFW_PRESS) {
-            Fpressed = true;
+        if (!fPressed and app.GetInput(GLFW_KEY_F) == GLFW_PRESS) {
+            fPressed = true;
             RectangleB.rigidbody->ApplyImpulse({0.0f, 300.0f, 0.0f});
         }
 
-        if (Fpressed and app.GetInput(GLFW_KEY_F) == GLFW_RELEASE) {
-            Fpressed = false;
+        if (fPressed and app.GetInput(GLFW_KEY_F) == GLFW_RELEASE) {
+            fPressed = false;
         }
     }
 private:
-    bool Fpressed{false};
+    bool fPressed{false};
 };
 
 int main() {

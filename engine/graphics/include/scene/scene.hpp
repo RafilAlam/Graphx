@@ -35,6 +35,8 @@ public:
 
     std::deque<Object> objects;
     PhysicsWorld physicsworld;
+    bool simulatephysics = true;
+    bool rendering = true;
 
     void OnStart();
     void Update(float deltaTime);

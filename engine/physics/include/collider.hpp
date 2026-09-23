@@ -97,7 +97,7 @@ struct Collider {
         return {min, max};
     }
 
-    std::vector<glm::vec3> getReferenceFace(glm::vec3 referenceNormal) {
+    std::vector<glm::vec3> getMostAligningFace(glm::vec3 referenceNormal) {
         const std::vector<glm::vec3>& vertices = std::get<PolygonData>(shapedata).worldvertices;
         float maxdot = -FLT_MAX;
         std::vector<glm::vec3> referenceFace;
@@ -117,27 +117,5 @@ struct Collider {
         }
 
         return referenceFace;
-    }
-
-    std::vector<glm::vec3> getIncidentFace(glm::vec3 referenceNormal) {
-        const std::vector<glm::vec3>& vertices = std::get<PolygonData>(shapedata).worldvertices;
-        float mindot = FLT_MAX;
-        std::vector<glm::vec3> incidentFace;
-        for (size_t i=0; i < vertices.size(); ++i) {
-            glm::vec3 p1 = vertices[i];
-            glm::vec3 p2 = vertices[i+1==vertices.size() ? 0 : i+1];
-            glm::vec3 face = p2 - p1;
-            glm::vec3 Normal = {-face.y, face.x, 0.0f};
-            Normal = glm::normalize(Normal);
-
-            float d = glm::dot(Normal, referenceNormal);
-
-            if (d < mindot) {
-                mindot = d;
-                incidentFace = {p1, p2};
-            }
-        }
-
-        return incidentFace;
     }
 };

@@ -9,7 +9,7 @@ void PhysicsWorld::UpdateCollider(Object& object) {
 
     for (int i = 0; i < localvertices.size(); ++i) {
         glm::vec4 localposition(localvertices[i] * object.transform.scale, 1.0f);
-        glm::vec3 rotatedPosition = glm::vec3(rotMatrix * localposition) + object.transform.position;
+        glm::vec3 rotatedPosition = glm::vec3(rotMatrix * localposition) + object.rigidbody->position;
         worldvertices[i] = rotatedPosition;
     }
 }
@@ -67,8 +67,7 @@ void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
     // Iterative Solving
     for (int k=0; k<8; ++k) {
         for (auto& contact : contacts) {
-            m_collisionsolver.PreStep(contact.second, deltaTime);
-            m_collisionsolver.Resolve(contact.second);
+            m_collisionsolver.Resolve(contact.second, deltaTime);
         }
     }
 

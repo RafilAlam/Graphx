@@ -57,7 +57,7 @@ void DebugRenderer::DrawPoints() {
     glEnableVertexAttribArray(1);
 
     glDrawArrays(GL_POINTS, 0, m_points.size());
-    m_points.clear();
+    //m_points.clear();
 }
 
 void DebugRenderer::Draw() {

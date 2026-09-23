@@ -1,6 +1,4 @@
 #include <engine/physics/include/collisionsolver.hpp>
-#include <engine/core/include/services.hpp>
-#include <iostream>
 
 bool ClipSegmentToLine(std::vector<ContactPoint>& points, const glm::vec3& normal, float offset) {
     std::vector<ContactPoint> result;
@@ -70,7 +68,7 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
             };
         } else if (overlap < minoverlap) {
             minoverlap = overlap;
-            smallestaxis = normalsA[i];
+            smallestaxis = -normalsA[i];
             referenceCollider = &*A.collider;
             incidentCollider = &*B.collider;
             referenceIt = i;
@@ -100,8 +98,10 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
         std::swap(referenceCollider, incidentCollider);
     }
 
-    referenceEdge = referenceCollider->getReferenceFace(smallestaxis);
-    incidentEdge = incidentCollider->getIncidentFace(smallestaxis);
+    std::cout << A.name << B.name << '\n';
+
+    referenceEdge = referenceCollider->getMostAligningFace(smallestaxis);
+    incidentEdge = incidentCollider->getMostAligningFace(-smallestaxis);
 
     glm::vec3 refDirection = glm::normalize(referenceEdge[1] - referenceEdge[0]);
     float offset1 = glm::dot(refDirection, referenceEdge[0]);
@@ -128,12 +128,21 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
         });
     }
 
+    for (auto& point : incidentEdge) {
+        Services::Get<DebugRenderer>().AddPoint({
+            .position = point,
+            .color = {0.0f, 0.65f, 0.0f}
+        });
+    }
+
     for (auto& point : contactpoints) {
         Services::Get<DebugRenderer>().AddPoint({
             .position = point.position,
             .color = {1.0f, 0.0f, 0.0f}
         });
     }
+
+    std::cout << contactpoints[0].penetrationDepth << '\n';
 
     return {
         A,
@@ -176,11 +185,25 @@ CollisionSolver::CollisionSolver() {
     };
 }*/
 
-void CollisionSolver::PreStep(Contact& contact, float deltaTime) {
-    //contact.K = contact.A.rigidbody->GetInverseMass() + contact.B.rigidbody->GetInverseMass();
+float PositionCorrection(Contact& contact, ContactPoint& contactpoint , float dt) {
+    float k = 15.0f;
+    float c = 0.02f;
+
+    glm::vec3 rA = contactpoint.position - contact.A.rigidbody->position;
+    glm::vec3 rB = contactpoint.position - contact.B.rigidbody->position;
+    float InvMassA = contact.A.rigidbody->GetInverseMass();
+    float InvMassB = contact.B.rigidbody->GetInverseMass();
+    float InvInertiaA = contact.A.rigidbody->GetInverseInertia();
+    float InvInertiaB = contact.B.rigidbody->GetInverseInertia();
+    float InvMeff = InvMassA + InvMassB + pow(Cross2D(rA, contact.manifold.normal), 2) * InvInertiaA + pow(Cross2D(rB, contact.manifold.normal), 2) * InvInertiaB;
+    glm::vec3 vA = contact.A.rigidbody->GetPointVelocity(contactpoint.position);
+    glm::vec3 vB = contact.B.rigidbody->GetPointVelocity(contactpoint.position);
+    float relativeVelocity = glm::dot(vB - vA, contact.manifold.normal);
+
+    return std::max(0.0f, -k * dt * contactpoint.penetrationDepth - c * dt * relativeVelocity) / (1 + k * dt * dt * InvMeff + c * dt * InvMeff);
 }
 
-void CollisionSolver::Resolve(Contact& contact) {
+void CollisionSolver::Resolve(Contact& contact, float deltaTime) {
     if (!contact.manifold.colliding)
         return;
 
@@ -210,7 +233,9 @@ void CollisionSolver::Resolve(Contact& contact) {
         float newj = std::max(0.0f, deltaj + oldj);
         deltaj = newj - oldj;
 
-        glm::vec3 impulse = deltaj * contact.manifold.normal;
+        float positioncorrection = contactpoint.penetrationDepth < 0.0f ? PositionCorrection(contact, contactpoint, deltaTime) : 0.0f;
+
+        glm::vec3 impulse = (deltaj + positioncorrection) * contact.manifold.normal;
         contact.A.rigidbody->ApplyImpulseAtPosition(-impulse , contactpoint.position);
         contact.B.rigidbody->ApplyImpulseAtPosition(impulse, contactpoint.position);
 
