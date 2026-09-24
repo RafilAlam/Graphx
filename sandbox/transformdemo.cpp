@@ -18,18 +18,29 @@ Object& Ground = scene.objects[2];
 class MainScript : public Script {
 public:
     void OnStart() override {
-        RectangleA.rigidbody->position = {200.0f, 50.0f, 5.0f};
+        RectangleA.rigidbody->position = {200.0f, 0.0f, 5.0f};
         RectangleB.rigidbody->position = {-200.0f, 0.0f, 5.0f};
         Ground.rigidbody->position = {0.0f, -200.0f, 5.0f};
     }
     void OnUpdate() override {
+
         if (!fPressed and app.GetInput(GLFW_KEY_F) == GLFW_PRESS) {
             fPressed = true;
             RectangleB.rigidbody->ApplyImpulse({0.0f, 300.0f, 0.0f});
         }
 
+        if (!scene.simulatephysics and app.GetInput(GLFW_KEY_SPACE) == GLFW_PRESS) {
+            scene.rendering = true;
+            scene.simulatephysics = true;
+        }
+
         if (fPressed and app.GetInput(GLFW_KEY_F) == GLFW_RELEASE) {
             fPressed = false;
+        }
+
+        if (scene.simulatephysics and app.GetInput(GLFW_KEY_SPACE) == GLFW_RELEASE) {
+            scene.rendering = false;
+            scene.simulatephysics = false;
         }
     }
 private:

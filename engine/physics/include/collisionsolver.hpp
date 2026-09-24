@@ -16,7 +16,6 @@ struct ContactID {
 };
 
 struct ContactPoint {
-    ContactID id;
     glm::vec3 position;
     float penetrationDepth;
     float normalImpulse;
@@ -29,8 +28,8 @@ struct CollisionManifold {
 };
 
 struct Contact {    
-    Object& A;
-    Object& B;
+    Object& reference;
+    Object& incident;
 
     CollisionManifold manifold;
 };

@@ -26,9 +26,9 @@ int App::Run() {
         if (m_scene.rendering) {
             m_renderer.Draw(m_scene.objects);
             m_debugrenderer.Draw();
+            m_window.SwapBuffers();
         }
         
-        m_window.SwapBuffers();
         glfwPollEvents();
     }
 

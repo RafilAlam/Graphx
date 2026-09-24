@@ -43,24 +43,7 @@ void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
             if (!objectB.collider)
                 continue;
             Contact newContact = m_collisionsolver.Dispatch[ToIndex(objectA.collider->type)][ToIndex(objectB.collider->type)](objectA, objectB);
-            auto storedContact = contacts.find({&newContact.A, &newContact.B});
-            if (storedContact != contacts.end()) {
-                if (newContact.manifold.colliding) {
-                    for (auto& newPoint : newContact.manifold.contactPoints) {
-                        for (auto& storedPoint : storedContact->second.manifold.contactPoints) {
-                            if (newPoint.id == storedPoint.id) {
-                                newPoint.normalImpulse = storedPoint.normalImpulse;
-                                break;
-                            }
-                        }
-                    }
-                    storedContact->second.manifold = std::move(newContact.manifold);
-                } else {
-                    contacts.erase(ShapePair(&newContact.A, &newContact.B));
-                }
-            } else if (newContact.manifold.colliding) {
-                contacts.emplace(ShapePair(&newContact.A, &newContact.B), std::move(newContact));
-            }
+            contacts.emplace(ShapePair(&newContact.reference, &newContact.incident), std::move(newContact));
         }
     }
 
@@ -78,4 +61,6 @@ void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
 
         m_integrator->IntegrateTransform(*object.rigidbody, deltaTime);
     }
+
+    contacts.clear();
 }

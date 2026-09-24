@@ -19,10 +19,6 @@ struct Projection {
     float max;
 
     float getOverlap(Projection p) {
-        if (min > p.max || p.min > max) {
-            return 0.0f; 
-        }
-
         float overlapMin = std::max(min, p.min);
         float overlapMax = std::min(max, p.max);
 
@@ -105,7 +101,7 @@ struct Collider {
             glm::vec3 p1 = vertices[i];
             glm::vec3 p2 = vertices[i+1==vertices.size() ? 0 : i+1];
             glm::vec3 face = p2 - p1;
-            glm::vec3 Normal = {-face.y, face.x, 0.0f};
+            glm::vec3 Normal = {face.y, -face.x, 0.0f};
             Normal = glm::normalize(Normal);
 
             float d = glm::dot(Normal, referenceNormal);
