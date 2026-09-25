@@ -19,7 +19,7 @@ class MainScript : public Script {
 public:
     void OnStart() override {
         RectangleA.rigidbody->position = {200.0f, 0.0f, 5.0f};
-        RectangleB.rigidbody->position = {-200.0f, 0.0f, 5.0f};
+        RectangleB.rigidbody->position = {-100.0f, 0.0f, 5.0f};
         Ground.rigidbody->position = {0.0f, -200.0f, 5.0f};
     }
     void OnUpdate() override {

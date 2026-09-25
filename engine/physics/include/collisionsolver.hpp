@@ -8,14 +8,37 @@
 #include <vector>
 #include <cmath>
 
+struct ObjectPair {
+    Object* Object1;
+    Object* Object2;
+
+    bool operator==(const ObjectPair& other) const {
+        return (Object1 == other.Object1 && Object2 == other.Object2) || (Object1 == other.Object2 && Object2 == other.Object1);
+    }
+};
+
+enum class FeatureType {
+    Vertex,
+    Face
+};
+
+struct Feature {
+    size_t index;
+    FeatureType type;
+
+    bool operator==(const Feature&) const = default;
+};
+
 struct ContactID {
-    size_t referenceIt;
-    size_t incidentIt;
+    ObjectPair objectpair;
+    Feature feature1;
+    Feature feature2;
 
     bool operator==(const ContactID&) const = default;
 };
 
 struct ContactPoint {
+    ContactID id;
     glm::vec3 position;
     float penetrationDepth;
     float normalImpulse;
@@ -34,13 +57,11 @@ struct Contact {
     CollisionManifold manifold;
 };
 
-bool ClipSegmentToLine(std::vector<ContactPoint>& incidentFace, const glm::vec3& clipnormal, float offset);
+bool ClipSegmentToLine(std::vector<ContactPoint>& points, const glm::vec3& normal, glm::vec3 referencePoint, size_t referenceVertexIndex, size_t incidentFaceIndex);
 
 Contact CircleCircleCheck(Object& A, Object& B);
 Contact RectangleCircleCheck(RigidBody& A, RigidBody& B);
 Contact PolygonPolygonCheck(Object& A, Object& B);
-
-float PositionCorrection(Contact& contact, ContactPoint& contactpoint, float deltaTime);
 
 class CollisionSolver {
 public:
@@ -49,6 +70,7 @@ public:
     using CollisionFn = Contact(*)(Object&, Object&);
     CollisionFn Dispatch[static_cast<int>(ColliderType::Count)][static_cast<int>(ColliderType::Count)];
 
-    void PreStep(Contact& contact, float deltaTime);
+    void WarmStart(Contact& contact);
     void Resolve(Contact& contact, float deltaTime);
+    void PositionCorrection(Contact& contact, float dt);
 };

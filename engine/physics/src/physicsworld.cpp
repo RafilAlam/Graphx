@@ -1,6 +1,10 @@
 #include <engine/physics/include/physicsworld.hpp>
 #include <engine/core/include/services.hpp>
 
+bool SameObjectPair(ContactID id, Contact contact) {
+    return id.objectpair == ObjectPair(&contact.reference, &contact.incident);
+}
+
 void PhysicsWorld::UpdateCollider(Object& object) {
     std::vector<glm::vec3>& localvertices = std::get<PolygonData>(object.collider->shapedata).localvertices;
     std::vector<glm::vec3>& worldvertices = std::get<PolygonData>(object.collider->shapedata).worldvertices;
@@ -33,6 +37,8 @@ void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
     }
 
     // Collision Detection
+    std::vector<Contact> oldContacts = std::move(m_contacts);
+    m_contacts.clear();
     for (size_t i = 0; i < objects.size(); ++i) {
         Object& objectA = objects[i];
         if (!objectA.collider)
@@ -43,15 +49,41 @@ void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
             if (!objectB.collider)
                 continue;
             Contact newContact = m_collisionsolver.Dispatch[ToIndex(objectA.collider->type)][ToIndex(objectB.collider->type)](objectA, objectB);
-            contacts.emplace(ShapePair(&newContact.reference, &newContact.incident), std::move(newContact));
+
+            bool found = false;
+            for (auto& newPoint : newContact.manifold.contactPoints) {
+                for (auto& oldContact : oldContacts) {
+                    if (!SameObjectPair(newPoint.id, oldContact))
+                        continue;
+                    for (auto& oldPoint : oldContact.manifold.contactPoints) {
+                        if (newPoint.id == oldPoint.id) {
+                            newPoint.normalImpulse = oldPoint.normalImpulse;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        found = false;
+                        break;
+                    }
+                }
+            }
+            if (newContact.manifold.colliding)
+                m_contacts.emplace_back(std::move(newContact));
         }
     }
 
     // Iterative Solving
+    for (auto& contact : m_contacts) {
+        m_collisionsolver.WarmStart(contact);
+    }
     for (int k=0; k<8; ++k) {
-        for (auto& contact : contacts) {
-            m_collisionsolver.Resolve(contact.second, deltaTime);
+        for (auto& contact : m_contacts) {
+            m_collisionsolver.Resolve(contact, deltaTime);
         }
+    }
+    for (auto& contact : m_contacts) {
+        m_collisionsolver.PositionCorrection(contact, deltaTime);
     }
 
     // Integrate Positions
@@ -61,6 +93,4 @@ void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
 
         m_integrator->IntegrateTransform(*object.rigidbody, deltaTime);
     }
-
-    contacts.clear();
 }
