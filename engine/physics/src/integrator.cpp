@@ -5,13 +5,13 @@ void EulerIntegrator::IntegrateVelocity(RigidBody& body, float deltaTime) {
         return;
 
     glm::vec3 acceleration = body.GetAccumulatedForce() * body.GetInverseMass();
-    body.velocity += acceleration * deltaTime;
+    body.linearvelocity += acceleration * deltaTime;
 }
 
 void EulerIntegrator::IntegrateTransform(RigidBody& body, float deltaTime) {
-    if (body.GetMass() == 0)
+    if (body.GetMass() == 0 || body.sleeping)
         return;
 
-    body.position += body.velocity * deltaTime;
+    body.position += body.linearvelocity * deltaTime;
     body.rotation += body.angularvelocity * deltaTime;
 }

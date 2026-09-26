@@ -9,9 +9,19 @@
 #include <memory>
 #include <deque>
 #include <vector>
+#include <stack>
 #include <stdint.h>
 
-bool SameObjectPair(ContactID id, Contact contact);
+bool SameObjectPair(ContactID& id, Contact& contact);
+
+void UpdateRestTime(Object& object, float dt);
+bool IsSleepy(Object& object);
+
+struct Island {
+    std::vector<Contact*> contacts;
+    std::vector<RigidBody*> rigidbodies;
+    bool sleeping{false};
+};
 
 class PhysicsWorld {
 public:
@@ -28,8 +38,13 @@ public:
 
     float gravity{-981.0f};
 
-    void NewContact();
-    std::vector<Contact> m_contacts;
+    std::vector<std::unique_ptr<Contact>> m_contacts;
+    
+    void AddContactEdge(RigidBody& rigidbody, ContactEdge* contactedge);
+    void UpdateContactGraph(Contact& contact);
+
+    std::vector<std::unique_ptr<Island>> m_islands;
+    void CreateIsland(RigidBody& rigidbody);
 
 private:
     std::unique_ptr<BaseIntegrator> m_integrator{std::make_unique<EulerIntegrator>()};

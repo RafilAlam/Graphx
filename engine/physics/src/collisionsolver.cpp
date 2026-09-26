@@ -223,8 +223,11 @@ void CollisionSolver::PositionCorrection(Contact& contact, float dt) {
 
 void CollisionSolver::WarmStart(Contact& contact) {
     for (auto& contactpoint : contact.manifold.contactPoints) {
-        float oldImpulse = contactpoint.normalImpulse;
-        glm::vec3 warmImpulse = oldImpulse * contact.manifold.normal;
+        float oldNormalImpulse = contactpoint.normalImpulse;
+        float oldTangentImpulse = contactpoint.tangentImpulse;
+        
+        glm::vec3 tangent(contact.manifold.normal.y, -contact.manifold.normal.x, 0.0f);
+        glm::vec3 warmImpulse = oldNormalImpulse * contact.manifold.normal + oldTangentImpulse * tangent;
         contact.reference.rigidbody->ApplyImpulseAtPosition(-warmImpulse , contactpoint.position);
         contact.incident.rigidbody->ApplyImpulseAtPosition(warmImpulse, contactpoint.position);
     }
@@ -272,7 +275,7 @@ void CollisionSolver::Resolve(Contact& contact, float deltaTime) {
         + ArmB * ArmB * contact.incident.rigidbody->GetInverseInertia();
 
         lambda = -slidingspeed / K;
-        float maxFriction = 1.0f * newNormalImpulse;
+        float maxFriction = 0.2f * newNormalImpulse;
         float oldTangentImpulse = contactpoint.tangentImpulse;
         float newTangentImpulse = glm::clamp(lambda + oldTangentImpulse, -maxFriction, maxFriction);
         float deltaTangentImpulse = newTangentImpulse - oldTangentImpulse;
