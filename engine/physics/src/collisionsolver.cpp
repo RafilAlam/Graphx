@@ -245,6 +245,7 @@ void CollisionSolver::Resolve(Contact& contact, float deltaTime) {
             restitution = 0.4f;
         }*/
 
+        // Normal Collision Impulse
         float ArmA = Cross2D(contactpoint.position - contact.reference.rigidbody->position, contact.manifold.normal);
         float ArmB = Cross2D(contactpoint.position - contact.incident.rigidbody->position, contact.manifold.normal);
         float K = 
@@ -254,18 +255,33 @@ void CollisionSolver::Resolve(Contact& contact, float deltaTime) {
             + ArmB * ArmB * contact.incident.rigidbody->GetInverseInertia();
 
         float lambda = -warmedvn / (K);
-        float oldImpulse = contactpoint.normalImpulse;
-        float newImpulse = std::max(0.0f, lambda + oldImpulse);
-        float deltaImpulse = newImpulse - oldImpulse;
+        float oldNormalImpulse = contactpoint.normalImpulse;
+        float newNormalImpulse = std::max(0.0f, lambda + oldNormalImpulse);
+        float deltaNormalImpulse = newNormalImpulse - oldNormalImpulse;
 
-        //float positioncorrection = contactpoint.penetrationDepth < 0.0f ? PositionCorrection(contact, deltaTime) : 0.0f;
+        // Tangential Friction
+        glm::vec3 tangent(contact.manifold.normal.y, -contact.manifold.normal.x, 0.0f);
+        float slidingspeed = glm::dot(warmedrelativevelocity, tangent);
 
-        glm::vec3 impulse = (deltaImpulse) * contact.manifold.normal;
+        ArmA = Cross2D(contactpoint.position - contact.reference.rigidbody->position, tangent);
+        ArmB = Cross2D(contactpoint.position - contact.incident.rigidbody->position, tangent);
+        K = 
+        contact.reference.rigidbody->GetInverseMass()
+        + contact.incident.rigidbody->GetInverseMass()
+        + ArmA * ArmA * contact.reference.rigidbody->GetInverseInertia()
+        + ArmB * ArmB * contact.incident.rigidbody->GetInverseInertia();
+
+        lambda = -slidingspeed / K;
+        float maxFriction = 1.0f * newNormalImpulse;
+        float oldTangentImpulse = contactpoint.tangentImpulse;
+        float newTangentImpulse = glm::clamp(lambda + oldTangentImpulse, -maxFriction, maxFriction);
+        float deltaTangentImpulse = newTangentImpulse - oldTangentImpulse;
+
+        glm::vec3 impulse = deltaNormalImpulse * contact.manifold.normal + deltaTangentImpulse * tangent;
         contact.reference.rigidbody->ApplyImpulseAtPosition(-impulse , contactpoint.position);
         contact.incident.rigidbody->ApplyImpulseAtPosition(impulse, contactpoint.position);
 
-        std::cout << contact.reference.name << "->" << contact.incident.name << " restitution: " << restitution << '\n';
-
-        contactpoint.normalImpulse = newImpulse;
+        contactpoint.normalImpulse = newNormalImpulse;
+        contactpoint.tangentImpulse = newTangentImpulse;
     }
 }

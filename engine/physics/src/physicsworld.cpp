@@ -83,7 +83,7 @@ void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
         }
     }
     for (auto& contact : m_contacts) {
-        m_collisionsolver.PositionCorrection(contact, deltaTime);
+        //m_collisionsolver.PositionCorrection(contact, deltaTime);
     }
 
     // Integrate Positions

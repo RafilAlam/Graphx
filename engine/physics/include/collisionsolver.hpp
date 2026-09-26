@@ -42,6 +42,7 @@ struct ContactPoint {
     glm::vec3 position;
     float penetrationDepth;
     float normalImpulse;
+    float tangentImpulse;
 };
 
 struct CollisionManifold {

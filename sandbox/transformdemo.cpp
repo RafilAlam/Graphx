@@ -26,7 +26,7 @@ public:
 
         if (!fPressed and app.GetInput(GLFW_KEY_F) == GLFW_PRESS) {
             fPressed = true;
-            RectangleB.rigidbody->ApplyImpulse({0.0f, 300.0f, 0.0f});
+            RectangleB.rigidbody->ApplyImpulse({100.0f, 0.0f, 0.0f});
         }
 
         if (!scene.simulatephysics and app.GetInput(GLFW_KEY_SPACE) == GLFW_PRESS) {
