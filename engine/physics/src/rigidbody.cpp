@@ -1,6 +1,6 @@
 #include <engine/physics/include/rigidbody.hpp>
 
-RigidBody::RigidBody(float mass, glm::vec3 size) : m_size(size), m_mass(mass), m_inertia(mass * (m_size.x * m_size.x + m_size.y * m_size.y) / 12), m_inversemass(mass==0.0f ? 0.0f : 1.0f/mass), m_inverseinertia(m_inertia==0.0f ? 0.0f : 1.0f/m_inertia) {}
+RigidBody::RigidBody(float mass, glm::vec3 size, float friction, float restitution) : m_size(size), m_mass(mass), m_inertia(mass * (m_size.x * m_size.x + m_size.y * m_size.y) / 12), m_inversemass(mass==0.0f ? 0.0f : 1.0f/mass), m_inverseinertia(m_inertia==0.0f ? 0.0f : 1.0f/m_inertia), friction(friction), restitution(restitution) {}
 
 void RigidBody::ApplyImpulse(glm::vec3 impulse) {
     linearvelocity += impulse * m_inversemass;

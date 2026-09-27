@@ -36,7 +36,7 @@ Scene::Scene(AssetManager& assetmanager, std::string filepath) {
             const Mesh& mesh = assetmanager.LoadMesh(meshpath);
             const Material& material = assetmanager.LoadMaterial(materialpath);
             Collider collider{ColliderType::Polygon, PolygonData::Rectangle()};
-            RigidBody rigidbody{mass, {x, y, z}};
+            RigidBody rigidbody{mass, {x, y, z}, material.friction, material.restitution};
             Object& object = CreateObject(name, mesh, material, rigidbody, collider);
             object.transform.scale = {x, y, z};
 
@@ -45,7 +45,7 @@ Scene::Scene(AssetManager& assetmanager, std::string filepath) {
             const Mesh& mesh = assetmanager.LoadMesh(meshpath);
             const Material& material = assetmanager.LoadMaterial(materialpath);
             Collider collider{ColliderType::Circle, CircleData{.radius = x}};
-            RigidBody rigidbody{mass, {x, y, z}};
+            RigidBody rigidbody{mass, {x, y, z}, material.friction, material.restitution};
             CreateObject(name, mesh, material, rigidbody, collider);
         }
     }

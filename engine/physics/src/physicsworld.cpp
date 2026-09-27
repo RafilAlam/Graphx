@@ -156,6 +156,13 @@ void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
         CreateIsland(*object.rigidbody);
     }
 
+    for (auto& island : m_islands) {
+        if (!island->sleeping) {
+            for (auto& contact : island->contacts)
+               m_collisionsolver.PreSolve(*contact);
+        }
+    }
+
     // Iterative Solving
     for (auto& island : m_islands) {
         if (!island->sleeping) {

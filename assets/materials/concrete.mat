@@ -1,6 +1,9 @@
-name: concrete
+Name: concrete
 
-texture: assets/textures/concrete.jpg
+Friction: 0.85
+Restitution: 0.45
 
-vertex_shader: assets/engine/shaders/default.vert
-fragment_shader: assets/engine/shaders/default.frag
+Texture: assets/textures/concrete.jpg
+
+Vertex_Shader: assets/engine/shaders/default.vert
+Fragment_Shader: assets/engine/shaders/default.frag

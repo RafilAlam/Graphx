@@ -1,6 +1,9 @@
-name: container
+Name: container
 
-texture: assets/textures/container.jpg
+Friction: 0.45
+Restitution: 0.3
 
-vertex_shader: assets/engine/shaders/default.vert
-fragment_shader: assets/engine/shaders/default.frag
+Texture: assets/textures/container.jpg
+
+Vertex_Shader: assets/engine/shaders/default.vert
+Fragment_Shader: assets/engine/shaders/default.frag

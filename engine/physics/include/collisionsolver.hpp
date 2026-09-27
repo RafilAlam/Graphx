@@ -9,6 +9,8 @@
 #include <cmath>
 
 bool ClipSegmentToLine(std::vector<ContactPoint>& points, const glm::vec3& normal, glm::vec3 referencePoint, size_t referenceVertexIndex, size_t incidentFaceIndex);
+float CombineFriction(float A, float B);
+float CombineRestitution(float A, float B);
 
 Contact CircleCircleCheck(Object& A, Object& B);
 Contact RectangleCircleCheck(RigidBody& A, RigidBody& B);
@@ -21,6 +23,7 @@ public:
     using CollisionFn = Contact(*)(Object&, Object&);
     CollisionFn Dispatch[static_cast<int>(ColliderType::Count)][static_cast<int>(ColliderType::Count)];
 
+    void PreSolve(Contact& contact);
     void WarmStart(Contact& contact);
     void Resolve(Contact& contact, float deltaTime);
     void PositionCorrection(Contact& contact, float dt);

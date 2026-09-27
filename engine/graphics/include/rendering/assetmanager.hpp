@@ -21,7 +21,7 @@ public:
   
     Shader& LoadShaders(std::string name, std::string vertexsourcepath, std::string fragmentsourcepath);
   
-    Material& LoadMaterial(std::string name, Shader& shader, Texture&& texture);
+    Material& LoadMaterial(std::string name, Shader& shader, Texture&& texture, float friction, float restitution);
     Material& LoadMaterial(std::string filepath);
 private:
     std::unordered_map<std::string, Material> m_materials;

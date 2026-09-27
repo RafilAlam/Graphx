@@ -63,11 +63,11 @@ Shader& AssetManager::LoadShaders(std::string name, std::string vertexsourcepath
     }
 }
 
-Material& AssetManager::LoadMaterial(std::string name, Shader& shader, Texture&& texture) {
+Material& AssetManager::LoadMaterial(std::string name, Shader& shader, Texture&& texture, float friction, float restitution) {
     if (m_materials.contains(name)) {
         return m_materials.at(name);
     } else {
-        auto [it, inserted] = m_materials.try_emplace(name, Material(shader, texture));
+        auto [it, inserted] = m_materials.try_emplace(name, Material(shader, texture, friction, restitution));
         return it->second;
     }
 }
@@ -78,15 +78,19 @@ Material& AssetManager::LoadMaterial(std::string filepath) {
     ryml::NodeRef root = tree.rootref();
     
     std::string name;
+    float friction;
+    float restitution;
     std::string texturepath;
     std::string vsourcepath;
     std::string fsourcepath;
 
-    root["name"] >> name;
-    root["texture"] >> texturepath;
-    root["vertex_shader"] >> vsourcepath;
-    root["fragment_shader"] >> fsourcepath;
+    root["Name"] >> name;
+    root["Friction"] >> friction;
+    root["Restitution"] >> restitution;
+    root["Texture"] >> texturepath;
+    root["Vertex_Shader"] >> vsourcepath;
+    root["Fragment_Shader"] >> fsourcepath;
     Shader& shader = LoadShaders(name, vsourcepath, fsourcepath);
 
-    return LoadMaterial(name, shader, Texture(texturepath.c_str()));
+    return LoadMaterial(name, shader, Texture(texturepath.c_str()), friction, restitution);
 }

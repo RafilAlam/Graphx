@@ -42,6 +42,7 @@ struct ContactPoint {
     ContactID id;
     glm::vec3 position;
     float penetrationDepth;
+    float initialvn;
     float normalImpulse;
     float tangentImpulse;
 };
@@ -72,7 +73,7 @@ struct Contact {
 
 class RigidBody {
 public:
-    RigidBody(float mass, glm::vec3 size);
+    RigidBody(float mass, glm::vec3 size, float friction, float restitution);
     
     void ApplyImpulse(glm::vec3 impulse);
     void ApplyImpulseAtPosition(glm::vec3 impulse, glm::vec3 position);
@@ -101,6 +102,9 @@ public:
 
     glm::vec3 rotation{0.0f};
     glm::vec3 angularvelocity{0.0f};
+
+    float friction{0.0f};
+    float restitution{0.0f};
 
     ContactEdge* contactList;
     bool islanded{false};
