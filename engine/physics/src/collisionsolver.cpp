@@ -35,6 +35,16 @@ float CombineRestitution(float A, float B) {
     return std::max(A, B);
 }
 
+bool AABBCollisionCheck(Object& A, Object& B) {
+    static constexpr glm::vec3 axes[2] = {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}};
+    for (const auto& axis : axes) {
+        if (A.collider->project(axis).getOverlap(B.collider->project(axis)) < 0.0f)
+            return false;
+    }
+
+    return true;
+}
+
 Contact CircleCircleCheck(Object& A, Object& B) {
     glm::vec3 AtoB = B.transform.position - A.transform.position;
     float distance = glm::length(AtoB);
@@ -52,6 +62,14 @@ Contact CircleCircleCheck(Object& A, Object& B) {
 }
 
 Contact PolygonPolygonCheck(Object& A, Object& B) {
+    if (!AABBCollisionCheck(A, B)) {
+        return {
+            A,
+            B,
+            {.colliding = false}
+        };
+    }
+
     std::vector<glm::vec3> normalsA = A.collider->getNormals();
     std::vector<glm::vec3> normalsB = B.collider->getNormals();
 

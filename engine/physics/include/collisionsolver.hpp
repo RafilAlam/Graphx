@@ -12,6 +12,7 @@ bool ClipSegmentToLine(std::vector<ContactPoint>& points, const glm::vec3& norma
 float CombineFriction(float A, float B);
 float CombineRestitution(float A, float B);
 
+Contact AABBCheck(Object& A, Object& B);
 Contact CircleCircleCheck(Object& A, Object& B);
 Contact RectangleCircleCheck(RigidBody& A, RigidBody& B);
 Contact PolygonPolygonCheck(Object& A, Object& B);
