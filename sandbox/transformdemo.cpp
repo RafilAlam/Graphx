@@ -10,7 +10,7 @@ App app({
 });
 AssetManager assetmanager;
 
-Scene& scene = app.NewScene(assetmanager, "assets/demoscene.scene");
+Scene& scene = app.NewScene(assetmanager, "assets/demoscene.json");
 Object& RectangleA = scene.objects[0];
 Object& RectangleB = scene.objects[1];
 Object& Ground = scene.objects[2];
@@ -18,8 +18,8 @@ Object& Ground = scene.objects[2];
 class MainScript : public Script {
 public:
     void OnStart() override {
-        RectangleA.rigidbody->position = {200.0f, 0.0f, 5.0f};
-        RectangleB.rigidbody->position = {-100.0f, 0.0f, 5.0f};
+        RectangleA.rigidbody->position = {0.0f, 300.0f, 5.0f};
+        RectangleB.rigidbody->position = {0.0f, 0.0f, 5.0f};
         Ground.rigidbody->position = {0.0f, -200.0f, 5.0f};
     }
     void OnUpdate() override {

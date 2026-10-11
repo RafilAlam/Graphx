@@ -73,24 +73,17 @@ Material& AssetManager::LoadMaterial(std::string name, Shader& shader, Texture&&
 }
 
 Material& AssetManager::LoadMaterial(std::string filepath) {
-    std::string file = LoadTextFile(filepath);
-    ryml::Tree tree = ryml::parse_in_arena(ryml::to_csubstr(file));
-    ryml::NodeRef root = tree.rootref();
-    
-    std::string name;
-    float friction;
-    float restitution;
-    std::string texturepath;
-    std::string vsourcepath;
-    std::string fsourcepath;
+    std::string json = LoadTextFile(filepath);
+    simdjson::dom::parser parser;
+    simdjson::dom::element doc = parser.parse(json);
 
-    root["Name"] >> name;
-    root["Friction"] >> friction;
-    root["Restitution"] >> restitution;
-    root["Texture"] >> texturepath;
-    root["Vertex_Shader"] >> vsourcepath;
-    root["Fragment_Shader"] >> fsourcepath;
-    Shader& shader = LoadShaders(name, vsourcepath, fsourcepath);
+    std::string_view name = doc["name"];
+    double friction = doc["friction"];
+    double restitution = doc["restitution"];
+    std::string_view texturepath = doc["texture"];
+    std::string_view vsourcepath = doc["vertex_shader"];
+    std::string_view fsourcepath = doc["fragment_shader"];
+    Shader& shader = LoadShaders(std::string(name), std::string(vsourcepath), std::string(fsourcepath));
 
-    return LoadMaterial(name, shader, Texture(texturepath.c_str()), friction, restitution);
+    return LoadMaterial(std::string(name), shader, Texture(std::string(texturepath).c_str()), friction, restitution);
 }

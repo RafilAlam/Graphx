@@ -1,0 +1,52 @@
+{
+  "objects": [
+    {
+      "name": "RectangleA",
+      "mesh": "assets/meshes/rectangle.obj",
+      "material": "assets/materials/concrete.json",
+      "rigid_body": {
+        "mass": 1.0
+      },
+      "collider": {
+        "type": "rectangle",
+        "half_extents": {
+          "x": 100.0,
+          "y": 100.0,
+          "z": 0.0
+        }
+      }
+    },
+    {
+      "name": "RectangleB",
+      "mesh": "assets/meshes/rectangle.obj",
+      "material": "assets/materials/container.json",
+      "rigid_body": {
+        "mass": 1.0
+      },
+      "collider": {
+        "type": "rectangle",
+        "half_extents": {
+          "x": 100.0,
+          "y": 100.0,
+          "z": 0.0
+        }
+      }
+    },
+    {
+      "name": "Ground",
+      "mesh": "assets/meshes/rectangle.obj",
+      "material": "assets/materials/container.json",
+      "rigid_body": {
+        "mass": 0.0
+      },
+      "collider": {
+        "type": "rectangle",
+        "half_extents": {
+          "x": 300.0,
+          "y": 50.0,
+          "z": 0.0
+        }
+      }
+    }
+  ]
+}

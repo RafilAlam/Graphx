@@ -43,18 +43,17 @@ set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 
 fetchcontent_makeavailable(assimp)
 
-fetchcontent_declare(
-  ryml
-  GIT_REPOSITORY https://github.com/biojppm/rapidyaml.git
-  GIT_TAG v0.15.2
+FetchContent_Declare(
+  simdjson
+  GIT_REPOSITORY https://github.com/simdjson/simdjson.git
+  GIT_TAG        tags/v5.0.3
+  GIT_SHALLOW    TRUE
 )
 
-set(RYML_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(RYML_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
-set(RYML_BUILD_API OFF CACHE BOOL "" FORCE)
-set(RYML_INSTALL OFF CACHE BOOL "" FORCE)
+set(SIMDJSON_BUILD_TESTS OFF CACHE INTERNAL "")
+set(SIMDJSON_JUST_LIBRARY ON CACHE INTERNAL "")
 
-fetchcontent_makeavailable(ryml)
+fetchcontent_makeavailable(simdjson)
 
 add_library(glad STATIC dependencies/glad/glad.c)
 target_include_directories(glad PRIVATE .)
@@ -67,7 +66,7 @@ add_library(Graphx STATIC
  engine/physics/src/physicsworld.cpp engine/physics/src/integrator.cpp engine/physics/src/rigidbody.cpp engine/physics/src/collisionsolver.cpp
 )
 target_include_directories(Graphx PRIVATE .)
-target_link_libraries(Graphx PUBLIC OpenGL::GL glfw glad glm::glm assimp ryml::ryml)
+target_link_libraries(Graphx PUBLIC OpenGL::GL glfw glad glm::glm assimp simdjson)
 
 add_executable(TransformDemo sandbox/transformdemo.cpp)
 target_include_directories(TransformDemo PRIVATE .)

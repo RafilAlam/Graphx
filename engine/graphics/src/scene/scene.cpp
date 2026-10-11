@@ -1,53 +1,52 @@
 #include <engine/graphics/include/scene/scene.hpp>
 
 Scene::Scene(AssetManager& assetmanager, std::string filepath) {
-    std::string file = LoadTextFile(filepath);
-    ryml::Tree tree = ryml::parse_in_arena(ryml::to_csubstr(file));
-    ryml::NodeRef root = tree.rootref();
+    std::string json = LoadTextFile(filepath);
+    simdjson::dom::parser parser;
     
-    ryml::NodeRef objects;
-    std::string name;
-    std::string meshpath;
-    std::string materialpath;
-    std::string collidertype;
-    float mass;
-    float x;
-    float y;
-    float z;
+    using namespace simdjson::builtin;
+    try {
+        simdjson::dom::element doc = parser.parse(json);
 
-    objects = root["Objects"];
-    for (auto object: objects) {
-        object["Name"] >> name;
-        object["Mesh"] >> meshpath;
-        object["Material"] >> materialpath;
-        if (object.has_child("Mass"))
-            object["Mass"] >> mass;
-        object["ColliderType"] >> collidertype;
-        if (collidertype == "Rectangle") {
-            ryml::NodeRef halfextents = object["HalfExtents"];
-            halfextents["x"] >> x;
-            halfextents["y"] >> y;
-            if (halfextents.has_child("z")) {
-                halfextents["z"] >> z;
-            } else {
-                z = 0.0f;
+        simdjson::dom::array objects = doc["objects"];
+
+        for (auto object: objects) {
+            std::string_view name = object["name"];
+            std::string_view meshpath = object["mesh"];
+            std::string_view materialpath = object["material"];
+            double mass;
+            double x{0.0};
+            double y{0.0};
+            double z{0.0};
+            std::string_view collidertype;
+            simdjson::dom::object rigidbody = object["rigid_body"];
+            mass = rigidbody["mass"];
+            simdjson::dom::object collider = object["collider"];
+            collidertype = collider["type"];
+            if (collidertype == "rectangle") {
+                simdjson::dom::object halfextents = collider["half_extents"];
+                x = halfextents["x"];
+                y = halfextents["y"];
+                z = halfextents["z"];
+
+                const Mesh& mesh = assetmanager.LoadMesh(std::string(meshpath));
+                const Material& material = assetmanager.LoadMaterial(std::string(materialpath));
+                Collider collider{ColliderType::Polygon, PolygonData::Rectangle()};
+                RigidBody rigidbody{mass, {x, y, z}, material.friction, material.restitution};
+                Object& object = CreateObject(std::string(name), mesh, material, rigidbody, collider);
+                object.transform.scale = {x, y, z};
+
+            } else if (collidertype == "circle") {
+                x = collider["radius"];
+                const Mesh& mesh = assetmanager.LoadMesh(std::string(meshpath));
+                const Material& material = assetmanager.LoadMaterial(std::string(materialpath));
+                Collider collider{ColliderType::Circle, CircleData{.radius = x}};
+                RigidBody rigidbody{mass, {x, y, z}, material.friction, material.restitution};
+                CreateObject(std::string(name), mesh, material, rigidbody, collider);
             }
-
-            const Mesh& mesh = assetmanager.LoadMesh(meshpath);
-            const Material& material = assetmanager.LoadMaterial(materialpath);
-            Collider collider{ColliderType::Polygon, PolygonData::Rectangle()};
-            RigidBody rigidbody{mass, {x, y, z}, material.friction, material.restitution};
-            Object& object = CreateObject(name, mesh, material, rigidbody, collider);
-            object.transform.scale = {x, y, z};
-
-        } else if (collidertype == "Circle") {
-            object["Radius"] >> x;
-            const Mesh& mesh = assetmanager.LoadMesh(meshpath);
-            const Material& material = assetmanager.LoadMaterial(materialpath);
-            Collider collider{ColliderType::Circle, CircleData{.radius = x}};
-            RigidBody rigidbody{mass, {x, y, z}, material.friction, material.restitution};
-            CreateObject(name, mesh, material, rigidbody, collider);
         }
+    } catch (const simdjson::simdjson_error& e) {
+        std::cerr << "JSON Parsing failed: " << e.what() << std::endl;
     }
 }
 

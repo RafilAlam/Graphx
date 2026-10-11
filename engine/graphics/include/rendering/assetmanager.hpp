@@ -8,9 +8,9 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include <ryml.hpp>
-#include <ryml_std.hpp>
+#include <iostream>
 #include <string>
+#include "simdjson.h"
 #include <unordered_map>
 
 class AssetManager {
