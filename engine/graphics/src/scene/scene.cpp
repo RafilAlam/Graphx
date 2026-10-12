@@ -36,6 +36,10 @@ Model& Scene::AddModel(AssetManager& assetmanager, std::string name, std::string
         std::string objectname = std::string(object["name"]);
         std::string meshpath = std::string(object["mesh"]);
         std::string materialpath = std::string(object["material"]);
+        simdjson::dom::object localposition = object["localposition"];
+        glm::vec3 localpositionvec = {static_cast<float>(localposition["x"].get_double()),
+                                      static_cast<float>(localposition["y"].get_double()),
+                                      static_cast<float>(localposition["z"].get_double())};
         double mass;
         float sizex{0.0};
         float sizey{0.0};
@@ -56,6 +60,7 @@ Model& Scene::AddModel(AssetManager& assetmanager, std::string name, std::string
             Collider collider{ColliderType::Polygon, PolygonData::Rectangle()};
             RigidBody rigidbody{static_cast<float>(mass), {sizex, sizey, sizez}, material.friction, material.restitution};
             Object object{objectname, mesh, material, rigidbody, collider};
+            object.rigidbody->position = position + localpositionvec;
             object.transform.scale = {sizex, sizey, sizez};
             newmodel.objects.emplace(objectname, std::move(object));
             objects.push_back(&newmodel.objects.at(objectname));
@@ -66,12 +71,13 @@ Model& Scene::AddModel(AssetManager& assetmanager, std::string name, std::string
             Collider collider{ColliderType::Circle, CircleData{.radius = sizex}};
             RigidBody rigidbody{static_cast<float>(mass), {sizex, sizey, sizez}, material.friction, material.restitution};
             Object object(objectname, mesh, material, rigidbody, collider);
+            object.rigidbody->position = position + localpositionvec;
             object.transform.scale = {sizex, sizey, sizez};
             newmodel.objects.emplace(objectname, std::move(object));
             objects.push_back(&newmodel.objects.at(objectname));
         }
     }
-    newmodel.SetPosition(position);
+    newmodel.position = position;
 
     return newmodel;
 }
