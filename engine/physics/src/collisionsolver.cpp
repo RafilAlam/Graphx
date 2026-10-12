@@ -127,7 +127,7 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
 
     if (glm::dot(incidentObject->rigidbody->position - referenceObject->rigidbody->position, smallestaxis) < 0.0f) {
         smallestaxis = -smallestaxis;
-        DebugPrint("SWAPPED A AND B!");
+        //DebugPrint("SWAPPED A AND B!");
     }
 
     referenceEdge = referenceObject->collider->getMostAligningFace(smallestaxis);
@@ -258,7 +258,7 @@ void CollisionSolver::Resolve(Contact& contact, float deltaTime) {
 
         if (contactpoint.initialvn < -10.0f) {
             restitution = CombineRestitution(referencebody.restitution, incidentbody.restitution);
-            std::cout << contactpoint.initialvn << '\n';
+            //std::cout << contactpoint.initialvn << '\n';
         }
 
         // Normal Collision Impulse
