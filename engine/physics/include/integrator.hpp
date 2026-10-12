@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/graphics/include/scene/object.hpp>
+#include <engine/graphics/include/scene/model.hpp>
 
 class BaseIntegrator {
 public:

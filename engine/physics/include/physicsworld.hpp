@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/graphics/include/scene/object.hpp>
+#include <engine/graphics/include/scene/model.hpp>
 #include <engine/graphics/include/rendering/debugrenderer.hpp>
 #include <engine/physics/include/integrator.hpp>
 #include <engine/physics/include/collisionsolver.hpp>
@@ -32,7 +32,7 @@ public:
         m_integrator = std::make_unique<T>();
     }
 
-    void Step(std::deque<Object>& objects, float deltaTime);
+    void Step(std::unordered_map<std::string, Model>& models, std::vector<Object*> objects, float deltaTime);
 
     void UpdateCollider(Object& object);
 

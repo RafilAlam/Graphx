@@ -1,7 +1,7 @@
 #pragma once
 
 #include <deque>
-#include <engine/graphics/include/scene/object.hpp>
+#include <engine/graphics/include/scene/model.hpp>
 #include <engine/graphics/include/rendering/uniformbuffer.hpp>
 #include <engine/graphics/include/rendering/mesh.hpp>
 #include <engine/core/include/debug.hpp>
@@ -21,8 +21,8 @@ struct ObjectData {
 class Renderer {
 public:
     Renderer();
-    void Draw(std::deque<Object>& objects);
-    void Draw(const Object& object);
+    void Draw(std::unordered_map<std::string, Model>& models);
+    void Draw(const Model& model);
 private:
     UniformBuffer m_materialbuffer;
     UniformBuffer m_objectbuffer;

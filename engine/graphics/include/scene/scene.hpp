@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/graphics/include/scene/object.hpp>
+#include <engine/graphics/include/scene/model.hpp>
 #include <engine/graphics/include/scene/script.hpp>
 #include <engine/graphics/include/rendering/assetmanager.hpp>
 #include <engine/graphics/include/rendering/debugrenderer.hpp>
@@ -20,9 +20,7 @@ public:
     Scene(Scene&&) noexcept = default;
     Scene& operator=(Scene&&) noexcept = default;
 
-    Object& CreateObject(std::string name, const Mesh& mesh, const Material& material);
-    Object& CreateObject(std::string name, const Mesh& mesh, const Material& material, RigidBody& rigidbody);
-    Object& CreateObject(std::string name, const Mesh& mesh, const Material& material, RigidBody& rigidbody, Collider& collider);
+    Model& AddModel(AssetManager& assetmanager, std::string name, std::string filepath, glm::vec3 position);
 
     template<typename T>
     void AddScript() {
@@ -31,7 +29,8 @@ public:
         );
     }
 
-    std::deque<Object> objects;
+    std::unordered_map<std::string, Model> models;
+    std::vector<Object*> objects;
     PhysicsWorld physicsworld;
     bool simulatephysics = true;
     bool rendering = true;

@@ -1,4 +1,4 @@
-#include <engine/graphics/include/scene/object.hpp>
+#include <engine/graphics/include/scene/model.hpp>
 
 void Transform::SetRotation(glm::vec3 degrees) {
     rotation = glm::quat(glm::radians(degrees));
@@ -36,3 +36,35 @@ const Mesh& Object::GetMesh() const {
 const Material& Object::GetMaterial() const {
     return *m_material;
 };
+
+Model::Model(std::string& name) {
+    name = name;
+}
+
+glm::vec3 Model::GetPosition() {
+    glm::vec3 sumposition{0.0f};
+
+    if (objects.empty())
+        return sumposition;
+
+    for (auto& objectpair : objects) {
+        Object& object = objectpair.second;
+        sumposition += object.rigidbody->position;
+    }
+    return sumposition / static_cast<float>(objects.size());
+}
+
+void Model::SetPosition(glm::vec3 newposition) {
+    position = newposition;
+    if (objects.empty())
+        return;
+
+    const glm::vec3 pivot = GetPosition();
+    glm::vec3 delta = newposition - pivot;
+
+    for (auto& objectpair : objects) {
+        Object& object = objectpair.second;
+        object.rigidbody->position += delta;
+        object.rigidbody->Wake();
+    }
+}

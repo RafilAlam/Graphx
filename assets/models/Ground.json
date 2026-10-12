@@ -1,0 +1,25 @@
+{  
+  "objects": [
+    {
+      "name": "Object",
+      "mesh": "assets/meshes/rectangle.obj",
+      "material": "assets/materials/container.json",
+      "localposition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rigid_body": {
+        "mass": 0.0
+      },
+      "collider": {
+        "type": "rectangle",
+        "half_extents": {
+          "x": 300.0,
+          "y": 50.0,
+          "z": 0.0
+        }
+      }
+    }
+  ]
+}

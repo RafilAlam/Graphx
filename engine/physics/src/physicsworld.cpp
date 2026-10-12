@@ -29,8 +29,11 @@ void PhysicsWorld::AddContactEdge(RigidBody& rigidbody, ContactEdge* contactedge
 }
 
 void PhysicsWorld::UpdateContactGraph(Contact& contact) {
-    contact.referenceEdge = ContactEdge{&contact, &*contact.incident.rigidbody};
-    contact.incidentEdge = ContactEdge{&contact, &*contact.reference.rigidbody};
+    contact.referenceEdge.contact = &contact;
+    contact.referenceEdge.other = &*contact.incident.rigidbody;
+
+    contact.incidentEdge.contact = &contact;
+    contact.incidentEdge.other = &*contact.reference.rigidbody;
 
     AddContactEdge(*contact.reference.rigidbody, &contact.referenceEdge);
     AddContactEdge(*contact.incident.rigidbody, &contact.incidentEdge);
@@ -81,46 +84,39 @@ void PhysicsWorld::CreateIsland(RigidBody& rigidbody) {
     m_islands.push_back(std::make_unique<Island>(std::move(island)));
 }
 
-void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
+void PhysicsWorld::Step(std::unordered_map<std::string, Model>& models, std::vector<Object*> objects, float deltaTime) {
 
     // Apply Gravity & Integrate Velocities
-    for (auto& object : objects) {
-        if (!object.rigidbody || object.rigidbody->sleeping)
-            continue;
-
-        object.rigidbody->ApplyForce({0, object.rigidbody->GetMass() * gravity, 0});
-        m_integrator->IntegrateVelocity(*object.rigidbody, deltaTime);
-        object.rigidbody->ClearAccumulatedForce();
-    }
-
-    // Update Collider World Coords
-    for (auto& object : objects) {
-        if (object.collider)
-            UpdateCollider(object);
+    for (auto& modelpair : models) {
+        auto& model = modelpair.second;
+        for (auto& objectpair : model.objects) {
+            Object& object = objectpair.second;
+            object.rigidbody->islanded = false;
+            object.rigidbody->contactList = nullptr;
+            
+            if (!object.rigidbody->sleeping) {
+                object.rigidbody->ApplyForce({0, object.rigidbody->GetMass() * gravity, 0});
+                m_integrator->IntegrateVelocity(*object.rigidbody, deltaTime);
+                object.rigidbody->ClearAccumulatedForce();
+                UpdateCollider(object);
+            }
+        }
     }
 
     // Collision Detection
     std::vector<std::unique_ptr<Contact>> oldContacts;
     std::swap(m_contacts, oldContacts);
 
-    for (auto& object : objects) {
-        if (!object.rigidbody)
+    for (auto i = objects.begin(); i != objects.end(); ++i) {
+        Object* objectA = *i;
+        if (!objectA->collider)
             continue;
 
-        object.rigidbody->islanded = false;
-        object.rigidbody->contactList = nullptr;
-    }
-
-    for (size_t i = 0; i < objects.size(); ++i) {
-        Object& objectA = objects[i];
-        if (!objectA.collider)
-            continue;
-
-        for (size_t j = i + 1; j < objects.size(); ++j) {
-            Object& objectB = objects[j];
-            if (!objectB.collider)
+        for (auto j = std::next(i); j != objects.end(); ++j) {
+            Object* objectB = *j;
+            if (!objectB->collider)
                 continue;
-            Contact newContact = m_collisionsolver.Dispatch[ToIndex(objectA.collider->type)][ToIndex(objectB.collider->type)](objectA, objectB);
+            Contact newContact = m_collisionsolver.Dispatch[ToIndex(objectA->collider->type)][ToIndex(objectB->collider->type)](*objectA, *objectB);
             if (!newContact.manifold.colliding)
                 continue;
 
@@ -150,10 +146,14 @@ void PhysicsWorld::Step(std::deque<Object>& objects, float deltaTime) {
 
     // Constructing Islands
     m_islands.clear();
-    for (auto& object : objects) {
-        if (object.rigidbody->islanded || object.rigidbody->GetMass() == 0.0f)
-            continue;
-        CreateIsland(*object.rigidbody);
+    for (auto& modelpair : models) {
+        auto& model = modelpair.second;
+        for (auto& objectpair : model.objects) {
+            Object& object = objectpair.second;
+            if (object.rigidbody->islanded || object.rigidbody->GetMass() == 0.0f)
+                continue;
+            CreateIsland(*object.rigidbody);
+        }
     }
 
     for (auto& island : m_islands) {

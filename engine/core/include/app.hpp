@@ -4,7 +4,7 @@
 #include <engine/core/include/services.hpp>
 #include <engine/core/include/debug.hpp>
 #include <engine/graphics/include/scene/scene.hpp>
-#include <engine/graphics/include/scene/object.hpp>
+#include <engine/graphics/include/scene/model.hpp>
 #include <engine/graphics/include/rendering/assetmanager.hpp>
 #include <engine/graphics/include/rendering/debugrenderer.hpp>
 #include <engine/graphics/include/rendering/renderer.hpp>

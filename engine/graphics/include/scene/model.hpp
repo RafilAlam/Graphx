@@ -33,3 +33,15 @@ private:
     const Mesh* m_mesh;
     const Material* m_material;
 };
+
+class Model {
+public:
+    Model(std::string& name);
+
+    glm::vec3 GetPosition();
+    void SetPosition(glm::vec3 newposition);
+    void SetRotation(glm::vec3 newrotation);
+    std::string name;
+    glm::vec3 position{0.0f};
+    std::unordered_map<std::string, Object> objects;
+};

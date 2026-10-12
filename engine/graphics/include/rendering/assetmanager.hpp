@@ -4,6 +4,7 @@
 #include <engine/graphics/include/rendering/shader.hpp>
 #include <engine/graphics/include/rendering/mesh.hpp>
 #include <engine/graphics/include/rendering/texture.hpp>
+#include <engine/graphics/include/scene/model.hpp>
 #include <engine/core/include/utils.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

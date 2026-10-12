@@ -24,7 +24,7 @@ int App::Run() {
         glClear(GL_COLOR_BUFFER_BIT);
         m_scene.Update(dt);
         if (m_scene.rendering) {
-            m_renderer.Draw(m_scene.objects);
+            m_renderer.Draw(m_scene.models);
             m_debugrenderer.Draw();
             m_window.SwapBuffers();
         }

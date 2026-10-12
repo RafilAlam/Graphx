@@ -11,22 +11,18 @@ App app({
 AssetManager assetmanager;
 
 Scene& scene = app.NewScene(assetmanager, "assets/demoscene.json");
-Object& RectangleA = scene.objects[0];
-Object& RectangleB = scene.objects[1];
-Object& Ground = scene.objects[2];
+Model& RectangleA = scene.models.at("RectangleA");
+Model& RectangleB = scene.models.at("RectangleB");
+Model& Ground = scene.models.at("Ground");
 
 class MainScript : public Script {
 public:
-    void OnStart() override {
-        RectangleA.rigidbody->position = {0.0f, 300.0f, 5.0f};
-        RectangleB.rigidbody->position = {0.0f, 0.0f, 5.0f};
-        Ground.rigidbody->position = {0.0f, -200.0f, 5.0f};
-    }
+    void OnStart() override {}
     void OnUpdate() override {
 
         if (!fPressed and app.GetInput(GLFW_KEY_F) == GLFW_PRESS) {
             fPressed = true;
-            RectangleB.rigidbody->ApplyImpulse({100.0f, 0.0f, 0.0f});
+            RectangleB.objects.at("Object").rigidbody->ApplyImpulse({100.0f, 0.0f, 0.0f});
         }
 
         if (!scene.simulatephysics and app.GetInput(GLFW_KEY_SPACE) == GLFW_PRESS) {

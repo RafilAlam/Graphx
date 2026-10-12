@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <engine/graphics/include/scene/object.hpp>
+#include <engine/graphics/include/scene/model.hpp>
 #include <engine/graphics/include/rendering/uniformbuffer.hpp>
 #include <engine/graphics/include/rendering/mesh.hpp>
 
