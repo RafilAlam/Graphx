@@ -84,13 +84,13 @@ void PhysicsWorld::CreateIsland(RigidBody& rigidbody) {
     m_islands.push_back(std::make_unique<Island>(std::move(island)));
 }
 
-void PhysicsWorld::Step(std::unordered_map<std::string, Model>& models, std::vector<Object*> objects, float deltaTime) {
+void PhysicsWorld::Step(std::unordered_map<uint64_t, std::unique_ptr<Model>>& models, std::vector<Object*> objects, std::vector<std::unique_ptr<Joint>>& joints, float deltaTime) {
 
     // Apply Gravity & Integrate Velocities
     for (auto& modelpair : models) {
-        auto& model = modelpair.second;
+        Model& model = *modelpair.second;
         for (auto& objectpair : model.objects) {
-            Object& object = objectpair.second;
+            Object& object = *objectpair.second;
             object.rigidbody->islanded = false;
             object.rigidbody->contactList = nullptr;
             
@@ -147,9 +147,9 @@ void PhysicsWorld::Step(std::unordered_map<std::string, Model>& models, std::vec
     // Constructing Islands
     m_islands.clear();
     for (auto& modelpair : models) {
-        auto& model = modelpair.second;
+        Model& model = *modelpair.second;
         for (auto& objectpair : model.objects) {
-            Object& object = objectpair.second;
+            Object& object = *objectpair.second;
             if (object.rigidbody->islanded || object.rigidbody->GetMass() == 0.0f)
                 continue;
             CreateIsland(*object.rigidbody);
@@ -177,6 +177,8 @@ void PhysicsWorld::Step(std::unordered_map<std::string, Model>& models, std::vec
                     m_collisionsolver.Resolve(*contact, deltaTime);
             }
         }
+        for (auto& joint : joints)
+            joint->SolveJoint(deltaTime);
     }
     for (auto& island : m_islands) {
         if (!island->sleeping) {

@@ -21,7 +21,7 @@ struct ObjectData {
 class Renderer {
 public:
     Renderer();
-    void Draw(std::unordered_map<std::string, Model>& models);
+    void Draw(std::unordered_map<uint64_t, std::unique_ptr<Model>>& models);
     void Draw(const Model& model);
 private:
     UniformBuffer m_materialbuffer;

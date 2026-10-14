@@ -37,9 +37,7 @@ const Material& Object::GetMaterial() const {
     return *m_material;
 };
 
-Model::Model(std::string& name) {
-    name = name;
-}
+Model::Model(uint64_t id, std::string& name) : id(id), name(name) {}
 
 glm::vec3 Model::GetPosition() {
     glm::vec3 sumposition{0.0f};
@@ -48,7 +46,7 @@ glm::vec3 Model::GetPosition() {
         return sumposition;
 
     for (auto& objectpair : objects) {
-        Object& object = objectpair.second;
+        Object& object = *objectpair.second;
         sumposition += object.rigidbody->position;
     }
     return sumposition / static_cast<float>(objects.size());
@@ -63,8 +61,12 @@ void Model::SetPosition(glm::vec3 newposition) {
     glm::vec3 delta = newposition - pivot;
 
     for (auto& objectpair : objects) {
-        Object& object = objectpair.second;
+        Object& object = *objectpair.second;
         object.rigidbody->position += delta;
         object.rigidbody->Wake();
     }
+}
+
+glm::vec3 Object::PointToWorldSpace(glm::vec3 localpoint) {
+    return transform.rotation * localpoint + transform.position;
 }

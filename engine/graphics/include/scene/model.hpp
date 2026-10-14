@@ -18,6 +18,8 @@ struct Transform {
     void Rotate(glm::vec3 axis, float degrees);
 };
 
+class Joint;
+
 class Object {
 public:
     Object(std::string name, const Mesh& mesh, const Material& material);
@@ -25,10 +27,12 @@ public:
     Object(std::string name, const Mesh& mesh, const Material& material, RigidBody& rigidbody, Collider& collider);
     const Mesh& GetMesh() const;
     const Material& GetMaterial() const;
+    glm::vec3 PointToWorldSpace(glm::vec3 localpoint);
+    std::string name;
     Transform transform;
     std::unique_ptr<RigidBody> rigidbody;
     std::unique_ptr<Collider> collider;
-    std::string name;
+    std::vector<Joint*> joints;
 private:
     const Mesh* m_mesh;
     const Material* m_material;
@@ -36,12 +40,13 @@ private:
 
 class Model {
 public:
-    Model(std::string& name);
+    Model(uint64_t id, std::string& name);
 
     glm::vec3 GetPosition();
     void SetPosition(glm::vec3 newposition);
     void SetRotation(glm::vec3 newrotation);
+    uint64_t id;
     std::string name;
     glm::vec3 position{0.0f};
-    std::unordered_map<std::string, Object> objects;
+    std::unordered_map<std::string, std::unique_ptr<Object>> objects;
 };

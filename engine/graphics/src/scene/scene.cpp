@@ -20,6 +20,32 @@ Scene::Scene(AssetManager& assetmanager, std::string filepath) {
             
             AddModel(assetmanager, modelname, filepath, positionvec);
         }
+
+        simdjson::dom::array joints = scenedoc["joints"];
+
+        for (auto joint : joints) {
+            std::string jointname = std::string(joint["name"]);
+            std::string type = std::string(joint["type"]);
+            simdjson::dom::object bodyA = joint["bodyA"];
+            uint64_t modelAid = bodyA["model"];
+            std::string objectAname = std::string(bodyA["object"]);
+            simdjson::dom::object localanchorA = bodyA["localanchor"];
+            glm::vec3 localanchorAvec = {static_cast<float>(localanchorA["x"].get_double()),
+                                         static_cast<float>(localanchorA["y"].get_double()),
+                                         static_cast<float>(localanchorA["z"].get_double())};
+
+            simdjson::dom::object bodyB = joint["bodyB"];
+            uint64_t modelBid = bodyB["model"];
+            std::string objectBname = std::string(bodyB["object"]);
+            simdjson::dom::object localanchorB = bodyB["localanchor"];
+            glm::vec3 localanchorBvec = {static_cast<float>(localanchorB["x"].get_double()),
+                                         static_cast<float>(localanchorB["y"].get_double()),
+                                         static_cast<float>(localanchorB["z"].get_double())};
+            
+            simdjson::dom::object properties = joint["properties"];
+            
+            AddJoint(jointname, type, modelAid, objectAname, localanchorAvec, modelBid, objectBname, localanchorBvec, properties);
+        }
     } catch (const simdjson::simdjson_error& e) {
         std::cerr << "JSON Parsing failed: " << filepath << e.what() << std::endl;
     }
@@ -31,7 +57,8 @@ Model& Scene::AddModel(AssetManager& assetmanager, std::string name, std::string
     simdjson::dom::element modeldoc = modelparser.parse(modeljson);
     simdjson::dom::array jsonobjects = modeldoc["objects"];
     
-    Model& newmodel = models.try_emplace(name, name).first->second;
+    uint64_t currentmodelID = newmodelID++;
+    Model& newmodel = *models.try_emplace(currentmodelID, std::make_unique<Model>(currentmodelID, name)).first->second;
     for (auto object : jsonobjects) {
         std::string objectname = std::string(object["name"]);
         std::string meshpath = std::string(object["mesh"]);
@@ -62,8 +89,8 @@ Model& Scene::AddModel(AssetManager& assetmanager, std::string name, std::string
             Object object{objectname, mesh, material, rigidbody, collider};
             object.rigidbody->position = position + localpositionvec;
             object.transform.scale = {sizex, sizey, sizez};
-            newmodel.objects.emplace(objectname, std::move(object));
-            objects.push_back(&newmodel.objects.at(objectname));
+            newmodel.objects.emplace(objectname, std::make_unique<Object>(std::move(object)));
+            objects.push_back(&*newmodel.objects.at(objectname));
         } else if (collidertype == "circle") {
             sizex = static_cast<float>(collider["radius"].get_double());
             const Mesh& mesh = assetmanager.LoadMesh(std::string(meshpath));
@@ -73,13 +100,28 @@ Model& Scene::AddModel(AssetManager& assetmanager, std::string name, std::string
             Object object(objectname, mesh, material, rigidbody, collider);
             object.rigidbody->position = position + localpositionvec;
             object.transform.scale = {sizex, sizey, sizez};
-            newmodel.objects.emplace(objectname, std::move(object));
-            objects.push_back(&newmodel.objects.at(objectname));
+            newmodel.objects.emplace(objectname, std::make_unique<Object>(std::move(object)));
+            objects.push_back(&*newmodel.objects.at(objectname));
         }
     }
     newmodel.position = position;
 
     return newmodel;
+}
+
+Joint& Scene::AddJoint(std::string name, std::string type, uint64_t modelAid, std::string objectAname, glm::vec3 localanchorA, uint64_t modelBid, std::string objectBname, glm::vec3 localanchorB, simdjson::dom::object& properties) {
+    Object& objectA = *models.at(modelAid)->objects.at(objectAname);
+    Object& objectB = *models.at(modelBid)->objects.at(objectBname);
+
+    if (type == "RodJoint") {
+        float length = static_cast<float>(properties["length"].get_double());
+        std::unique_ptr<Joint>& joint = joints.emplace_back(std::make_unique<RodJoint>(name, objectA, localanchorA, objectB, localanchorB, length));
+        objectA.joints.emplace_back(&*joint);
+        objectB.joints.emplace_back(&*joint);
+        return *joint;
+    } else {
+        throw std::runtime_error("Invalid joint type.");
+    }
 }
 
 void Scene::OnStart() {
@@ -93,13 +135,14 @@ void Scene::Update(float deltaTime) {
         script->OnUpdate();
     }
     if (simulatephysics)
-        physicsworld.Step(models, objects, m_physicstimestep);
+        physicsworld.Step(models, objects, joints, m_physicstimestep);
 
-    for (auto& model : models) {
-        for (auto& object : model.second.objects) { 
-            if (object.second.rigidbody != nullptr) {
-                object.second.transform.position = object.second.rigidbody->position;
-                object.second.transform.rotation = object.second.rigidbody->rotation;
+    for (auto& modelpair : models) {
+        Model& model = *modelpair.second;
+        for (auto& object : model.objects) { 
+            if (object.second->rigidbody != nullptr) {
+                object.second->transform.position = object.second->rigidbody->position;
+                object.second->transform.rotation = object.second->rigidbody->rotation;
             }
         }
     }
