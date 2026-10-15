@@ -1,6 +1,8 @@
 #include <engine/graphics/include/scene/scene.hpp>
 
-Scene::Scene(AssetManager& assetmanager, std::string filepath) {
+Scene::Scene(AssetManager& assetmanager): assetmanager(&assetmanager) {};
+
+Scene::Scene(AssetManager& assetmanager, std::string filepath): assetmanager(&assetmanager) {
     std::string scenejson = LoadTextFile(filepath);
     simdjson::dom::parser sceneparser;
     
@@ -18,7 +20,7 @@ Scene::Scene(AssetManager& assetmanager, std::string filepath) {
                                      static_cast<float>(position["y"].get_double()),
                                      static_cast<float>(position["z"].get_double())};
             
-            AddModel(assetmanager, modelname, filepath, positionvec);
+            AddModel(modelname, filepath, positionvec);
         }
 
         simdjson::dom::array joints = scenedoc["joints"];
@@ -51,7 +53,7 @@ Scene::Scene(AssetManager& assetmanager, std::string filepath) {
     }
 }
 
-Model& Scene::AddModel(AssetManager& assetmanager, std::string name, std::string filepath, glm::vec3 position) {
+Model& Scene::AddModel(std::string name, std::string filepath, glm::vec3 position) {
     std::string modeljson = LoadTextFile(filepath);
     simdjson::dom::parser modelparser;
     simdjson::dom::element modeldoc = modelparser.parse(modeljson);
@@ -82,8 +84,8 @@ Model& Scene::AddModel(AssetManager& assetmanager, std::string name, std::string
             sizey = static_cast<float>(halfextents["y"].get_double());
             sizez = static_cast<float>(halfextents["z"].get_double());
 
-            const Mesh& mesh = assetmanager.LoadMesh(std::string(meshpath));
-            const Material& material = assetmanager.LoadMaterial(std::string(materialpath));
+            const StaticMesh& mesh = assetmanager->LoadMesh(std::string(meshpath));
+            const Material& material = assetmanager->LoadMaterial(std::string(materialpath));
             Collider collider{ColliderType::Polygon, PolygonData::Rectangle()};
             RigidBody rigidbody{static_cast<float>(mass), {sizex, sizey, sizez}, material.friction, material.restitution};
             Object object{objectname, mesh, material, rigidbody, collider};
@@ -93,8 +95,8 @@ Model& Scene::AddModel(AssetManager& assetmanager, std::string name, std::string
             objects.push_back(&*newmodel.objects.at(objectname));
         } else if (collidertype == "circle") {
             sizex = static_cast<float>(collider["radius"].get_double());
-            const Mesh& mesh = assetmanager.LoadMesh(std::string(meshpath));
-            const Material& material = assetmanager.LoadMaterial(std::string(materialpath));
+            const StaticMesh& mesh = assetmanager->LoadMesh(std::string(meshpath));
+            const Material& material = assetmanager->LoadMaterial(std::string(materialpath));
             Collider collider{ColliderType::Circle, CircleData{.radius = sizex}};
             RigidBody rigidbody{static_cast<float>(mass), {sizex, sizey, sizez}, material.friction, material.restitution};
             Object object(objectname, mesh, material, rigidbody, collider);
@@ -110,14 +112,17 @@ Model& Scene::AddModel(AssetManager& assetmanager, std::string name, std::string
 }
 
 Joint& Scene::AddJoint(std::string name, std::string type, uint64_t modelAid, std::string objectAname, glm::vec3 localanchorA, uint64_t modelBid, std::string objectBname, glm::vec3 localanchorB, simdjson::dom::object& properties) {
-    Object& objectA = *models.at(modelAid)->objects.at(objectAname);
-    Object& objectB = *models.at(modelBid)->objects.at(objectBname);
+    Object* objectA = models.at(modelAid)->objects.at(objectAname).get();
+    Object* objectB = models.at(modelBid)->objects.at(objectBname).get();
 
     if (type == "RodJoint") {
         float length = static_cast<float>(properties["length"].get_double());
-        std::unique_ptr<Joint>& joint = joints.emplace_back(std::make_unique<RodJoint>(name, objectA, localanchorA, objectB, localanchorB, length));
-        objectA.joints.emplace_back(&*joint);
-        objectB.joints.emplace_back(&*joint);
+        StaticMesh& mesh = assetmanager->LoadMesh("assets/engine/meshes/rectangle.obj");
+        Material& material = assetmanager->LoadMaterial("assets/engine/materials/rod.json");
+
+        RodJoint* joint = static_cast<RodJoint*>(joints.emplace_back(std::make_unique<RodJoint>(name, objectA, localanchorA, objectB, localanchorB, length, mesh, material)).get());
+        objectA->joints.emplace_back(&*joint);
+        objectB->joints.emplace_back(&*joint);
         return *joint;
     } else {
         throw std::runtime_error("Invalid joint type.");
@@ -134,8 +139,10 @@ void Scene::Update(float deltaTime) {
     for (auto& script : m_scripts) {
         script->OnUpdate();
     }
-    if (simulatephysics)
-        physicsworld.Step(models, objects, joints, m_physicstimestep);
+    if (!simulatephysics)
+        return;
+
+    physicsworld.Step(models, objects, joints, m_physicstimestep);
 
     for (auto& modelpair : models) {
         Model& model = *modelpair.second;
@@ -145,5 +152,8 @@ void Scene::Update(float deltaTime) {
                 object.second->transform.rotation = object.second->rigidbody->rotation;
             }
         }
+    }
+    for (auto& joint : joints) {
+        joint->visuals->Update();
     }
 }

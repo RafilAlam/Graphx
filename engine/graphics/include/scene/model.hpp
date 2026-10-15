@@ -22,10 +22,10 @@ class Joint;
 
 class Object {
 public:
-    Object(std::string name, const Mesh& mesh, const Material& material);
-    Object(std::string name, const Mesh& mesh, const Material& material, RigidBody& rigidbody);
-    Object(std::string name, const Mesh& mesh, const Material& material, RigidBody& rigidbody, Collider& collider);
-    const Mesh& GetMesh() const;
+    Object(std::string name, const StaticMesh& mesh, const Material& material);
+    Object(std::string name, const StaticMesh& mesh, const Material& material, RigidBody& rigidbody);
+    Object(std::string name, const StaticMesh& mesh, const Material& material, RigidBody& rigidbody, Collider& collider);
+    const StaticMesh& GetMesh() const;
     const Material& GetMaterial() const;
     glm::vec3 PointToWorldSpace(glm::vec3 localpoint);
     std::string name;
@@ -34,7 +34,7 @@ public:
     std::unique_ptr<Collider> collider;
     std::vector<Joint*> joints;
 private:
-    const Mesh* m_mesh;
+    const StaticMesh* m_mesh;
     const Material* m_material;
 };
 

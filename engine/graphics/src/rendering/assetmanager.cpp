@@ -1,15 +1,15 @@
 #include <engine/graphics/include/rendering/assetmanager.hpp>
 
-Mesh& AssetManager::LoadMesh(std::string name, std::vector<Vertex> vertices, std::vector<Face> faces) {
+StaticMesh& AssetManager::LoadMesh(std::string name, std::vector<Vertex> vertices, std::vector<Face> faces) {
     if (m_meshes.contains(name)) {
         return m_meshes.at(name);
     } else {
-        auto [it, inserted] = m_meshes.try_emplace(name, Mesh(vertices, faces));
+        auto [it, inserted] = m_meshes.try_emplace(name, StaticMesh(vertices, faces));
         return it->second;
     }
 }
 
-Mesh& AssetManager::LoadMesh(std::string filepath) {
+StaticMesh& AssetManager::LoadMesh(std::string filepath) {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs);
     aiMesh* mesh = scene->mMeshes[0];

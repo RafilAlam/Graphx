@@ -17,8 +17,8 @@
 class AssetManager {
 public:
     AssetManager() = default;
-    Mesh& LoadMesh(std::string name, std::vector<Vertex> vertices, std::vector<Face> faces);
-    Mesh& LoadMesh(std::string filepath);
+    StaticMesh& LoadMesh(std::string name, std::vector<Vertex> vertices, std::vector<Face> faces);
+    StaticMesh& LoadMesh(std::string filepath);
   
     Shader& LoadShaders(std::string name, std::string vertexsourcepath, std::string fragmentsourcepath);
   
@@ -27,5 +27,5 @@ public:
 private:
     std::unordered_map<std::string, Material> m_materials;
     std::unordered_map<std::string, Shader> m_shaders;
-    std::unordered_map<std::string, Mesh> m_meshes;
+    std::unordered_map<std::string, StaticMesh> m_meshes;
 };

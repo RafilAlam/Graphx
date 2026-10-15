@@ -24,7 +24,7 @@ int App::Run() {
         glClear(GL_COLOR_BUFFER_BIT);
         m_scene.Update(dt);
         if (m_scene.rendering) {
-            m_renderer.Draw(m_scene.models);
+            m_renderer.Draw(m_scene);
             m_debugrenderer.Draw();
             m_window.SwapBuffers();
         }
@@ -42,8 +42,8 @@ int App::GetInput(int keycode) {
     return glfwGetKey(m_window.GetHandle(), keycode);
 }
 
-Scene& App::NewScene() {
-    m_scene = Scene{};
+Scene& App::NewScene(AssetManager& assetmanager) {
+    m_scene = Scene{assetmanager};
     return m_scene;
 }
 

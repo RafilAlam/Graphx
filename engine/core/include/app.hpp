@@ -33,7 +33,7 @@ public:
     App(AppConfig config);
     int Run();
     int GetInput(int keycode);
-    Scene& NewScene();
+    Scene& NewScene(AssetManager& assetmanager);
     Scene& NewScene(AssetManager& assetmanager, std::string filepath);
     float GetTime();
     float dt{0.0f};

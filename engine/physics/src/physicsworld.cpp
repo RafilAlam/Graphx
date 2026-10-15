@@ -177,8 +177,17 @@ void PhysicsWorld::Step(std::unordered_map<uint64_t, std::unique_ptr<Model>>& mo
                     m_collisionsolver.Resolve(*contact, deltaTime);
             }
         }
-        for (auto& joint : joints)
+        for (auto& joint : joints) {
             joint->SolveJoint(deltaTime);
+            Services::Get<DebugRenderer>().AddPoint({
+                .position = joint->anchorA,
+                .color = {1.0f, 1.0f, 1.0f}
+            });
+            Services::Get<DebugRenderer>().AddPoint({
+                .position = joint->anchorB,
+                .color = {1.0f, 1.0f, 1.0f}
+            });
+        }
     }
     for (auto& island : m_islands) {
         if (!island->sleeping) {

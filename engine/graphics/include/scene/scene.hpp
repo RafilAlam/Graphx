@@ -13,6 +13,7 @@
 class Scene {
 public:
     Scene() = default;
+    Scene(AssetManager& assetmanager);
     Scene(AssetManager& assetmanager, std::string filepath);
     
     Scene(const Scene&) = delete;
@@ -21,7 +22,7 @@ public:
     Scene(Scene&&) noexcept = default;
     Scene& operator=(Scene&&) noexcept = default;
 
-    Model& AddModel(AssetManager& assetmanager, std::string name, std::string filepath, glm::vec3 position);
+    Model& AddModel(std::string name, std::string filepath, glm::vec3 position);
     Joint& AddJoint(std::string name, std::string type, uint64_t modelAid, std::string objectAname, glm::vec3 localanchorA, uint64_t modelBid, std::string objectBname, glm::vec3 localanchorB, simdjson::dom::object& properties);
 
     template<typename T>
@@ -34,6 +35,7 @@ public:
     std::vector<std::unique_ptr<Joint>> joints;
     std::unordered_map<uint64_t, std::unique_ptr<Model>> models;
     std::vector<Object*> objects;
+    AssetManager* assetmanager;
     PhysicsWorld physicsworld;
     bool simulatephysics = true;
     bool rendering = true;

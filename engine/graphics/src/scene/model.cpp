@@ -17,19 +17,19 @@ void Transform::Rotate(glm::vec3 axis, float degrees) {
     rotation *= glm::angleAxis(glm::radians(degrees), glm::normalize(axis));
 }
 
-Object::Object(std::string name, const Mesh& mesh, const Material& material)
+Object::Object(std::string name, const StaticMesh& mesh, const Material& material)
  : name(name), m_mesh(&mesh), m_material(&material)
  {}
 
-Object::Object(std::string name, const Mesh& mesh, const Material& material, RigidBody& rigidbody)
+Object::Object(std::string name, const StaticMesh& mesh, const Material& material, RigidBody& rigidbody)
  : name(name), m_mesh(&mesh), m_material(&material), rigidbody(std::make_unique<RigidBody>(std::move(rigidbody)))
  {}
 
-Object::Object(std::string name, const Mesh& mesh, const Material& material, RigidBody& rigidbody, Collider& collider)
+Object::Object(std::string name, const StaticMesh& mesh, const Material& material, RigidBody& rigidbody, Collider& collider)
  : name(name), m_mesh(&mesh), m_material(&material), rigidbody(std::make_unique<RigidBody>(std::move(rigidbody))), collider(std::make_unique<Collider>(std::move(collider)))
  {}
 
-const Mesh& Object::GetMesh() const {
+const StaticMesh& Object::GetMesh() const {
     return *m_mesh;
 };
 

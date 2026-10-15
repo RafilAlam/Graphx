@@ -36,7 +36,7 @@
         "model": 0,
         "object": "Object",
         "localanchor": {
-          "x": 200.0,
+          "x": 100.0,
           "y": 0.0,
           "z": 0.0
         }
@@ -45,13 +45,13 @@
         "model": 1,
         "object": "Object",
         "localanchor": {
-          "x": -200.0,
+          "x": -100.0,
           "y": 0.0,
           "z": 0.0
         }
       },
       "properties": {
-        "length": 1.0
+        "length": 100.0
       }
     }
   ]

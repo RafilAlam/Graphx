@@ -20,14 +20,24 @@ struct Vertex {
 };
 
 class Mesh {
-public: 
-    Mesh(std::vector<Vertex> vertexdata, std::vector<Face> facedata);
+public:
     GLuint GetVAO() const;
     GLuint GetVBO() const;
     unsigned int GetIndexCount() const;
-private:
+protected:
     unsigned int m_indexcount;
     GLuint m_vbo;
     GLuint m_ebo;
     GLuint m_vao;
+};
+
+class StaticMesh : public Mesh {
+public: 
+    StaticMesh(const std::vector<Vertex>& vertexdata, std::vector<Face> facedata);
+};
+
+class DynamicMesh : public Mesh {
+public: 
+    DynamicMesh(const std::vector<Vertex>& vertexdata, std::vector<Face> facedata);
+    void UpdateVertices(const std::vector<Vertex>& vertexdata);
 };
