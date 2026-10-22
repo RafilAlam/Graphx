@@ -1,7 +1,7 @@
 #pragma once
 
-#include <dependencies/glad/glad.h>
-#include <dependencies/stb_image.h>
+#include <glad.h>
+#include <stb_image.h>
 #include <GLFW/glfw3.h>
 #include <engine/core/include/debug.hpp>
 #include <vector>

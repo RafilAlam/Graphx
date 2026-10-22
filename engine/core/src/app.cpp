@@ -7,35 +7,38 @@ App::App(AppConfig config)
     Services::Set<DebugRenderer>(m_debugrenderer);
 }
 
-int App::Run() {
+void App::Init() {
     DebugPrint("Running!");
     
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    m_scene.OnStart();
 
-    float lastFrame = GetTime();
-    float currentFrame;
+    lastFrame = GetTime();
+    currentFrame;
+}
 
-    while (!m_window.ShouldClose()) {
-        currentFrame = GetTime();
-        dt = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+void App::PhysicsStep() {
+    currentFrame = GetTime();
+    dt = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+    m_scene.Update(dt);
+}
 
-        glClear(GL_COLOR_BUFFER_BIT);
-        m_scene.Update(dt);
-        if (m_scene.rendering) {
-            m_renderer.Draw(m_scene);
-            m_debugrenderer.Draw();
-            m_window.SwapBuffers();
-        }
-        
-        glfwPollEvents();
+void App::RenderStep() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    if (m_scene.rendering) {
+        m_renderer.Draw(m_scene);
+        m_debugrenderer.Draw();
+        m_window.SwapBuffers();
     }
+    
+    glfwPollEvents();
+    shouldclose = m_window.ShouldClose();
+}
 
+void App::Shutdown() {
     DebugPrint("Closing...");
     glfwTerminate();
     DebugPrint("Closed.");
-    return 0;
 }
 
 int App::GetInput(int keycode) {

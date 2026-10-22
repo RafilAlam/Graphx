@@ -1,17 +1,75 @@
 #include <engine/graphics/include/rendering/assetmanager.hpp>
 
-StaticMesh& AssetManager::LoadMesh(std::string name, std::vector<Vertex> vertices, std::vector<Face> faces) {
-    if (m_meshes.contains(name)) {
-        return m_meshes.at(name);
-    } else {
-        auto [it, inserted] = m_meshes.try_emplace(name, StaticMesh(vertices, faces));
-        return it->second;
+UUID::UUID(UUIDv4::UUID uuid) {
+    uuid.bytes(data);
+}
+
+AssetRegistry::AssetRegistry() {
+    CacheAssetPaths(std::filesystem::current_path() / "assets");
+}
+
+void AssetRegistry::CacheAssetPaths(std::filesystem::path assetsPath) {
+    if (!std::filesystem::exists(assetsPath) || !std::filesystem::is_directory(assetsPath)) {
+        DebugError("Invalid asset directory path.");
+        return;
+    }
+
+    auto options = std::filesystem::directory_options::skip_permission_denied;
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(assetsPath, options)) {
+        if (entry.is_regular_file()) {
+            const auto& assetpath = entry.path();
+            std::string assetext = assetpath.extension().string();
+            if (!storeableExtensions.contains(assetext))
+                continue;
+            auto metapath = assetpath;
+            metapath.replace_extension(assetext + ".gxmeta");
+            UUIDv4::UUID internaluuid;
+            if (std::filesystem::exists(metapath)) {
+                std::string assetjson = LoadTextFile(metapath.string());
+                simdjson::ondemand::document doc = parser.iterate(assetjson);
+                internaluuid = UUIDv4::UUID::fromStrFactory(std::string(doc["uuid"]));
+            } else {
+                internaluuid = m_uuidGenerator.getUUID();
+                yyjson_mut_doc *doc = yyjson_mut_doc_new(NULL);
+                yyjson_mut_val *root = yyjson_mut_obj(doc);
+                yyjson_mut_doc_set_root(doc, root);
+                yyjson_mut_obj_add_str(doc, root, "uuid", internaluuid.str().c_str());
+                yyjson_write_flag flg = YYJSON_WRITE_PRETTY;
+                yyjson_write_err err;
+                
+                bool success = yyjson_mut_write_file(metapath.string().c_str(), doc, flg, NULL, &err);
+                yyjson_mut_doc_free(doc);
+                if (!success) {
+                    std::cerr << "Failed to write JSON metafile. Error: " << err.msg << '\n';
+                }
+            }
+            UUID uuid = UUID(internaluuid);
+            if (assetext == ".png" || assetext == ".jpg")
+                textureMap.emplace(uuid, assetpath);
+            else if (assetext == ".obj")
+                meshMap.emplace(uuid, assetpath);
+            else if (assetext == ".gxmat")
+                materialMap.emplace(uuid, assetpath);
+            else if (assetext == ".vert") {
+                auto fassetpath = assetpath;
+                fassetpath.replace_extension(".frag");
+                
+                if (!std::filesystem::exists(fassetpath))
+                    fassetpath.clear();
+
+                shaderMap.emplace(uuid, ShaderSources(assetpath, fassetpath));
+            }
+        }
     }
 }
 
-StaticMesh& AssetManager::LoadMesh(std::string filepath) {
+AssetHandle AssetPool::LoadMesh(std::string filepath) {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs);
+    
+    if (!scene || !scene->mMeshes)
+        DebugError("Failed to load mesh file: " + filepath);
+
     aiMesh* mesh = scene->mMeshes[0];
 
     std::vector<Vertex> vertices(mesh->mNumVertices);
@@ -19,6 +77,8 @@ StaticMesh& AssetManager::LoadMesh(std::string filepath) {
 
     for (unsigned int i=0; i<mesh->mNumVertices; i++) {
         const aiVector3d& vertex = mesh->mVertices[i];
+        if (!mesh->HasNormals())
+            DebugError("Mesh has no normals. File: " + filepath);
         const aiVector3d& normal = mesh->mNormals[i];
         glm::vec2 uv;
         if (mesh->HasTextureCoords(0)) {
@@ -45,45 +105,104 @@ StaticMesh& AssetManager::LoadMesh(std::string filepath) {
     }
 
     std::string name = mesh->mName.C_Str();
-    if (m_meshes.contains(name)) {
-        DebugPrint(std::string("Cached Mesh reused by Asset Manager: " + name));
-        return m_meshes.at(name);
-    } else {
-        DebugPrint(std::string("Mesh created by Asset Manager: " + name));
-        return LoadMesh(mesh->mName.C_Str(), vertices, faces);
-    }
+    DebugPrint(std::string("Mesh created by Asset Manager: " + name));
+    meshMap.emplace_back(vertices, faces);
+    return AssetHandle{meshMap.size() - 1};
 }
 
-Shader& AssetManager::LoadShaders(std::string name, std::string vertexsourcepath, std::string fragmentsourcepath) {
-    if (m_shaders.contains(name)) {
-        return m_shaders.at(name);
-    } else {
-        auto [it, inserted] = m_shaders.try_emplace(name, Shader(vertexsourcepath, fragmentsourcepath));
-        return it->second;
-    }
+AssetHandle AssetPool::LoadTexture(std::string filepath) {
+    textureMap.emplace_back(filepath);
+    return AssetHandle{textureMap.size() - 1};
 }
 
-Material& AssetManager::LoadMaterial(std::string name, Shader& shader, Texture&& texture, float friction, float restitution) {
-    if (m_materials.contains(name)) {
-        return m_materials.at(name);
-    } else {
-        auto [it, inserted] = m_materials.try_emplace(name, Material(shader, texture, friction, restitution));
-        return it->second;
-    }
+AssetHandle AssetPool::LoadShader(std::string vsourcepath, std::string fsourcepath) {
+    shaderMap.emplace_back(vsourcepath, fsourcepath);
+    return AssetHandle{shaderMap.size() - 1};
 }
 
-Material& AssetManager::LoadMaterial(std::string filepath) {
+//TODO: REUSE TEXTURE AND SHADER
+MaterialData AssetPool::LoadMaterialData(std::string filepath) {
     std::string json = LoadTextFile(filepath);
     simdjson::dom::parser parser;
     simdjson::dom::element doc = parser.parse(json);
 
-    std::string_view name = doc["name"];
-    double friction = doc["friction"];
-    double restitution = doc["restitution"];
-    std::string_view texturepath = doc["texture"];
-    std::string_view vsourcepath = doc["vertex_shader"];
-    std::string_view fsourcepath = doc["fragment_shader"];
-    Shader& shader = LoadShaders(std::string(name), std::string(vsourcepath), std::string(fsourcepath));
+    return {
+        UUIDv4::UUID::fromStrFactory(std::string(doc["texture"])),
+        UUIDv4::UUID::fromStrFactory(std::string(doc["shader"]))
+    };
+}
 
-    return LoadMaterial(std::string(name), shader, Texture(std::string(texturepath).c_str()), friction, restitution);
+AssetHandle AssetPool::LoadMaterial(Texture& texture, Shader& shader) {
+    materialMap.emplace_back(shader, texture);
+    return AssetHandle{materialMap.size() - 1};
+}
+
+AssetHandle AssetManager::GetMesh(UUID uuid) {
+    if (meshMap.contains(uuid))
+        return meshMap.at(uuid);
+    
+    AssetHandle handle = pool.LoadMesh(registry.meshMap.at(uuid).string());
+    meshMap.emplace(uuid, handle);
+    return handle;
+}
+
+Mesh* AssetManager::GetMesh(AssetHandle handle) {
+    if (handle.index >= pool.meshMap.size())
+        return nullptr;
+    
+    return &pool.meshMap.at(handle.index);
+}
+
+//TODO: REPLACE REGISTRY LOOKUP BY REGISTRY FUNCTION
+AssetHandle AssetManager::GetTexture(UUID uuid) {
+    if (textureMap.contains(uuid))
+        return textureMap.at(uuid);
+    
+    AssetHandle handle = pool.LoadTexture(registry.textureMap.at(uuid).string());
+    textureMap.emplace(uuid, handle);
+    return handle;
+}
+
+Texture* AssetManager::GetTexture(AssetHandle handle) {
+    if (handle.index >= pool.textureMap.size())
+        return nullptr;
+    
+    return &pool.textureMap.at(handle.index);
+}
+
+AssetHandle AssetManager::GetShader(UUID uuid) {
+    if (shaderMap.contains(uuid))
+        return shaderMap.at(uuid);
+    
+    ShaderSources sources = registry.shaderMap.at(uuid);
+
+    AssetHandle handle = pool.LoadShader(sources.vsource.string(), sources.fsource.string());
+    shaderMap.emplace(uuid, handle);
+    return handle;
+}
+
+Shader* AssetManager::GetShader(AssetHandle handle) {
+    if (handle.index >= pool.shaderMap.size())
+        return nullptr;
+    
+    return &pool.shaderMap.at(handle.index);
+}
+
+AssetHandle AssetManager::GetMaterial(UUID uuid) {
+    if (materialMap.contains(uuid))
+        return materialMap.at(uuid);
+    
+    MaterialData data = pool.LoadMaterialData(registry.materialMap.at(uuid).string());
+    Texture* texture = GetTexture(GetTexture(data.texture));
+    Shader* shader = GetShader(GetShader(data.shader));
+    AssetHandle handle = pool.LoadMaterial(*texture, *shader);
+    materialMap.emplace(uuid, handle);
+    return handle;
+}
+
+Material* AssetManager::GetMaterial(AssetHandle handle) {
+    if (handle.index >= pool.materialMap.size())
+        return nullptr;
+    
+    return &pool.materialMap.at(handle.index);
 }

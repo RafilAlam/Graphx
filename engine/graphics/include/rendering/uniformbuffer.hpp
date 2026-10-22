@@ -1,6 +1,6 @@
 #pragma once
 
-#include <dependencies/glad/glad.h>
+#include <glad.h>
 #include <GLFW/glfw3.h>
 
 class UniformBuffer {

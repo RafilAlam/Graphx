@@ -1,7 +1,7 @@
 #pragma once
 
 #include <engine/core/include/debug.hpp>
-#include <dependencies/glad/glad.h>
+#include <extern/glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <string>
 

@@ -129,16 +129,7 @@ Joint& Scene::AddJoint(std::string name, std::string type, uint64_t modelAid, st
     }
 }
 
-void Scene::OnStart() {
-    for (auto& script : m_scripts) {
-        script->OnStart();
-    }
-}
-
 void Scene::Update(float deltaTime) {
-    for (auto& script : m_scripts) {
-        script->OnUpdate();
-    }
     if (!simulatephysics)
         return;
 

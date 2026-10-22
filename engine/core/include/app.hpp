@@ -31,10 +31,16 @@ private:
     std::chrono::steady_clock::time_point m_startTime;
 public:
     App(AppConfig config);
-    int Run();
+    void Init();
+    void PhysicsStep();
+    void RenderStep();
+    void Shutdown();
     int GetInput(int keycode);
     Scene& NewScene(AssetManager& assetmanager);
     Scene& NewScene(AssetManager& assetmanager, std::string filepath);
     float GetTime();
+    float lastFrame{0.0f};
+    float currentFrame{0.0f};
     float dt{0.0f};
+    bool shouldclose{false};
 };

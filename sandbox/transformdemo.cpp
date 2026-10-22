@@ -15,11 +15,12 @@ Model& RectangleA = *scene.models.at(0);
 Model& RectangleB = *scene.models.at(1);
 Model& Ground = *scene.models.at(2);
 
-class MainScript : public Script {
-public:
-    void OnStart() override {}
-    void OnUpdate() override {
+bool fPressed{false};
 
+int main() {
+    app.Init();
+    while (!app.shouldclose) {
+        app.PhysicsStep();
         if (!fPressed and app.GetInput(GLFW_KEY_F) == GLFW_PRESS) {
             fPressed = true;
             RectangleB.objects.at("Object")->rigidbody->ApplyImpulse({250.0f, 0.0f, 0.0f});
@@ -38,13 +39,7 @@ public:
             scene.rendering = false;
             scene.simulatephysics = false;
         }
+        app.RenderStep();
     }
-private:
-    bool fPressed{false};
-};
-
-int main() {
-    scene.AddScript<MainScript>();
-
-    app.Run();
+    app.Shutdown();
 }

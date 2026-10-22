@@ -1,5 +1,6 @@
 #pragma once
 
+#include <engine/core/include/common.hpp>
 #include <engine/graphics/include/rendering/shader.hpp>
 #include <engine/graphics/include/rendering/texture.hpp>
 #include <glm/glm.hpp>
@@ -9,9 +10,7 @@ public:
     Material(Shader& shader, Texture texture, float friction, float restitution);
     Shader& GetShader() const;
     glm::vec4 basecolor = {1.0f, 1.0f, 1.0f, 1.0f};
-    Texture texture;
-    float friction{0.0f};
-    float restitution{0.0f};
+    AssetHandle texture;
 private:
     Shader* m_shader;
 };
