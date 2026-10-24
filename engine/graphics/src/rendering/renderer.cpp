@@ -37,5 +37,8 @@ void Renderer::Draw(Scene& scene, AssetManager& assetmanager) {
         Material* material = assetmanager.GetMaterial(meshrenderer.materialhandle);
         if (mesh && material)
             Draw(assetmanager, *mesh, *material, scene.transforms.at(i));
+        else {
+            DebugError("Mesh and/or Material corrupt!");
+        }
     }
 }

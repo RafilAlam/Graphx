@@ -8,9 +8,8 @@ Shader::Shader(std::string vertexsourcepath, std::string fragmentsourcepath) {
         std::string fragmentsource = LoadTextFile(fragmentsourcepath);
         const char* charfragmentsource = fragmentsource.data();
         Init(charvertexsource, charfragmentsource);
-    }
-
-    Init(charvertexsource);
+    } else
+        Init(charvertexsource);
 }
 
 Shader::Shader(const char* vertexsource, const char* fragmentsource) {

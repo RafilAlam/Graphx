@@ -1,17 +1,17 @@
 #include <engine/graphics/include/project/entity.hpp>
 
-MeshRenderer::MeshRenderer(od::object& o)
-: meshhandle(o["mesh"].get_uint32().value()), 
-  materialhandle(o["material"].get_uint32().value()) 
+MeshRenderer::MeshRenderer(AssetHandle meshhandle, AssetHandle materialhandle)
+: meshhandle(meshhandle), 
+  materialhandle(materialhandle) 
 {}
 
-Transform::Transform(od::object& o)
-: position(o["position"]["x"].get_float().value(),
-           o["position"]["y"].get_float().value(),
-           o["position"]["z"].get_float().value()),
-  scale(o["half_extents"]["x"].get_float().value(), 
-        o["half_extents"]["y"].get_float().value(), 
-        o["half_extents"]["z"].get_float().value()) 
+Transform::Transform(yyjson_val* position, yyjson_val* half_extents)
+: position(static_cast<float>(yyjson_get_num(yyjson_obj_get(position, "x"))),
+           static_cast<float>(yyjson_get_num(yyjson_obj_get(position, "y"))),
+           static_cast<float>(yyjson_get_num(yyjson_obj_get(position, "z")))),
+  scale(static_cast<float>(yyjson_get_num(yyjson_obj_get(half_extents, "x"))), 
+        static_cast<float>(yyjson_get_num(yyjson_obj_get(half_extents, "y"))), 
+        static_cast<float>(yyjson_get_num(yyjson_obj_get(half_extents, "z")))) 
 {}
 
 void Transform::SetRotation(glm::vec3 degrees) {

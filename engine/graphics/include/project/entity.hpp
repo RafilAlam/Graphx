@@ -4,18 +4,16 @@
 #include <engine/graphics/include/rendering/mesh.hpp>
 #include <engine/graphics/include/rendering/shader.hpp>
 #include <engine/physics/include/rigidbody.hpp>
-#include <simdjson.h>
+#include <yyjson.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-
-namespace od = simdjson::ondemand;
 
 struct Entity {
     uint32_t id;
 };
 
 struct MeshRenderer {
-    MeshRenderer(od::object& o);
+    MeshRenderer(AssetHandle meshhandle, AssetHandle materialhandle);
     AssetHandle meshhandle;
     AssetHandle materialhandle;
 };
@@ -25,7 +23,7 @@ struct Transform {
     glm::quat rotation{1.0f, 0.0f, 0.0f, 0.0f};
     glm::vec3 scale{1.0f};
 
-    Transform(od::object& o);
+    Transform(yyjson_val* position, yyjson_val* half_extents);
     void SetRotation(glm::vec3 degrees);
     void SetRotation(glm::vec3 axis, float degrees);
     void Rotate(glm::vec3 degrees);

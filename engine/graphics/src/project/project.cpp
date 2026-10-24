@@ -1,31 +1,37 @@
 #include <engine/graphics/include/project/project.hpp>
 
 namespace fs = std::filesystem;
-namespace od = simdjson::ondemand;
 
 Scene::Scene(AssetManager* assetmanager): assetmanager(assetmanager) {}
 
 Scene::Scene(AssetManager* assetmanager, std::string filepath): assetmanager(assetmanager) {
-    std::string scenejson = LoadTextFile(filepath);
-    od::parser sceneparser;
-    
-    using namespace simdjson::builtin;
-    try {
-        auto doc = sceneparser.iterate(scenejson);
-        activescene = doc["activescene"];
-        for (od::object entity : doc["entities"]) {
-            od::array components = entity["components"];
-            for (od::object component : components) {
-                if (component["type"] == "transform")
-                    transforms.emplace_back(component);
-                else if (component["type"] == "meshrenderer") {
-                    meshrenderers.emplace_back(component);
-                }
+    yyjson_doc* doc = yyjson_read_file(filepath.c_str(), 0, nullptr, nullptr);
+    yyjson_val* root = yyjson_doc_get_root(doc);
+    activescene = yyjson_get_bool(yyjson_obj_get(root, "activescene"));
+
+    yyjson_val* entities = yyjson_obj_get(root, "entities");
+
+    size_t ide, maxe;
+    yyjson_val* entity;
+    yyjson_arr_foreach(entities, ide, maxe, entity) {
+        yyjson_val* components = yyjson_obj_get(entity, "components");
+
+        size_t idc, maxc;
+        yyjson_val* component;
+        yyjson_arr_foreach(components, idc, maxc, component) {
+            std::string_view type = yyjson_get_str(yyjson_obj_get(component, "type"));
+            if (type == "transform") {
+                yyjson_val* position = yyjson_obj_get(component, "position");
+                yyjson_val* half_extents = yyjson_obj_get(component, "half_extents");
+                transforms.emplace_back(position, half_extents);
+                DebugPrint("Transform Added");
+            } else if (type == "meshrenderer") {
+                AssetHandle meshhandle = assetmanager->GetMesh(yyjson_get_str(yyjson_obj_get(component, "mesh")));
+                AssetHandle materialhandle = assetmanager->GetMaterial(yyjson_get_str(yyjson_obj_get(component, "material")));
+                meshrenderers.emplace_back(meshhandle, materialhandle);
+                DebugPrint("MeshRenderer Added");
             }
-            //AddJoint(jointname, type, modelAid, objectAname, localanchorAvec, modelBid, objectBname, localanchorBvec, properties);
         }
-    } catch (const simdjson::simdjson_error& e) {
-        std::cerr << "JSON Parsing failed: " << filepath << e.what() << std::endl;
     }
 }
 
@@ -54,7 +60,8 @@ Scene& Project::GetActiveScene() {
 }
 
 void Project::LoadProject(std::string projectname) {
-    fs::path projectpath = fs::current_path() / projectname;
+    DebugPrint("Loading Project: " + projectname);
+    fs::path projectpath = fs::current_path() / "projects" / projectname;
     if (fs::exists(projectpath) && fs::is_directory(projectpath)) {
         for (const auto& entry : fs::directory_iterator(projectpath)) {
             if (fs::is_regular_file(entry.path())) {
@@ -62,11 +69,16 @@ void Project::LoadProject(std::string projectname) {
             }
         }
     }
+    DebugPrint("Loaded");
 }
 
 void Project::AddScene(std::string filepath) {
-    if (scenes.emplace_back(assetmanager, filepath).activescene)
+    DebugPrint("Scene added: " + filepath);
+    Scene& scene = scenes.emplace_back(assetmanager, filepath);
+    if (scene.activescene) {
         activescene = scenes.size() - 1;
+        DebugPrint("Active Scene set to " + filepath);
+    }
 }
 
 void Project::AddScene(Scene& scene) {

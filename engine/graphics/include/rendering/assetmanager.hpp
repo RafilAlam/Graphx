@@ -13,7 +13,6 @@
 #include <iostream>
 #include <string>
 #include <memory>
-#include <simdjson.h>
 #include <uuid_v4.h>
 #include <unordered_map>
 #include <unordered_set>
@@ -21,9 +20,10 @@
 #include <yyjson.h>
 
 struct UUID {
-    char data[16];
+    char data[16]{};
 
     UUID() = default;
+    UUID(const char* uuid);
     UUID(UUIDv4::UUID uuid);
 
     bool operator==(const UUID& other) const noexcept {
@@ -66,7 +66,7 @@ public:
 private:
     UUIDv4::UUIDGenerator<std::mt19937_64> m_uuidGenerator;
     
-    const std::unordered_set<std::string> storeableExtensions {".png", ".jpg", ".obj", ".vert"};
+    const std::unordered_set<std::string> storeableExtensions {".png", ".jpg", ".obj", ".vert", ".gxmat"};
 };
 
 class AssetPool {

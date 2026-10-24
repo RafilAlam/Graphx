@@ -1,8 +1,5 @@
 {
     "name": "container",
-    "friction": 0.45,
-    "restitution": 0.3,
-    "texture": "assets/textures/container.jpg",
-    "vertex_shader": "assets/engine/shaders/default.vert",
-    "fragment_shader": "assets/engine/shaders/default.frag"
+    "texture": "89df8c67-9274-41c2-976b-c07096b92e70",
+    "shader": "8573c415-4bad-4b09-a7e3-2ea8385f985e"
 }

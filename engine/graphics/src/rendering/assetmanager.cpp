@@ -1,5 +1,10 @@
 #include <engine/graphics/include/rendering/assetmanager.hpp>
 
+UUID::UUID(const char* uuid) {
+    auto parsed = UUIDv4::UUID::fromStrFactory(uuid);
+    parsed.bytes(data);
+}
+
 UUID::UUID(UUIDv4::UUID uuid) {
     uuid.bytes(data);
 }
@@ -28,11 +33,24 @@ void AssetRegistry::CacheAssetPaths(std::filesystem::path assetsPath) {
             UUIDv4::UUID internaluuid;
             if (std::filesystem::exists(metapath)) {
                     DebugPrint("Fetching UUID for " + assetpath.string());
-                    simdjson::ondemand::parser parser;
-                    std::string assetjson = LoadTextFile(metapath.string());
-                    simdjson::ondemand::document doc = parser.iterate(assetjson);
-                    DebugPrint("Iterate");
-                    internaluuid = UUIDv4::UUID::fromStrFactory(std::string(doc["uuid"]));
+                    yyjson_doc* doc = yyjson_read_file(metapath.string().c_str(), 0, nullptr, nullptr);
+                    if (!doc) {
+                        DebugError("Failed to parse: " + metapath.string());
+                        continue;
+                    }
+
+                    yyjson_val* root = yyjson_doc_get_root(doc);
+                    yyjson_val* uuid = yyjson_obj_get(root, "uuid");
+
+                    if (!yyjson_is_str(uuid)) {
+                        DebugError("Missing or invalid UUID: " + metapath.string());
+                        yyjson_doc_free(doc);
+                        continue;
+                    }
+
+                    internaluuid = UUIDv4::UUID::fromStrFactory(yyjson_get_str(uuid));
+                    
+                    yyjson_doc_free(doc);
                     DebugPrint("Fetched");
             } else {
                 DebugPrint("Generating .gxmeta for " + assetpath.string());
@@ -55,8 +73,9 @@ void AssetRegistry::CacheAssetPaths(std::filesystem::path assetsPath) {
             UUID uuid = UUID(internaluuid);
             if (assetext == ".png" || assetext == ".jpg")
                 textureMap.emplace(uuid, assetpath);
-            else if (assetext == ".obj")
+            else if (assetext == ".obj") {
                 meshMap.emplace(uuid, assetpath);
+            }
             else if (assetext == ".gxmat")
                 materialMap.emplace(uuid, assetpath);
             else if (assetext == ".vert") {
@@ -130,15 +149,16 @@ AssetHandle AssetPool::LoadShader(std::string vsourcepath, std::string fsourcepa
     return AssetHandle{static_cast<uint32_t>(shaderMap.size() - 1)};
 }
 
-//TODO: REUSE TEXTURE AND SHADER
 MaterialData AssetPool::LoadMaterialData(std::string filepath) {
-    std::string json = LoadTextFile(filepath);
-    simdjson::dom::parser parser;
-    simdjson::dom::element doc = parser.parse(json);
+    yyjson_doc* doc = yyjson_read_file(filepath.c_str(), 0, nullptr, nullptr);
+    yyjson_val* root = yyjson_doc_get_root(doc);
+
+    const char* texture = yyjson_get_str(yyjson_obj_get(root, "texture"));
+    const char* shader = yyjson_get_str(yyjson_obj_get(root, "shader"));
 
     return {
-        UUIDv4::UUID::fromStrFactory(std::string(doc["texture"])),
-        UUIDv4::UUID::fromStrFactory(std::string(doc["shader"]))
+        UUIDv4::UUID::fromStrFactory(texture),
+        UUIDv4::UUID::fromStrFactory(shader)
     };
 }
 
@@ -150,7 +170,7 @@ AssetHandle AssetPool::LoadMaterial(AssetHandle shaderhandle, AssetHandle textur
 AssetHandle AssetManager::GetMesh(UUID uuid) {
     if (meshMap.contains(uuid))
         return meshMap.at(uuid);
-    
+
     AssetHandle handle = pool.LoadMesh(registry.meshMap.at(uuid).string());
     meshMap.emplace(uuid, handle);
     return handle;
@@ -194,7 +214,7 @@ AssetHandle AssetManager::GetShader(UUID uuid) {
 Shader* AssetManager::GetShader(AssetHandle handle) {
     if (handle.index >= pool.shaderMap.size())
         return nullptr;
-    
+
     return &pool.shaderMap.at(handle.index);
 }
 

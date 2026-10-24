@@ -38,7 +38,6 @@ set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 fetchcontent_makeavailable(assimp)
 
 add_subdirectory(extern/yyjson)
-add_subdirectory(extern/simdjson)
 add_subdirectory(extern/stb_image)
 add_subdirectory(extern/uuid_v4)
 add_subdirectory(extern/glad)
@@ -51,7 +50,7 @@ add_library(Graphx STATIC
  engine/physics/src/physicsworld.cpp engine/physics/src/integrator.cpp engine/physics/src/rigidbody.cpp engine/physics/src/collisionsolver.cpp engine/physics/src/joint.cpp
 )
 target_include_directories(Graphx PRIVATE .)
-target_link_libraries(Graphx PUBLIC OpenGL::GL stb_image glfw glad glm::glm assimp simdjson uuid_v4::uuid_v4 yyjson)
+target_link_libraries(Graphx PUBLIC OpenGL::GL stb_image glfw glad glm::glm assimp uuid_v4::uuid_v4 yyjson)
 
 add_executable(TransformDemo sandbox/transformdemo.cpp)
 target_include_directories(TransformDemo PRIVATE .)
