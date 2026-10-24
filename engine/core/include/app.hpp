@@ -3,8 +3,8 @@
 #include <engine/core/include/window.hpp>
 #include <engine/core/include/services.hpp>
 #include <engine/core/include/debug.hpp>
-#include <engine/graphics/include/scene/scene.hpp>
-#include <engine/graphics/include/scene/model.hpp>
+#include <engine/graphics/include/project/project.hpp>
+#include <engine/graphics/include/project/entity.hpp>
 #include <engine/graphics/include/rendering/assetmanager.hpp>
 #include <engine/graphics/include/rendering/debugrenderer.hpp>
 #include <engine/graphics/include/rendering/renderer.hpp>
@@ -26,18 +26,18 @@ private:
     Window m_window;
     Renderer m_renderer;
     DebugRenderer m_debugrenderer;
-    Scene m_scene;
+    AssetManager m_assetmanager;
+    Project m_project;
     unsigned int m_shaderprogram;
     std::chrono::steady_clock::time_point m_startTime;
 public:
-    App(AppConfig config);
+    App(AppConfig config, std::string projectname);
     void Init();
     void PhysicsStep();
     void RenderStep();
     void Shutdown();
     int GetInput(int keycode);
-    Scene& NewScene(AssetManager& assetmanager);
-    Scene& NewScene(AssetManager& assetmanager, std::string filepath);
+    Project& LoadProject(std::string filepath);
     float GetTime();
     float lastFrame{0.0f};
     float currentFrame{0.0f};

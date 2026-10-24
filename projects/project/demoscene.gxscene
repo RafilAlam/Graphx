@@ -1,0 +1,74 @@
+{
+  "activescene": true,
+  "entities": [
+    {   
+      "name": "RectangleA",
+      "components": [
+        {
+          "type": "transform",
+          "position": {
+            "x": -200.0,
+            "y": 0.0,
+            "z": 5.0
+          },
+          "half_extents": {
+            "x": 100.0,
+            "y": 100.0,
+            "z": 0.0
+          }
+        },
+        {
+          "type": "meshrenderer",
+          "mesh": "6f5c464a-6391-4b0b-a384-401bf9253e0c",
+          "material": "033df8e7-05e9-4311-8b2b-4d39d287dc85"
+        }
+      ]
+    },
+    {  
+      "name": "RectangleB",
+      "components": [
+        {
+          "type": "transform",
+          "position": {
+            "x": 200.0,
+            "y": 0.0,
+            "z": 5.0
+          },
+          "half_extents": {
+            "x": 100.0,
+            "y": 100.0,
+            "z": 0.0
+          }
+        },
+        {
+          "type": "meshrenderer",
+          "mesh": "6f5c464a-6391-4b0b-a384-401bf9253e0c",
+          "material": "36fcaf73-03a4-4c6d-a20a-ffc05c843ad9"
+        }
+      ]
+    },
+    {  
+      "name": "Ground",
+      "components": [
+        {
+          "type": "transform",
+          "position": {
+            "x": 0.0,
+            "y": -200.0,
+            "z": 5.0
+          },
+          "half_extents": {
+            "x": 300.0,
+            "y": 50.0,
+            "z": 0.0
+          }
+        },
+        {
+          "type": "meshrenderer",
+          "mesh": "6f5c464a-6391-4b0b-a384-401bf9253e0c",
+          "material": "36fcaf73-03a4-4c6d-a20a-ffc05c843ad9"
+        }
+      ]
+    }
+  ]
+}

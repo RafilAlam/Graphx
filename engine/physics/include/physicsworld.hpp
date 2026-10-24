@@ -1,6 +1,7 @@
 #pragma once
 
-#include <engine/graphics/include/scene/model.hpp>
+#include <engine/graphics/include/project/entity.hpp>
+#include <engine/graphics/include/project/project.hpp>
 #include <engine/physics/include/joint.hpp>
 #include <engine/graphics/include/rendering/debugrenderer.hpp>
 #include <engine/physics/include/integrator.hpp>
@@ -12,7 +13,7 @@
 #include <vector>
 #include <stack>
 #include <stdint.h>
-
+/*
 bool SameObjectPair(ContactID& id, Contact& contact);
 
 void UpdateRestTime(Object& object, float dt);
@@ -26,7 +27,7 @@ struct Island {
 
 class PhysicsWorld {
 public:
-    PhysicsWorld() = default;
+    PhysicsWorld(Scene& scene);
 
     template<typename T>
     void SetIntegrator() {
@@ -48,6 +49,9 @@ public:
     void CreateIsland(RigidBody& rigidbody);
 
 private:
+    Scene& m_scene;
     std::unique_ptr<BaseIntegrator> m_integrator{std::make_unique<EulerIntegrator>()};
     CollisionSolver m_collisionsolver;
 };
+
+*/

@@ -33,11 +33,11 @@ protected:
 
 class StaticMesh : public Mesh {
 public: 
-    StaticMesh(const std::vector<Vertex>& vertexdata, std::vector<Face> facedata);
+    StaticMesh(const std::vector<Vertex>& vertexdata, const std::vector<Face>& facedata);
 };
 
 class DynamicMesh : public Mesh {
 public: 
-    DynamicMesh(const std::vector<Vertex>& vertexdata, std::vector<Face> facedata);
+    DynamicMesh(const std::vector<Vertex>& vertexdata, const std::vector<Face>& facedata);
     void UpdateVertices(const std::vector<Vertex>& vertexdata);
 };

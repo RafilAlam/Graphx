@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/graphics/include/scene/model.hpp>
+#include <engine/graphics/include/project/entity.hpp>
 #include <engine/core/include/utils.hpp>
 #include <engine/core/include/services.hpp>
 #include <glm/glm.hpp>

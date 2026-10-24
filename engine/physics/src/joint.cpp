@@ -1,5 +1,5 @@
 #include <engine/physics/include/joint.hpp>
-
+/*
 Joint::Joint(std::string name, Object* ObjectA, glm::vec3 localanchorA, Object* ObjectB, glm::vec3 localanchorB): name(name), ObjectA(ObjectA), localanchorA(localanchorA), ObjectB(ObjectB), localanchorB(localanchorB) {}
 
 RodJoint::RodJoint(std::string name, Object* ObjectA, glm::vec3 localanchorA, Object* ObjectB, glm::vec3 localanchorB, float length, StaticMesh& mesh, Material& material): Joint(name, ObjectA, localanchorA, ObjectB, localanchorB), length(length) {
@@ -48,3 +48,4 @@ void RodVisuals::Update() {
     transform.SetRotation(glm::vec3(0.0f, 0.0f, 1.0f), angle);
     transform.scale = glm::vec3(glm::length(direction) * 0.5f, 5.0f, 1.0f);
 }
+*/

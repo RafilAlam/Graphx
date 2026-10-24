@@ -2,7 +2,7 @@
 
 #include <engine/graphics/include/rendering/mesh.hpp>
 #include <engine/graphics/include/rendering/material.hpp>
-#include <engine/graphics/include/scene/model.hpp>
+#include <engine/graphics/include/project/entity.hpp>
 #include <glm/glm.hpp>
 
 #include <numbers>

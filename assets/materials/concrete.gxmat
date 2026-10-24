@@ -1,8 +1,6 @@
 {
     "name": "concrete",
-    "friction": 0.85,
-    "restitution": 0.45,
-    "texture": "assets/textures/concrete.jpg",
+    "texture": "4a70d2b6-2725-4a8a-be86-aafd312dd78d",
     "vertex_shader": "assets/engine/shaders/default.vert",
     "fragment_shader": "assets/engine/shaders/default.frag"
 }

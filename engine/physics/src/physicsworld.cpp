@@ -1,9 +1,11 @@
 #include <engine/physics/include/physicsworld.hpp>
 #include <engine/core/include/services.hpp>
-
+/*
 bool SameObjectPair(ContactID& id, Contact& contact) {
     return id.objectpair == ObjectPair(&contact.reference, &contact.incident);
 }
+
+PhysicsWorld::PhysicsWorld(Scene& scene): m_scene(scene) {}
 
 void PhysicsWorld::UpdateCollider(Object& object) {
     std::vector<glm::vec3>& localvertices = std::get<PolygonData>(object.collider->shapedata).localvertices;
@@ -146,14 +148,11 @@ void PhysicsWorld::Step(std::unordered_map<uint64_t, std::unique_ptr<Model>>& mo
 
     // Constructing Islands
     m_islands.clear();
-    for (auto& modelpair : models) {
-        Model& model = *modelpair.second;
-        for (auto& objectpair : model.objects) {
-            Object& object = *objectpair.second;
-            if (object.rigidbody->islanded || object.rigidbody->GetMass() == 0.0f)
-                continue;
-            CreateIsland(*object.rigidbody);
-        }
+    for (auto i = objects.begin(); i != objects.end(); ++i) {
+        RigidBody& rigidbody = 
+        if (object.rigidbody->islanded || object.rigidbody->GetMass() == 0.0f)
+            continue;
+        CreateIsland(*object.rigidbody);
     }
 
     for (auto& island : m_islands) {
@@ -223,3 +222,4 @@ void PhysicsWorld::Step(std::unordered_map<uint64_t, std::unique_ptr<Model>>& mo
         }
     }
 }
+*/

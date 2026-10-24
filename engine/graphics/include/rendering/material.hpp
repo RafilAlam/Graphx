@@ -7,10 +7,9 @@
 
 class Material  {
 public:
-    Material(Shader& shader, Texture texture, float friction, float restitution);
-    Shader& GetShader() const;
+    Material(AssetHandle shaderhandle, AssetHandle texturehandle);
     glm::vec4 basecolor = {1.0f, 1.0f, 1.0f, 1.0f};
-    AssetHandle texture;
+    AssetHandle texturehandle;
+    AssetHandle shaderhandle;
 private:
-    Shader* m_shader;
 };

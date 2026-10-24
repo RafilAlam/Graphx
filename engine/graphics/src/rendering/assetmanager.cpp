@@ -19,16 +19,23 @@ void AssetRegistry::CacheAssetPaths(std::filesystem::path assetsPath) {
         if (entry.is_regular_file()) {
             const auto& assetpath = entry.path();
             std::string assetext = assetpath.extension().string();
-            if (!storeableExtensions.contains(assetext))
+            if (!storeableExtensions.contains(assetext)) {
+                DebugPrint("Ignored " + assetpath.string());
                 continue;
+            }
             auto metapath = assetpath;
             metapath.replace_extension(assetext + ".gxmeta");
             UUIDv4::UUID internaluuid;
             if (std::filesystem::exists(metapath)) {
-                std::string assetjson = LoadTextFile(metapath.string());
-                simdjson::ondemand::document doc = parser.iterate(assetjson);
-                internaluuid = UUIDv4::UUID::fromStrFactory(std::string(doc["uuid"]));
+                    DebugPrint("Fetching UUID for " + assetpath.string());
+                    simdjson::ondemand::parser parser;
+                    std::string assetjson = LoadTextFile(metapath.string());
+                    simdjson::ondemand::document doc = parser.iterate(assetjson);
+                    DebugPrint("Iterate");
+                    internaluuid = UUIDv4::UUID::fromStrFactory(std::string(doc["uuid"]));
+                    DebugPrint("Fetched");
             } else {
+                DebugPrint("Generating .gxmeta for " + assetpath.string());
                 internaluuid = m_uuidGenerator.getUUID();
                 yyjson_mut_doc *doc = yyjson_mut_doc_new(NULL);
                 yyjson_mut_val *root = yyjson_mut_obj(doc);
@@ -42,7 +49,9 @@ void AssetRegistry::CacheAssetPaths(std::filesystem::path assetsPath) {
                 if (!success) {
                     std::cerr << "Failed to write JSON metafile. Error: " << err.msg << '\n';
                 }
+                DebugPrint("Generated");
             }
+            DebugPrint("Loading " + assetpath.string());
             UUID uuid = UUID(internaluuid);
             if (assetext == ".png" || assetext == ".jpg")
                 textureMap.emplace(uuid, assetpath);
@@ -59,6 +68,7 @@ void AssetRegistry::CacheAssetPaths(std::filesystem::path assetsPath) {
 
                 shaderMap.emplace(uuid, ShaderSources(assetpath, fassetpath));
             }
+            DebugPrint("Loaded");
         }
     }
 }
@@ -107,17 +117,17 @@ AssetHandle AssetPool::LoadMesh(std::string filepath) {
     std::string name = mesh->mName.C_Str();
     DebugPrint(std::string("Mesh created by Asset Manager: " + name));
     meshMap.emplace_back(vertices, faces);
-    return AssetHandle{meshMap.size() - 1};
+    return AssetHandle{static_cast<uint32_t>(meshMap.size() - 1)};
 }
 
 AssetHandle AssetPool::LoadTexture(std::string filepath) {
-    textureMap.emplace_back(filepath);
-    return AssetHandle{textureMap.size() - 1};
+    textureMap.emplace_back(filepath.c_str());
+    return AssetHandle{static_cast<uint32_t>(textureMap.size() - 1)};
 }
 
 AssetHandle AssetPool::LoadShader(std::string vsourcepath, std::string fsourcepath) {
     shaderMap.emplace_back(vsourcepath, fsourcepath);
-    return AssetHandle{shaderMap.size() - 1};
+    return AssetHandle{static_cast<uint32_t>(shaderMap.size() - 1)};
 }
 
 //TODO: REUSE TEXTURE AND SHADER
@@ -132,9 +142,9 @@ MaterialData AssetPool::LoadMaterialData(std::string filepath) {
     };
 }
 
-AssetHandle AssetPool::LoadMaterial(Texture& texture, Shader& shader) {
-    materialMap.emplace_back(shader, texture);
-    return AssetHandle{materialMap.size() - 1};
+AssetHandle AssetPool::LoadMaterial(AssetHandle shaderhandle, AssetHandle texturehandle) {
+    materialMap.emplace_back(shaderhandle, texturehandle);
+    return AssetHandle{static_cast<uint32_t>(materialMap.size() - 1)};
 }
 
 AssetHandle AssetManager::GetMesh(UUID uuid) {
@@ -193,9 +203,7 @@ AssetHandle AssetManager::GetMaterial(UUID uuid) {
         return materialMap.at(uuid);
     
     MaterialData data = pool.LoadMaterialData(registry.materialMap.at(uuid).string());
-    Texture* texture = GetTexture(GetTexture(data.texture));
-    Shader* shader = GetShader(GetShader(data.shader));
-    AssetHandle handle = pool.LoadMaterial(*texture, *shader);
+    AssetHandle handle = pool.LoadMaterial(GetShader(data.shader), GetTexture(data.texture));
     materialMap.emplace(uuid, handle);
     return handle;
 }

@@ -3,16 +3,14 @@
 App app({
     .WindowWidth = 500,
     .WindowHeight = 500,
-    .WindowTitle = "TransformDemo"
-});
-AssetManager assetmanager;
-Scene& scene = app.NewScene(assetmanager, "assets/demoscene.json");
+    .WindowTitle = "GraphX Editor"
+}, "project");
 
 
 int main() {
     app.Init();
     while (!app.shouldclose) {
-        app.PhysicsStep();
+        //app.PhysicsStep();
         app.RenderStep();
     }
     app.Shutdown();

@@ -1,5 +1,5 @@
 #include <engine/physics/include/collisionsolver.hpp>
-
+/*
 bool ClipSegmentToLine(std::vector<ContactPoint>& points, const glm::vec3& normal, glm::vec3 referencePoint, size_t referenceVertexIndex, size_t incidentFaceIndex) {
     std::vector<ContactPoint> result;
 
@@ -197,32 +197,7 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
 CollisionSolver::CollisionSolver() {
     Dispatch[ToIndex(ColliderType::Circle)][ToIndex(ColliderType::Circle)] = CircleCircleCheck;
     Dispatch[ToIndex(ColliderType::Polygon)][ToIndex(ColliderType::Polygon)] = PolygonPolygonCheck;
-    //Dispatch[ToIndex(ColliderType::Polygon)][ToIndex(ColliderType::Circle)] = PolygonCircleCheck;
-    /*Dispatch[ToIndex(ColliderType::Circle)][ToIndex(ColliderType::Polygon)] = [](RigidBody& A, RigidBody& B){
-        Contact contact = RectangleCircleCheck(B, A);
-        std::swap(contact.A, contact.B);
-        contact.manifold.normal *= -1.0f;
-        return contact;
-    };*/
 }
-
-/*Contact PolygonCircleCheck(RigidBody& A, RigidBody& B) {
-    glm::vec3 RectanglePosition = glm::vec3{0.0f};
-    glm::vec3 RectangletoCircle = B.position - A.position;
-    glm::vec3 ClosestPointOnRectangle = glm::clamp(RectangletoCircle, RectanglePosition-A.collider.rectangle.halfExtents, RectanglePosition+A.collider.rectangle.halfExtents);
-    glm::vec3 CircletoClosestPoint = ClosestPointOnRectangle - RectangletoCircle;
-    float CircletoClosestPointDistance = glm::length(CircletoClosestPoint);
-
-    return {
-        &A,
-        &B,
-        {
-            .colliding = CircletoClosestPointDistance < B.collider.circle.radius,
-            .normal = -glm::normalize(CircletoClosestPoint),
-            .penetrationDepth = B.collider.circle.radius - CircletoClosestPointDistance
-        }
-    };
-}*/
 
 void CollisionSolver::PreSolve(Contact& contact) {
     for (auto& contactpoint : contact.manifold.contactPoints) {
@@ -327,3 +302,4 @@ void CollisionSolver::PositionCorrection(Contact& contact, float dt) {
         incidentbody.ApplyImpulseAtPosition(impulse, contactpoint.position);
     }
 }
+*/

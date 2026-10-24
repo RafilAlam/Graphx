@@ -13,7 +13,7 @@ unsigned int Mesh::GetIndexCount() const {
     return m_indexcount;
 }
 
-StaticMesh::StaticMesh(const std::vector<Vertex>& vertexdata, std::vector<Face> facedata) {
+StaticMesh::StaticMesh(const std::vector<Vertex>& vertexdata, const std::vector<Face>& facedata) {
     glGenVertexArrays(1, &m_vao);
     glBindVertexArray(m_vao);
 
@@ -40,7 +40,7 @@ StaticMesh::StaticMesh(const std::vector<Vertex>& vertexdata, std::vector<Face> 
     glBindVertexArray(0);
 }
 
-DynamicMesh::DynamicMesh(const std::vector<Vertex>& vertexdata, std::vector<Face> facedata) {
+DynamicMesh::DynamicMesh(const std::vector<Vertex>& vertexdata, const std::vector<Face>& facedata) {
     glGenVertexArrays(1, &m_vao);
     glBindVertexArray(m_vao);
 

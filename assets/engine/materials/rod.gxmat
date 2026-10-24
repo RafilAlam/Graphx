@@ -1,7 +1,5 @@
 {
     "name": "rod",
-    "friction": 0.0,
-    "restitution": 0.0,
     "texture": "assets/engine/textures/container.jpg",
     "vertex_shader": "assets/engine/shaders/default.vert",
     "fragment_shader": "assets/engine/shaders/default.frag"

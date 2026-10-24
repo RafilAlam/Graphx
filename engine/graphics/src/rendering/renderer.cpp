@@ -1,12 +1,12 @@
 #include <engine/graphics/include/rendering/renderer.hpp>
 
 Renderer::Renderer()
- : m_materialbuffer(sizeof(MaterialData), 0),
-   m_objectbuffer(sizeof(ObjectData), 1)
+ : m_materialbuffer(sizeof(MateriaBufferData), 0),
+   m_objectbuffer(sizeof(ObjectBufferData), 1)
 {}
 
-void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform& transform) {
-    const Shader& shader = material.GetShader();
+void Renderer::Draw(AssetManager& assetmanager, const Mesh& mesh, const Material& material, const Transform& transform) {
+    const Shader& shader = *assetmanager.GetShader(material.shaderhandle);
 
     glUseProgram(shader.GetProgram());
 
@@ -19,10 +19,10 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform&
 
     glm::mat4 projectionmat = glm::orthoLH(-300.0f, 300.0f, -300.0f, 300.0f, 0.1f, 100.0f);
 
-    m_objectbuffer.Upload(ObjectData{.Transform = projectionmat * viewmat * modelmat});
-    m_materialbuffer.Upload(MaterialData{.Color = material.basecolor});
+    m_objectbuffer.Upload(ObjectBufferData{.Transform = projectionmat * viewmat * modelmat});
+    m_materialbuffer.Upload(MateriaBufferData{.Color = material.basecolor});
 
-    material.texture.BindTexture();
+    assetmanager.GetTexture(material.texturehandle)->BindTexture();
     glBindVertexArray(mesh.GetVAO());
 
     glDrawElements(GL_TRIANGLES, mesh.GetIndexCount(), GL_UNSIGNED_INT, nullptr);
@@ -30,31 +30,12 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform&
     glBindVertexArray(0);
 }
 
-void Renderer::Draw(std::unordered_map<uint64_t, std::unique_ptr<Model>>& models) {
-    for (const auto& modelpair : models) {
-        const Model& model = *modelpair.second;
-        Draw(model);
-    }
-}
-
-void Renderer::Draw(const Model& model) {
-    for (auto& objectpair : model.objects) {
-        auto& object = objectpair.second;
-        const Material& material = object->GetMaterial();
-        const Shader& shader = material.GetShader();
-        const StaticMesh& mesh = object->GetMesh();
-
-        Draw(mesh, material, object->transform);
-    }
-}
-
-void Renderer::Draw(const Scene& scene) {
-    for (const auto& modelpair : scene.models) {
-        const Model& model = *modelpair.second;
-        Draw(model);
-    }
-    for (const auto& joint : scene.joints) {
-        JointVisuals& visuals = *joint->visuals;
-        Draw(visuals.mesh, visuals.material, visuals.transform);
+void Renderer::Draw(Scene& scene, AssetManager& assetmanager) {
+    for (uint32_t i = 0; i < scene.transforms.size(); ++i) {
+        MeshRenderer& meshrenderer = scene.meshrenderers.at(i);
+        Mesh* mesh = assetmanager.GetMesh(meshrenderer.meshhandle);
+        Material* material = assetmanager.GetMaterial(meshrenderer.materialhandle);
+        if (mesh && material)
+            Draw(assetmanager, *mesh, *material, scene.transforms.at(i));
     }
 }

@@ -6,7 +6,7 @@
 #include <engine/graphics/include/rendering/shader.hpp>
 #include <engine/graphics/include/rendering/mesh.hpp>
 #include <engine/graphics/include/rendering/texture.hpp>
-#include <engine/graphics/include/scene/model.hpp>
+#include <engine/graphics/include/project/entity.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -65,14 +65,13 @@ public:
     std::unordered_map<UUID, std::filesystem::path> materialMap;
 private:
     UUIDv4::UUIDGenerator<std::mt19937_64> m_uuidGenerator;
-    simdjson::ondemand::parser parser;
     
-    const std::unordered_set<std::string> storeableExtensions {".png", ".jpg", ".obj", ".gxmat", ".glsl", "gxmeta"};
+    const std::unordered_set<std::string> storeableExtensions {".png", ".jpg", ".obj", ".vert"};
 };
 
 class AssetPool {
 public:
-    std::vector<Mesh> meshMap;
+    std::vector<StaticMesh> meshMap;
     std::vector<Texture> textureMap;
     std::vector<Shader> shaderMap;
     std::vector<Material> materialMap;
@@ -81,7 +80,7 @@ public:
     AssetHandle LoadTexture(std::string filepath);
     AssetHandle LoadShader(std::string vsourcepath, std::string fsourcepath);
     MaterialData LoadMaterialData(std::string filepath);
-    AssetHandle LoadMaterial(Texture& texture, Shader& shader);
+    AssetHandle LoadMaterial(AssetHandle shaderhandle, AssetHandle texturehandle);
 };
 
 //TODO: REPLACE UNORDERED_MAP FOR FLATMAPS
