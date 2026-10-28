@@ -12,28 +12,5 @@ App app({
 //bool fPressed{false};
 
 int main() {
-    app.Init();
-    while (!app.shouldclose) {
-        //app.PhysicsStep();
-        /*if (!fPressed and app.GetInput(GLFW_KEY_F) == GLFW_PRESS) {
-            fPressed = true;
-            //RectangleB.objects.at("Object")->rigidbody->ApplyImpulse({250.0f, 0.0f, 0.0f});
-        }
-
-        if (!scene.simulatephysics and app.GetInput(GLFW_KEY_SPACE) == GLFW_PRESS) {
-            scene.rendering = true;
-            scene.simulatephysics = true;
-        }
-
-        if (fPressed and app.GetInput(GLFW_KEY_F) == GLFW_RELEASE) {
-            fPressed = false;
-        }
-
-        if (scene.simulatephysics and app.GetInput(GLFW_KEY_SPACE) == GLFW_RELEASE) {
-            scene.rendering = false;
-            scene.simulatephysics = false;
-        }*/
-        app.RenderStep();
-    }
-    app.Shutdown();
+    app.Run();
 }

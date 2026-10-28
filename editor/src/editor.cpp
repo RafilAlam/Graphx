@@ -8,10 +8,5 @@ App app({
 
 
 int main() {
-    app.Init();
-    while (!app.shouldclose) {
-        //app.PhysicsStep();
-        app.RenderStep();
-    }
-    app.Shutdown();
+    app.Run();
 }
