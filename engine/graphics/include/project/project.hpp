@@ -26,15 +26,15 @@ public:
 
     //TODO: replace with sparse arrays to avoid unused indices
     template<typename T>
-    T GetComponent(Entity entity) {
+    T GetComponent(EntityHandle handle) {
         if constexpr (std::is_same_v<T, MeshRenderer>) {
-            return meshrenderers.at(entity.id);
+            return meshrenderers.at(handle.id);
         } if constexpr (std::is_same_v<T, Transform>) {
-            return transforms.at(entity.id);
+            return transforms.at(handle.id);
         } if constexpr (std::is_same_v<T, RigidBody>) {
-            return rigidbodies.at(entity.id);
+            return rigidbodies.at(handle.id);
         } if constexpr (std::is_same_v<T, Collider>) {
-            return colliders.at(entity.id);
+            return colliders.at(handle.id);
         }
     }
 

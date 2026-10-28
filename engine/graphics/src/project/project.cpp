@@ -23,13 +23,26 @@ Scene::Scene(AssetManager* assetmanager, std::string filepath): assetmanager(ass
             if (type == "transform") {
                 yyjson_val* position = yyjson_obj_get(component, "position");
                 yyjson_val* half_extents = yyjson_obj_get(component, "half_extents");
-                transforms.emplace_back(position, half_extents);
+                transforms.at(ide) = Transform(position, half_extents);
                 DebugPrint("Transform Added");
             } else if (type == "meshrenderer") {
                 AssetHandle meshhandle = assetmanager->GetMesh(yyjson_get_str(yyjson_obj_get(component, "mesh")));
                 AssetHandle materialhandle = assetmanager->GetMaterial(yyjson_get_str(yyjson_obj_get(component, "material")));
-                meshrenderers.emplace_back(meshhandle, materialhandle);
+                meshrenderers.at(ide) = MeshRenderer(meshhandle, materialhandle);
                 DebugPrint("MeshRenderer Added");
+            } else if (type == "rigidbody") {
+                float mass = static_cast<float>(yyjson_get_num(yyjson_obj_get(component, "mass")));
+                float friction = static_cast<float>(yyjson_get_num(yyjson_obj_get(component, "friction")));
+                float restitution = static_cast<float>(yyjson_get_num(yyjson_obj_get(component, "restitution")));
+                yyjson_val* half_extents = yyjson_obj_get(component, "half_extents");
+                glm::vec3 sizevec{
+                    static_cast<float>(yyjson_get_num(yyjson_obj_get(half_extents, "x"))),
+                    static_cast<float>(yyjson_get_num(yyjson_obj_get(half_extents, "y"))),
+                    static_cast<float>(yyjson_get_num(yyjson_obj_get(half_extents, "z")))
+                };
+                rigidbodies.at(ide) = RigidBody(mass, sizevec, friction, restitution);
+            } else if (type == "collider") {
+                colliders.at(ide) = Collider{ColliderType::Polygon, PolygonData::Rectangle()};
             }
         }
     }

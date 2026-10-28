@@ -8,7 +8,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-struct Entity {
+struct EntityHandle {
     uint32_t id;
 };
 
