@@ -1,5 +1,5 @@
 #include <engine/physics/include/collisionsolver.hpp>
-/*
+
 bool ClipSegmentToLine(std::vector<ContactPoint>& points, const glm::vec3& normal, glm::vec3 referencePoint, size_t referenceVertexIndex, size_t incidentFaceIndex) {
     std::vector<ContactPoint> result;
 
@@ -35,20 +35,20 @@ float CombineRestitution(float A, float B) {
     return std::max(A, B);
 }
 
-bool AABBCollisionCheck(Object& A, Object& B) {
+bool AABBCheck(EntityPhysicsData& A, EntityPhysicsData& B) {
     static constexpr glm::vec3 axes[2] = {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}};
     for (const auto& axis : axes) {
-        if (A.collider->project(axis).getOverlap(B.collider->project(axis)) < 0.0f)
+        if (A.collider.project(axis).getOverlap(B.collider.project(axis)) < 0.0f)
             return false;
     }
 
     return true;
 }
 
-Contact CircleCircleCheck(Object& A, Object& B) {
+Contact CollisionSolver::CircleCircleCheck(EntityPhysicsData& A, EntityPhysicsData& B) {
     glm::vec3 AtoB = B.transform.position - A.transform.position;
     float distance = glm::length(AtoB);
-    float combinedradius = std::get<CircleData>(A.collider->shapedata).radius + std::get<CircleData>(B.collider->shapedata).radius;
+    float combinedradius = std::get<CircleData>(A.collider.shapedata).radius + std::get<CircleData>(B.collider.shapedata).radius;
 
     return {
         A,
@@ -61,8 +61,8 @@ Contact CircleCircleCheck(Object& A, Object& B) {
     };
 }
 
-Contact PolygonPolygonCheck(Object& A, Object& B) {
-    if (!AABBCollisionCheck(A, B)) {
+Contact CollisionSolver::PolygonPolygonCheck(EntityPhysicsData& A, EntityPhysicsData& B) {
+    if (!AABBCheck(A, B)) {
         return {
             A,
             B,
@@ -70,20 +70,20 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
         };
     }
 
-    std::vector<glm::vec3> normalsA = A.collider->getNormals();
-    std::vector<glm::vec3> normalsB = B.collider->getNormals();
+    std::vector<glm::vec3> normalsA = A.collider.getNormals();
+    std::vector<glm::vec3> normalsB = B.collider.getNormals();
 
     glm::vec3 smallestaxis;
     float minoverlap = FLT_MAX;
-    Object* referenceObject;
-    Object* incidentObject;
+    EntityPhysicsData* referenceEntity;
+    EntityPhysicsData* incidentEntity;
     ContactID newContactID;
     std::vector<glm::vec3> referenceEdge;
     std::vector<glm::vec3> incidentEdge;
 
     for (size_t i = 0; i < normalsA.size(); ++i) {
-        Projection p1 = A.collider->project(normalsA[i]);
-        Projection p2 = B.collider->project(normalsA[i]);
+        Projection p1 = A.collider.project(normalsA[i]);
+        Projection p2 = B.collider.project(normalsA[i]);
         float overlap = p1.getOverlap(p2);
         if (overlap < 0.0f) {
             return {
@@ -94,13 +94,13 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
         } else if (overlap < minoverlap) {
             minoverlap = overlap;
             smallestaxis = normalsA[i];
-            referenceObject = &A;
-            incidentObject = &B;
+            referenceEntity = &A;
+            incidentEntity = &B;
         }
     }
     for (size_t i = 0; i < normalsB.size(); ++i) {
-        Projection p1 = A.collider->project(normalsB[i]);
-        Projection p2 = B.collider->project(normalsB[i]);
+        Projection p1 = A.collider.project(normalsB[i]);
+        Projection p2 = B.collider.project(normalsB[i]);
         float overlap = p1.getOverlap(p2);
         if (overlap < 0.0f) {
             return {
@@ -111,8 +111,8 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
         } else if (overlap < minoverlap) {
             minoverlap = overlap;
             smallestaxis = normalsB[i];
-            referenceObject = &B;
-            incidentObject = &A;
+            referenceEntity = &B;
+            incidentEntity = &A;
         }
     }
 
@@ -125,13 +125,13 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
         newContactID.objectpair.Object2 = &A;
     }
 
-    if (glm::dot(incidentObject->rigidbody->position - referenceObject->rigidbody->position, smallestaxis) < 0.0f) {
+    if (glm::dot(incidentEntity->rigidbody.position - referenceEntity->rigidbody.position, smallestaxis) < 0.0f) {
         smallestaxis = -smallestaxis;
         //DebugPrint("SWAPPED A AND B!");
     }
 
-    referenceEdge = referenceObject->collider->getMostAligningFace(smallestaxis);
-    incidentEdge = incidentObject->collider->getMostAligningFace(-smallestaxis);
+    referenceEdge = referenceEntity->collider.getMostAligningFace(smallestaxis);
+    incidentEdge = incidentEntity->collider.getMostAligningFace(-smallestaxis);
 
     newContactID.feature1 = Feature(referenceEdge[2].x, FeatureType::Face);
 
@@ -156,7 +156,7 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
         }
     }
 
-    if (referenceObject == newContactID.objectpair.Object2) {
+    if (referenceEntity == newContactID.objectpair.Object2) {
         for (auto& point : contactpoints) {
             std::swap(point.id.feature1, point.id.feature2);
         }
@@ -194,7 +194,7 @@ Contact PolygonPolygonCheck(Object& A, Object& B) {
     };
 }
 
-CollisionSolver::CollisionSolver() {
+CollisionSolver::CollisionSolver(Scene& scene): m_scene(scene) {
     Dispatch[ToIndex(ColliderType::Circle)][ToIndex(ColliderType::Circle)] = CircleCircleCheck;
     Dispatch[ToIndex(ColliderType::Polygon)][ToIndex(ColliderType::Polygon)] = PolygonPolygonCheck;
 }
@@ -302,4 +302,3 @@ void CollisionSolver::PositionCorrection(Contact& contact, float dt) {
         incidentbody.ApplyImpulseAtPosition(impulse, contactpoint.position);
     }
 }
-*/

@@ -13,7 +13,7 @@
 #include <vector>
 #include <stack>
 #include <stdint.h>
-/*
+
 bool SameObjectPair(ContactID& id, Contact& contact);
 
 void UpdateRestTime(Object& object, float dt);
@@ -34,9 +34,9 @@ public:
         m_integrator = std::make_unique<T>();
     }
 
-    void Step(std::unordered_map<uint64_t, std::unique_ptr<Model>>& models, std::vector<Object*> objects, std::vector<std::unique_ptr<Joint>>& joints, float deltaTime);
+    void Step(float deltaTime);
 
-    void UpdateCollider(Object& object);
+    void UpdateCollider(EntityHandle handle);
 
     float gravity{-981.0f};
 
@@ -53,5 +53,3 @@ private:
     std::unique_ptr<BaseIntegrator> m_integrator{std::make_unique<EulerIntegrator>()};
     CollisionSolver m_collisionsolver;
 };
-
-*/

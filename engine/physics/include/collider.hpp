@@ -46,10 +46,6 @@ struct PolygonData {
     }
 };
 
-constexpr int ToIndex(ColliderType type) {
-    return static_cast<int>(type);
-}
-
 struct Collider {
     ColliderType type;
     std::variant<CircleData, PolygonData> shapedata;

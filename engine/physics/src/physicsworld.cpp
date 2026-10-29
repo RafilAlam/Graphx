@@ -1,21 +1,24 @@
 #include <engine/physics/include/physicsworld.hpp>
 #include <engine/core/include/services.hpp>
-/*
+
 bool SameObjectPair(ContactID& id, Contact& contact) {
     return id.objectpair == ObjectPair(&contact.reference, &contact.incident);
 }
 
 PhysicsWorld::PhysicsWorld(Scene& scene): m_scene(scene) {}
 
-void PhysicsWorld::UpdateCollider(Object& object) {
-    std::vector<glm::vec3>& localvertices = std::get<PolygonData>(object.collider->shapedata).localvertices;
-    std::vector<glm::vec3>& worldvertices = std::get<PolygonData>(object.collider->shapedata).worldvertices;
-    glm::quat rotationQuat(object.rigidbody->rotation);
+void PhysicsWorld::UpdateCollider(EntityHandle handle) {
+    Collider& collider = m_scene.colliders.at(handle.id);
+    RigidBody& rigidbody = m_scene.rigidbodies.at(handle.id);
+    Transform& transform = m_scene.transforms.at(handle.id);
+    std::vector<glm::vec3>& localvertices = std::get<PolygonData>(collider.shapedata).localvertices;
+    std::vector<glm::vec3>& worldvertices = std::get<PolygonData>(collider.shapedata).worldvertices;
+    glm::quat rotationQuat(rigidbody.rotation);
     glm::mat4 rotMatrix = glm::mat4_cast(rotationQuat);
 
     for (int i = 0; i < localvertices.size(); ++i) {
-        glm::vec4 localposition(localvertices[i] * object.transform.scale, 1.0f);
-        glm::vec3 rotatedPosition = glm::vec3(rotMatrix * localposition) + object.rigidbody->position;
+        glm::vec4 localposition(localvertices[i] * transform.scale, 1.0f);
+        glm::vec3 rotatedPosition = glm::vec3(rotMatrix * localposition) + rigidbody.position;
         worldvertices[i] = rotatedPosition;
     }
 }
@@ -86,22 +89,20 @@ void PhysicsWorld::CreateIsland(RigidBody& rigidbody) {
     m_islands.push_back(std::make_unique<Island>(std::move(island)));
 }
 
-void PhysicsWorld::Step(std::unordered_map<uint64_t, std::unique_ptr<Model>>& models, std::vector<Object*> objects, std::vector<std::unique_ptr<Joint>>& joints, float deltaTime) {
+void PhysicsWorld::Step(float deltaTime) {
 
     // Apply Gravity & Integrate Velocities
-    for (auto& modelpair : models) {
-        Model& model = *modelpair.second;
-        for (auto& objectpair : model.objects) {
-            Object& object = *objectpair.second;
-            object.rigidbody->islanded = false;
-            object.rigidbody->contactList = nullptr;
+    for (size_t i = 0; i < m_scene.rigidbodies.size(); ++i) {
+        RigidBody& rigidbody = m_scene.rigidbodies.at(i);
+        rigidbody.islanded = false;
+        rigidbody.contactList = nullptr;
+        
+        if (!rigidbody.sleeping) {
+            rigidbody.ApplyForce({0, rigidbody.GetMass() * gravity, 0});
+            m_integrator->IntegrateVelocity(rigidbody, deltaTime);
+            rigidbody.ClearAccumulatedForce();
             
-            if (!object.rigidbody->sleeping) {
-                object.rigidbody->ApplyForce({0, object.rigidbody->GetMass() * gravity, 0});
-                m_integrator->IntegrateVelocity(*object.rigidbody, deltaTime);
-                object.rigidbody->ClearAccumulatedForce();
-                UpdateCollider(object);
-            }
+            UpdateCollider(EntityHandle{i});
         }
     }
 
@@ -109,16 +110,11 @@ void PhysicsWorld::Step(std::unordered_map<uint64_t, std::unique_ptr<Model>>& mo
     std::vector<std::unique_ptr<Contact>> oldContacts;
     std::swap(m_contacts, oldContacts);
 
-    for (auto i = objects.begin(); i != objects.end(); ++i) {
-        Object* objectA = *i;
-        if (!objectA->collider)
-            continue;
-
-        for (auto j = std::next(i); j != objects.end(); ++j) {
-            Object* objectB = *j;
-            if (!objectB->collider)
-                continue;
-            Contact newContact = m_collisionsolver.Dispatch[ToIndex(objectA->collider->type)][ToIndex(objectB->collider->type)](*objectA, *objectB);
+    for (auto i = 0; i < m_scene.colliders.size(); ++i) {
+        Collider& colliderA = m_scene.colliders.at(i);
+        for (auto j = i + 1; j < m_scene.colliders.size(); ++j) {
+            Collider& colliderB = m_scene.colliders.at(j);
+            Contact newContact = m_collisionsolver.Dispatch[static_cast<int>(colliderA.type)][static_cast<int>(colliderB.type)](EntityHandle{i}, EntityHandle{j});
             if (!newContact.manifold.colliding)
                 continue;
 
@@ -148,11 +144,11 @@ void PhysicsWorld::Step(std::unordered_map<uint64_t, std::unique_ptr<Model>>& mo
 
     // Constructing Islands
     m_islands.clear();
-    for (auto i = objects.begin(); i != objects.end(); ++i) {
-        RigidBody& rigidbody = 
-        if (object.rigidbody->islanded || object.rigidbody->GetMass() == 0.0f)
+    for (auto i = 0; i < m_scene.rigidbodies.size(); ++i) {
+        RigidBody& rigidbody = m_scene.rigidbodies.at(i);
+        if (rigidbody.islanded || rigidbody.GetMass() == 0.0f)
             continue;
-        CreateIsland(*object.rigidbody);
+        CreateIsland(rigidbody);
     }
 
     for (auto& island : m_islands) {
@@ -176,7 +172,7 @@ void PhysicsWorld::Step(std::unordered_map<uint64_t, std::unique_ptr<Model>>& mo
                     m_collisionsolver.Resolve(*contact, deltaTime);
             }
         }
-        for (auto& joint : joints) {
+        /*for (auto& joint : joints) {
             joint->SolveJoint(deltaTime);
             Services::Get<DebugRenderer>().AddPoint({
                 .position = joint->anchorA,
@@ -186,7 +182,7 @@ void PhysicsWorld::Step(std::unordered_map<uint64_t, std::unique_ptr<Model>>& mo
                 .position = joint->anchorB,
                 .color = {1.0f, 1.0f, 1.0f}
             });
-        }
+        }*/
     }
     for (auto& island : m_islands) {
         if (!island->sleeping) {
@@ -222,4 +218,3 @@ void PhysicsWorld::Step(std::unordered_map<uint64_t, std::unique_ptr<Model>>& mo
         }
     }
 }
-*/

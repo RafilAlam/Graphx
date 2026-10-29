@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/graphics/include/project/entity.hpp>
+#include <engine/graphics/include/project/project.hpp>
 #include <engine/core/include/utils.hpp>
 #include <engine/core/include/services.hpp>
 #include <glm/glm.hpp>
@@ -12,20 +12,28 @@ bool ClipSegmentToLine(std::vector<ContactPoint>& points, const glm::vec3& norma
 float CombineFriction(float A, float B);
 float CombineRestitution(float A, float B);
 
-Contact AABBCheck(Object& A, Object& B);
-Contact CircleCircleCheck(Object& A, Object& B);
-Contact RectangleCircleCheck(RigidBody& A, RigidBody& B);
-Contact PolygonPolygonCheck(Object& A, Object& B);
+struct EntityPhysicsData {
+    Transform& transform;
+    RigidBody& rigidbody;
+    Collider& collider;
+};
+
+bool AABBCheck(EntityPhysicsData& A, EntityPhysicsData& B);
+Contact CircleCircleCheck(EntityPhysicsData& A, EntityPhysicsData& B);
+Contact PolygonPolygonCheck(EntityPhysicsData& A, EntityPhysicsData& B);
 
 class CollisionSolver {
 public:
-    CollisionSolver();
+    CollisionSolver(Scene& scene);
     
-    using CollisionFn = Contact(*)(Object&, Object&);
+    using CollisionFn = Contact(*)(EntityHandle, EntityHandle);
     CollisionFn Dispatch[static_cast<int>(ColliderType::Count)][static_cast<int>(ColliderType::Count)];
 
     void PreSolve(Contact& contact);
     void WarmStart(Contact& contact);
     void Resolve(Contact& contact, float deltaTime);
     void PositionCorrection(Contact& contact, float dt);
+
+private:
+    Scene& m_scene;
 };
