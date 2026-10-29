@@ -1,7 +1,6 @@
 #pragma once
 
 #include <engine/graphics/include/project/entity.hpp>
-#include <engine/physics/include/joint.hpp>
 #include <engine/graphics/include/rendering/assetmanager.hpp>
 #include <engine/core/include/utils.hpp>
 #include <engine/physics/include/physicsworld.hpp>
