@@ -8,3 +8,7 @@ void RigidBody2D::ApplyForce(const glm::vec2& force) {
     m_forceaccumulator += force;
     DebugPrint("RigidBody2D", std::to_string(force.x));
 }
+
+glm::vec2 Collider2D::transformpoint(glm::vec2 point, glm::vec2 position) const {
+    return point * half_extents + position;
+}

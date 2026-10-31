@@ -14,6 +14,7 @@ public:
 private:
     World& world;
     bool _AABB(const Collider2D& cA, const Collider2D& cB) const;
+    bool _SAT(const Collider2D& cA, const Collider2D& cB) const;
 };
 
 struct WorldSettings {
