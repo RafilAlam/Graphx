@@ -12,12 +12,11 @@ struct PhysicsHandle {
 };
 
 struct PhysicalProperties {
-    PhysicalProperties(float mass, float friction, float restitution, glm::vec2 half_extents);
+    PhysicalProperties(float mass, float friction, float restitution);
     float mass{1.0f};
     float inversemass{1.0f};
     float friction{1.0f};
     float restitution{1.0f};
-    glm::vec2 half_extents{1.0f};
 };
 
 struct RigidBody2D {
@@ -36,4 +35,7 @@ private:
     glm::vec2 m_forceaccumulator{0.0f};
 };
 
-struct Collider2D;
+struct Collider2D {
+    glm::vec2 half_extents{1.0f};
+    PhysicsHandle handle;
+};
