@@ -31,12 +31,12 @@ void Renderer::Draw(AssetManager& assetmanager, const Mesh& mesh, const Material
 }
 
 void Renderer::Draw(Scene& scene, AssetManager& assetmanager) {
-    for (uint32_t i = 0; i < scene.transforms.size(); ++i) {
-        MeshRenderer& meshrenderer = scene.meshrenderers.at(i);
+    for (auto& transform : scene.transforms.dense) {
+        MeshRenderer& meshrenderer = scene.meshrenderers[transform.handle.id];
         Mesh* mesh = assetmanager.GetMesh(meshrenderer.meshhandle);
         Material* material = assetmanager.GetMaterial(meshrenderer.materialhandle);
         if (mesh && material)
-            Draw(assetmanager, *mesh, *material, scene.transforms.at(i));
+            Draw(assetmanager, *mesh, *material, transform);
         else {
             DebugError("Mesh and/or Material corrupt!");
         }

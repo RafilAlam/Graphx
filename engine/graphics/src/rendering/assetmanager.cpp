@@ -25,14 +25,14 @@ void AssetRegistry::CacheAssetPaths(std::filesystem::path assetsPath) {
             const auto& assetpath = entry.path();
             std::string assetext = assetpath.extension().string();
             if (!storeableExtensions.contains(assetext)) {
-                DebugPrint("Ignored " + assetpath.string());
+                DebugPrint("AssetRegistry", "Ignored " + assetpath.string());
                 continue;
             }
             auto metapath = assetpath;
             metapath.replace_extension(assetext + ".gxmeta");
             UUIDv4::UUID internaluuid;
             if (std::filesystem::exists(metapath)) {
-                    DebugPrint("Fetching UUID for " + assetpath.string());
+                    DebugPrint("AssetRegistry", "Fetching UUID for " + assetpath.string());
                     yyjson_doc* doc = yyjson_read_file(metapath.string().c_str(), 0, nullptr, nullptr);
                     if (!doc) {
                         DebugError("Failed to parse: " + metapath.string());
@@ -51,9 +51,9 @@ void AssetRegistry::CacheAssetPaths(std::filesystem::path assetsPath) {
                     internaluuid = UUIDv4::UUID::fromStrFactory(yyjson_get_str(uuid));
                     
                     yyjson_doc_free(doc);
-                    DebugPrint("Fetched");
+                    DebugPrint("AssetRegistry", "Fetched");
             } else {
-                DebugPrint("Generating .gxmeta for " + assetpath.string());
+                DebugPrint("AssetRegistry", "Generating .gxmeta for " + assetpath.string());
                 internaluuid = m_uuidGenerator.getUUID();
                 yyjson_mut_doc *doc = yyjson_mut_doc_new(NULL);
                 yyjson_mut_val *root = yyjson_mut_obj(doc);
@@ -67,9 +67,9 @@ void AssetRegistry::CacheAssetPaths(std::filesystem::path assetsPath) {
                 if (!success) {
                     std::cerr << "Failed to write JSON metafile. Error: " << err.msg << '\n';
                 }
-                DebugPrint("Generated");
+                DebugPrint("AssetRegistry", "Generated");
             }
-            DebugPrint("Loading " + assetpath.string());
+            DebugPrint("AssetRegistry", "Loading " + assetpath.string());
             UUID uuid = UUID(internaluuid);
             if (assetext == ".png" || assetext == ".jpg")
                 textureMap.emplace(uuid, assetpath);
@@ -87,7 +87,7 @@ void AssetRegistry::CacheAssetPaths(std::filesystem::path assetsPath) {
 
                 shaderMap.emplace(uuid, ShaderSources(assetpath, fassetpath));
             }
-            DebugPrint("Loaded");
+            DebugPrint("AssetRegistry", "Loaded");
         }
     }
 }
@@ -134,7 +134,7 @@ AssetHandle AssetPool::LoadMesh(std::string filepath) {
     }
 
     std::string name = mesh->mName.C_Str();
-    DebugPrint(std::string("Mesh created by Asset Manager: " + name));
+    DebugPrint("AssetPool", std::string("Mesh created by Asset Manager: " + name));
     meshMap.emplace_back(vertices, faces);
     return AssetHandle{static_cast<uint32_t>(meshMap.size() - 1)};
 }

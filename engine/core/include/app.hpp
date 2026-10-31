@@ -77,8 +77,6 @@ private:
     std::chrono::steady_clock::time_point m_startTime;
 public:
     App(AppConfig config, std::string projectname);
-    void PhysicsStep();
-    void RenderStep();
     void Shutdown();
     void Run();
     int GetInput(int keycode);

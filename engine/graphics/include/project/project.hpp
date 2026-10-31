@@ -3,7 +3,8 @@
 #include <engine/graphics/include/project/entity.hpp>
 #include <engine/graphics/include/rendering/assetmanager.hpp>
 #include <engine/core/include/utils.hpp>
-#include <engine/physics/include/physicsworld.hpp>
+#include <engine/physics/include/world.hpp>
+#include <engine/core/include/sparseset.hpp>
 #include <filesystem>
 #include <memory>
 #include <deque>
@@ -25,25 +26,22 @@ public:
 
     //TODO: replace with sparse arrays to avoid unused indices
     template<typename T>
-    T GetComponent(EntityHandle handle) {
+    T& operator[](uint32_t id) {
         if constexpr (std::is_same_v<T, MeshRenderer>) {
-            return meshrenderers.at(handle.id);
+            return meshrenderers[id];
         } if constexpr (std::is_same_v<T, Transform>) {
-            return transforms.at(handle.id);
-        } if constexpr (std::is_same_v<T, RigidBody>) {
-            return rigidbodies.at(handle.id);
-        } if constexpr (std::is_same_v<T, Collider>) {
-            return colliders.at(handle.id);
+            return transforms[id];
+        } if constexpr (std::is_same_v<T, RigidBody2D>) {
+            return world.rigidbodies[id];
+        } if constexpr (std::is_same_v<T, Collider2D>) {
+            //return world.colliders.at(handle.id);
         }
     }
 
-    std::vector<Transform> transforms;
-    std::vector<MeshRenderer> meshrenderers;
-    std::vector<RigidBody> rigidbodies;
-    std::vector<Collider> colliders;
-    //std::vector<Joint> joints;
+    sparseset<Transform> transforms;
+    sparseset<MeshRenderer> meshrenderers;
     AssetManager* assetmanager;
-    //PhysicsWorld physicsworld;
+    World world;
     bool activescene{false};
     bool simulatephysics{true};
     bool rendering{true};
@@ -51,7 +49,6 @@ public:
     void OnStart();
     void Update(float deltaTime);
 private:
-    uint64_t newmodelID = 0;
     float m_physicstimestep = 1/120.0f;
 };
 

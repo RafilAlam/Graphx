@@ -5,13 +5,14 @@ MeshRenderer::MeshRenderer(AssetHandle meshhandle, AssetHandle materialhandle)
   materialhandle(materialhandle) 
 {}
 
-Transform::Transform(yyjson_val* position, yyjson_val* half_extents)
+Transform::Transform(uint32_t id, yyjson_val* position, yyjson_val* half_extents)
 : position(static_cast<float>(yyjson_get_num(yyjson_obj_get(position, "x"))),
            static_cast<float>(yyjson_get_num(yyjson_obj_get(position, "y"))),
            static_cast<float>(yyjson_get_num(yyjson_obj_get(position, "z")))),
   scale(static_cast<float>(yyjson_get_num(yyjson_obj_get(half_extents, "x"))), 
         static_cast<float>(yyjson_get_num(yyjson_obj_get(half_extents, "y"))), 
-        static_cast<float>(yyjson_get_num(yyjson_obj_get(half_extents, "z")))) 
+        static_cast<float>(yyjson_get_num(yyjson_obj_get(half_extents, "z")))),
+  handle(id)
 {}
 
 void Transform::SetRotation(glm::vec3 degrees) {

@@ -55,6 +55,17 @@
           "type": "meshrenderer",
           "mesh": "6f5c464a-6391-4b0b-a384-401bf9253e0c",
           "material": "36fcaf73-03a4-4c6d-a20a-ffc05c843ad9"
+        },
+        {
+          "type": "rigidbody",
+          "mass": 1.0,
+          "friction": 1.0,
+          "restitution": 1.0,
+          "half_extents": {
+            "x": 100.0,
+            "y": 100.0,
+            "z": 0.0
+          }
         }
       ]
     },

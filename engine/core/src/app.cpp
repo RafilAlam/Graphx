@@ -7,11 +7,19 @@ void PhysicsLayer::OnAttach() {
     app.currentFrame;
 }
 void PhysicsLayer::OnDetach() {}
+
+// Simulates Physics & Updates Positions
 void PhysicsLayer::OnUpdate() {
     app.currentFrame = app.GetTime();
     float dt = app.currentFrame - app.lastFrame;
     app.lastFrame = app.currentFrame;
-    app.GetProject().GetActiveScene().Update(dt);
+    for (auto& scene : app.GetProject().scenes) {
+        scene.world.Simulate(dt);
+        for (auto& rigidbody : scene.world.rigidbodies.dense) {
+            Transform& transform = scene.transforms[rigidbody.handle.id];
+            transform.position = glm::vec3{rigidbody.position, transform.position.z};
+        }
+    }
 }
 
 RenderingLayer::RenderingLayer(App& app): app(app) {}
@@ -57,15 +65,16 @@ App::App(AppConfig config, std::string projectname)
 }
 
 void App::Shutdown() {
-    DebugPrint("Closing...");
+    DebugPrint("App", "Closing...");
     m_layerstack.Clear();
-    DebugPrint("Closed.");
+    DebugPrint("App", "Closed.");
 }
 
 void App::Run() {
-    DebugPrint("Running!");
+    DebugPrint("App", "Running!");
     while(!shouldclose)
         m_layerstack.Update();
+    Shutdown();
 }
 
 int App::GetInput(int keycode) {

@@ -17,7 +17,7 @@ Shader::Shader(const char* vertexsource, const char* fragmentsource) {
 }
 
 void Shader::Init(const char* vertexsource, const char* fragmentsource) {
-    DebugPrint("Loading Shaders...");
+    DebugPrint("Shader", "Loading Shaders...");
 
     unsigned int vertexshader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexshader, 1, &vertexsource, NULL);
@@ -51,7 +51,7 @@ void Shader::Init(const char* vertexsource, const char* fragmentsource) {
         glGetProgramInfoLog(m_program, 512, NULL, infoLog);
         DebugError("ERROR::SHADER::PROGRAM::LINKING_FAILED\n" + std::string(infoLog));
     }
-    DebugPrint("Loaded Shaders!");
+    DebugPrint("Shader", "Loaded Shaders!");
 
     glUseProgram(m_program);
     glDeleteShader(vertexshader);
@@ -59,7 +59,7 @@ void Shader::Init(const char* vertexsource, const char* fragmentsource) {
 }
 
 void Shader::Init(const char* vertexsource) {
-    DebugPrint("Loading Shaders...");
+    DebugPrint("Shader", "Loading Shaders...");
 
     unsigned int vertexshader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexshader, 1, &vertexsource, NULL);
@@ -82,7 +82,7 @@ void Shader::Init(const char* vertexsource) {
         glGetProgramInfoLog(m_program, 512, NULL, infoLog);
         DebugError("ERROR::SHADER::PROGRAM::LINKING_FAILED\n" + std::string(infoLog));
     }
-    DebugPrint("Loaded Shaders!");
+    DebugPrint("Shader", "Loaded Shaders!");
 
     glUseProgram(m_program);
     glDeleteShader(vertexshader);
