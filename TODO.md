@@ -2,7 +2,7 @@
 - [ ] Collision Handling:
   - [ ] Implement Sequential-Impulse Collision Resolving:
     Using the collision manifold over many iterations in a frame, produce an impulse using effective mass and apply for both bodies. Allow them to converge to rest and abide by the pliant collision constraint.
-  - [ ] Implement SAT collision detection:
+  - [x] Implement SAT collision detection:
     For every edge/face on each object as a reference, SAT stamps both objects as projections and checks if there is an overlap. If there is, the objects are not colliding. If no overlap is found and references run out, there is a collision.
   - [x] Implement AABB collision detection:
     AABB takes the maximum and minimum X and Y values, a total of 4 coordinates to check whether two objects are colliding.

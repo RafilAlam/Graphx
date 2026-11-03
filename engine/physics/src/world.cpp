@@ -25,37 +25,91 @@ bool ConstraintHandler2D::_AABB(const Collider2D& cA, const Collider2D& cB) cons
     return pA.overlap(pB);
 }
 
-bool ConstraintHandler2D::_SAT(const Collider2D& cA, const Collider2D& cB) const {
+CollisionManifold::CollisionManifold(): contacts(2) {}
+
+CollisionManifold ConstraintHandler2D::_SAT(const Collider2D& cA, const Collider2D& cB) const {
+    using edge = std::array<glm::vec2, 2>;
     struct projection {
-        projection(const Collider2D& c, const RigidBody2D& b, glm::vec2 reference) {
+        projection(const Collider2D& c, const RigidBody2D& b, glm::vec2 normal) {
             auto shape = primitives::unitshapes[static_cast<size_t>(c.type)];
             for (glm::vec2 point : shape) {
-                float dot = glm::dot(c.transformpoint(point, b.position), reference);
+                float dot = glm::dot(c.transformpoint(point, b.position), normal);
                 if (dot < min)
                     min = dot;
                 if (dot > max)
                     max = dot;
             }
         }
-        bool overlap(projection other) {
-            return min < other.max && max > other.min;
+        float overlap(projection other) {
+            return std::min(max - other.min, other.max - min);
         }
         float min{std::numeric_limits<float>::max()};
         float max{std::numeric_limits<float>::lowest()};
     };
+    auto getIncidentEdge = [](std::span<const glm::vec2> s, const RigidBody2D& rb, const Collider2D& c, glm::vec2 referenceNormal) {
+        edge incident;
+        float minalign{0.0f};
+            size_t prev_idx = s.size() - 1;
+        for (size_t current_idx=0; current_idx<s.size(); ++current_idx) {
+            glm::vec2 p0 = c.transformpoint(s[current_idx], rb.position);
+            glm::vec2 p1 = c.transformpoint(s[prev_idx], rb.position);
+            glm::vec2 normal = glm::normalize(p0 - p1);
+            normal = {normal.y, -normal.x};
+            
+            float align = glm::dot(normal, referenceNormal);
+            if (align < minalign) {
+                incident = {p0, p1};
+                minalign = align;
+            }
 
-    auto sA = primitives::unitshapes[static_cast<size_t>(cA.type)];
+            prev_idx = current_idx;
+        }
+
+        return incident;
+    };
+    auto clip = [](glm::vec2 clippingedge, glm::vec2 referencepoint, edge& points) {
+        float s1 = glm::dot(clippingedge, points[0]) - glm::dot(clippingedge, referencepoint);
+        float s2 = glm::dot(clippingedge, points[1]) - glm::dot(clippingedge, referencepoint);
+
+        if (s1 < 0 && s2 < 0)
+            return 1;
+        if (s1 >= 0 && s2 >= 0)
+            return 0;
+
+        float t = s1 / (s1 - s2);
+        if (s2 >= 0)
+            points[0] = points[0] + t * (points[1] - points[0]);
+        else
+            points[1] = points[0] + t * (points[1] - points[0]);
+        
+        return 0;
+    };
+
     const RigidBody2D& rbA = world.rigidbodies[cA.handle.id];
     const RigidBody2D& rbB = world.rigidbodies[cB.handle.id];
+    CollisionManifold manifold;
+    float minoverlap{std::numeric_limits<float>::max()};
+    bool sAincident{false};
+    edge reference;
+    edge incident;
+
+    auto sA = primitives::unitshapes[static_cast<size_t>(cA.type)];
     size_t prev_idx = sA.size() - 1;
     for (size_t current_idx=0; current_idx<sA.size(); ++current_idx) {
-        glm::vec2 reference = glm::normalize(cA.transformpoint(sA[current_idx], rbA.position) - cA.transformpoint(sA[prev_idx], rbA.position));
-        reference = {reference.y, -reference.x};
+        glm::vec2 p0 = cA.transformpoint(sA[current_idx], rbA.position);
+        glm::vec2 p1 = cA.transformpoint(sA[prev_idx], rbA.position);
+        glm::vec2 normal = glm::normalize(p0 - p1);
+        normal = {normal.y, -normal.x};
         
-        projection pA(cA, rbA, reference);
-        projection pB(cB, rbB, reference);
-        if (!pA.overlap(pB)) {
-            return false;
+        projection pA(cA, rbA, normal);
+        projection pB(cB, rbB, normal);
+        float overlap = pA.overlap(pB);
+        if (overlap <= 0.0f)
+            return manifold;
+        if (overlap < minoverlap) {
+            reference = {p0, p1};
+            manifold.normal = normal;
+            minoverlap = overlap;
         }
 
         prev_idx = current_idx;
@@ -64,19 +118,47 @@ bool ConstraintHandler2D::_SAT(const Collider2D& cA, const Collider2D& cB) const
     auto sB = primitives::unitshapes[static_cast<size_t>(cB.type)];
     prev_idx = sB.size() - 1;
     for (size_t current_idx=0; current_idx<sB.size(); ++current_idx) {
-        glm::vec2 reference = glm::normalize(cB.transformpoint(sB[current_idx], rbB.position) - cB.transformpoint(sB[prev_idx], rbB.position));
-        reference = {reference.y, -reference.x};
+        glm::vec2 p0 = cB.transformpoint(sB[current_idx], rbB.position);
+        glm::vec2 p1 = cB.transformpoint(sB[prev_idx], rbB.position);
+        glm::vec2 normal = glm::normalize(p0 - p1);
+        normal = {normal.y, -normal.x};
 
-        projection pA(cA, rbA, reference);
-        projection pB(cB, rbB, reference);
-        if (!pA.overlap(pB)) {
-            return false;
+        projection pA(cA, rbA, normal);
+        projection pB(cB, rbB, normal);
+        float overlap = pA.overlap(pB);
+        if (overlap <= 0.0f)
+            return manifold;
+        if (overlap < minoverlap) {
+            reference = {p0, p1};
+            manifold.normal = normal;
+            minoverlap = overlap;
+            sAincident = true;
         }
 
         prev_idx = current_idx;
     }
 
-    return true;
+    if (sAincident)
+        incident = getIncidentEdge(sA, rbA, cA, manifold.normal);
+    else
+        incident = getIncidentEdge(sB, rbB, cB, manifold.normal);
+
+    std::array<glm::vec2, 2> clippedpoints = incident;
+    glm::vec2 refdirection = glm::normalize(reference[0] - reference[1]);
+    
+    if (clip(refdirection, reference[0], clippedpoints) ||
+        clip(-refdirection, reference[1], clippedpoints))
+        return manifold;
+
+    float clippingedge2 = glm::dot(manifold.normal, reference[0]);
+    for (size_t i=0; i<clippedpoints.size(); ++i) {
+        float depth = glm::dot(manifold.normal, clippedpoints[i]) - clippingedge2;
+        if (depth > 0)
+            manifold.contacts.emplace_back(clippedpoints[i], depth);
+    }
+
+    manifold.colliding = !manifold.contacts.empty();
+    return manifold;
 }
 
 void ConstraintHandler2D::HandleCollision(const Collider2D& cA, const Collider2D& cB) {

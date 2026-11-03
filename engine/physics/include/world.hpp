@@ -8,13 +8,27 @@
 
 // Defines a world/scene where components are processed
 
+struct Contact {
+    glm::vec2 position;
+    float penetrationdepth;
+};
+
+struct CollisionManifold {
+    CollisionManifold();
+    glm::vec2 normal;
+    bool colliding{false};
+    std::vector<Contact> contacts;
+    PhysicsHandle A;
+    PhysicsHandle B;
+};
+
 class ConstraintHandler2D {
 public:
     void HandleCollision(const Collider2D& cA, const Collider2D& cB);
 private:
     World& world;
     bool _AABB(const Collider2D& cA, const Collider2D& cB) const;
-    bool _SAT(const Collider2D& cA, const Collider2D& cB) const;
+    CollisionManifold _SAT(const Collider2D& cA, const Collider2D& cB) const;
 };
 
 struct WorldSettings {
