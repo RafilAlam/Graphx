@@ -18,17 +18,20 @@ struct CollisionManifold {
     glm::vec2 normal;
     bool colliding{false};
     std::vector<Contact> contacts;
-    PhysicsHandle A;
-    PhysicsHandle B;
+    PhysicsHandle reference;
+    PhysicsHandle incident;
 };
 
 class ConstraintHandler2D {
 public:
-    void HandleCollision(const Collider2D& cA, const Collider2D& cB);
+    ConstraintHandler2D(World& world);
+    void HandleCollisions();
 private:
     World& world;
-    bool _AABB(const Collider2D& cA, const Collider2D& cB) const;
-    CollisionManifold _SAT(const Collider2D& cA, const Collider2D& cB) const;
+    std::vector<CollisionManifold> manifolds;
+    bool test_aabb(const Collider2D& cA, const Collider2D& cB) const;
+    CollisionManifold test_sat(const Collider2D& cA, const Collider2D& cB) const;
+    void solve_collision(CollisionManifold manifold);
 };
 
 struct WorldSettings {
@@ -37,6 +40,7 @@ struct WorldSettings {
 
 class World {
 public:
+    World();
     WorldSettings settings;
 
     sparseset<RigidBody2D> rigidbodies;

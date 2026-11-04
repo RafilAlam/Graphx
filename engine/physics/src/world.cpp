@@ -1,6 +1,8 @@
 #include <engine/physics/include/world.hpp>
 
-bool ConstraintHandler2D::_AABB(const Collider2D& cA, const Collider2D& cB) const {
+ConstraintHandler2D::ConstraintHandler2D(World& world): world(world) {}
+
+bool ConstraintHandler2D::test_aabb(const Collider2D& cA, const Collider2D& cB) const {
     struct projection {
         glm::vec2 min;
         glm::vec2 max;
@@ -27,7 +29,7 @@ bool ConstraintHandler2D::_AABB(const Collider2D& cA, const Collider2D& cB) cons
 
 CollisionManifold::CollisionManifold(): contacts(2) {}
 
-CollisionManifold ConstraintHandler2D::_SAT(const Collider2D& cA, const Collider2D& cB) const {
+CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Collider2D& cB) const {
     using edge = std::array<glm::vec2, 2>;
     struct projection {
         projection(const Collider2D& c, const RigidBody2D& b, glm::vec2 normal) {
@@ -138,10 +140,16 @@ CollisionManifold ConstraintHandler2D::_SAT(const Collider2D& cA, const Collider
         prev_idx = current_idx;
     }
 
-    if (sAincident)
+    if (sAincident) {
         incident = getIncidentEdge(sA, rbA, cA, manifold.normal);
-    else
+        manifold.reference = cB.handle;
+        manifold.incident = cA.handle;
+    }
+    else {
         incident = getIncidentEdge(sB, rbB, cB, manifold.normal);
+        manifold.reference = cA.handle;
+        manifold.incident = cB.handle;
+    }
 
     std::array<glm::vec2, 2> clippedpoints = incident;
     glm::vec2 refdirection = glm::normalize(reference[0] - reference[1]);
@@ -161,10 +169,38 @@ CollisionManifold ConstraintHandler2D::_SAT(const Collider2D& cA, const Collider
     return manifold;
 }
 
-void ConstraintHandler2D::HandleCollision(const Collider2D& cA, const Collider2D& cB) {
-    if (!_AABB(cA, cB))
-        return;
+void ConstraintHandler2D::solve_collision(CollisionManifold manifold) {
+    RigidBody2D& rbA = world.rigidbodies[manifold.reference.id];
+    RigidBody2D& rbB = world.rigidbodies[manifold.incident.id];
+    float restitution = 1.0f;
+
+    glm::vec2 vRel = rbB.linearvelocity - rbA.linearvelocity;
+    glm::vec2 vDelta = -(1 + restitution) * vRel;
+    float K = rbA.properties.inversemass + rbB.properties.inversemass;
+    glm::vec2 impulse = vDelta / K;
+
+    rbA.ApplyImpulse(impulse);
+    rbB.ApplyImpulse(-impulse);
 }
+
+void ConstraintHandler2D::HandleCollisions() {
+    manifolds.clear();
+    for (size_t i=0; i<world.colliders.dense.size(); ++i) {
+        for (size_t j=i+1; j<world.colliders.dense.size(); ++j) {
+            if (!test_aabb(world.colliders.dense[i], world.colliders.dense[j]))
+                continue;
+            CollisionManifold manifold = test_sat(world.colliders.dense[i], world.colliders.dense[j]);
+            if (manifold.colliding)
+                manifolds.emplace_back(std::move(manifold));
+        }
+    }
+
+    for (const auto& manifold : manifolds) {
+        solve_collision(manifold);
+    }
+}
+
+World::World(): constrainthandler(*this) {}
 
 void World::integratevelocity(RigidBody2D& rigidbody, float dt) {
     rigidbody.linearvelocity += rigidbody.m_forceaccumulator * rigidbody.properties.inversemass * dt;
@@ -177,7 +213,10 @@ void World::integrateposition(RigidBody2D& rigidbody, float dt) {
 void World::Simulate(float dt) {
     for (auto& rigidbody : rigidbodies.dense) {
         integratevelocity(rigidbody, dt);
-        integrateposition(rigidbody, dt);
         rigidbody.linearvelocity -= glm::vec2{0.0f, settings.gravity};
+    }
+    constrainthandler.HandleCollisions();
+    for (auto& rigidbody : rigidbodies.dense) {
+        integrateposition(rigidbody, dt);
     }
 }

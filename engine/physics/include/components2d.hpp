@@ -32,7 +32,7 @@ struct RigidBody2D {
     PhysicsHandle handle;
 
     void ApplyForce(const glm::vec2& force);
-    void ApplyImpulse();
+    void ApplyImpulse(const glm::vec2& impulse);
 private:
     glm::vec2 m_forceaccumulator{0.0f};
 };
@@ -50,8 +50,8 @@ namespace primitives {
         glm::vec2{-1.0f, 1.0f}
     };
 
-    inline const std::array<std::span<const glm::vec2>, static_cast<size_t>(MaxTypes)> unitshapes {
-        std::span<const glm::vec2>(box)
+    inline const std::array<std::span<const glm::vec2>, static_cast<size_t>(type::MaxTypes)> unitshapes {
+        std::span<const glm::vec2>{box}
     };
 }
 
