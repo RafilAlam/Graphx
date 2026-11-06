@@ -56,8 +56,9 @@ namespace primitives {
 }
 
 struct Collider2D {
+    Collider2D(size_t id, glm::vec2 half_extents);
+    PhysicsHandle handle;
     glm::vec2 half_extents{1.0f};
     primitives::type type{primitives::type::Box};
-    PhysicsHandle handle;
     glm::vec2 transformpoint(glm::vec2 point, glm::vec2 position) const;
 };

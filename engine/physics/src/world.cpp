@@ -28,7 +28,9 @@ bool ConstraintHandler2D::test_aabb(const Collider2D& cA, const Collider2D& cB) 
     return pA.overlap(pB);
 }
 
-CollisionManifold::CollisionManifold(): contacts(2) {}
+CollisionManifold::CollisionManifold() {
+    contacts.reserve(2);
+}
 
 CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Collider2D& cB) const {
     using edge = std::array<glm::vec2, 2>;
@@ -122,6 +124,8 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
 
     auto sA = primitives::unitshapes[static_cast<size_t>(cA.type)];
     size_t prev_idx = sA.size() - 1;
+
+    // Find Reference Edge in A
     for (size_t current_idx=0; current_idx<sA.size(); ++current_idx) {
         glm::vec2 p0 = cA.transformpoint(sA[current_idx], rbA.position);
         glm::vec2 p1 = cA.transformpoint(sA[prev_idx], rbA.position);
@@ -134,6 +138,7 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
         if (overlap <= 0.0f)
             return manifold;
         if (overlap < minoverlap) {
+            DebugPrint("SAT", "A is REFERENCE");
             reference = {p0, p1};
             manifold.normal = normal;
             minoverlap = overlap;
@@ -144,6 +149,8 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
 
     auto sB = primitives::unitshapes[static_cast<size_t>(cB.type)];
     prev_idx = sB.size() - 1;
+
+    // Find Reference Edge in B
     for (size_t current_idx=0; current_idx<sB.size(); ++current_idx) {
         glm::vec2 p0 = cB.transformpoint(sB[current_idx], rbB.position);
         glm::vec2 p1 = cB.transformpoint(sB[prev_idx], rbB.position);
@@ -156,6 +163,7 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
         if (overlap <= 0.0f)
             return manifold;
         if (overlap < minoverlap) {
+            DebugPrint("SAT", "B is REFERENCE");
             reference = {p0, p1};
             manifold.normal = normal;
             minoverlap = overlap;
@@ -169,19 +177,24 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
         incident = getIncidentEdge(sA, rbA, cA, manifold.normal);
         manifold.reference = cB.handle;
         manifold.incident = cA.handle;
+        DebugPrint("SAT", "A is INCIDENT");
     }
     else {
         incident = getIncidentEdge(sB, rbB, cB, manifold.normal);
         manifold.reference = cA.handle;
         manifold.incident = cB.handle;
+        DebugPrint("SAT", "B is INCIDENT");
     }
+
     glm::vec2 refdirection = glm::normalize(reference[0] - reference[1]);
     
     // detected reference and incident points
-    for (auto& point : reference)
+    for (auto& point : reference) {
         DebugDrawBuffer::AddPoint(point, color::red);
-    for (auto& point : incident)
+    }
+    for (auto& point : incident) {
         DebugDrawBuffer::AddPoint(point, color::blue);
+    }
 
     // Clipping
     clippededge clipped = {incident, 2};
@@ -237,10 +250,16 @@ void ConstraintHandler2D::HandleCollisions() {
 World::World(): constrainthandler(*this) {}
 
 void World::integratevelocity(RigidBody2D& rigidbody, float dt) {
+    if (rigidbody.properties.mass <= 0)
+        return;
+
     rigidbody.linearvelocity += rigidbody.m_forceaccumulator * rigidbody.properties.inversemass * dt;
     rigidbody.m_forceaccumulator = glm::vec2(0.0f);
 }
 void World::integrateposition(RigidBody2D& rigidbody, float dt) {
+    if (rigidbody.properties.mass <= 0)
+        return;
+
     rigidbody.position += rigidbody.linearvelocity * dt;
 }
 

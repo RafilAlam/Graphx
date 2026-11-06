@@ -46,7 +46,7 @@ void DebugDrawBuffer::init()
 }
 
 void DebugDrawBuffer::AddPoint(const glm::vec2 position, const glm::vec3 color) {
-    m_points.emplace_back(glm::vec3{position, 0.0f}, color);
+    m_points.emplace_back(glm::vec3{position, 5.0f}, color);
 }
 
 void DebugDrawBuffer::Flush() {

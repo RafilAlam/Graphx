@@ -50,7 +50,7 @@ Scene::Scene(AssetManager* assetmanager, std::string filepath): assetmanager(ass
                     static_cast<float>(yyjson_get_num(yyjson_obj_get(half_extents, "x"))),
                     static_cast<float>(yyjson_get_num(yyjson_obj_get(half_extents, "y")))
                 };
-                world.colliders.emplace_back(ide, sizevec);
+                world.colliders.emplace_back(ide, ide, sizevec);
             }
         }
     }

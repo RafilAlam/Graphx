@@ -102,6 +102,12 @@
           "material": "36fcaf73-03a4-4c6d-a20a-ffc05c843ad9"
         },
         {
+          "type": "rigidbody",
+          "mass": 0.0,
+          "friction": 1.0,
+          "restitution": 1.0
+        },
+        {
           "type": "collider",
           "half_extents": {
             "x": 100.0,
