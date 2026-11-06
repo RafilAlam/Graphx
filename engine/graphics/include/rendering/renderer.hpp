@@ -5,6 +5,7 @@
 #include <engine/graphics/include/project/entity.hpp>
 #include <engine/graphics/include/rendering/uniformbuffer.hpp>
 #include <engine/graphics/include/rendering/mesh.hpp>
+#include <engine/graphics/include/rendering/debugdrawbuffer.hpp>
 #include <engine/core/include/debug.hpp>
 
 #include <glm/glm.hpp>
@@ -24,6 +25,7 @@ public:
     Renderer();
     void Draw(AssetManager& assetmanager, const Mesh& mesh, const Material& material, const Transform& transform);
     void Draw(Scene& scene, AssetManager& assetmanager);
+    void DrawDebug();
 private:
     UniformBuffer m_materialbuffer;
     UniformBuffer m_objectbuffer;

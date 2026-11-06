@@ -6,7 +6,6 @@
 #include <engine/graphics/include/project/project.hpp>
 #include <engine/graphics/include/project/entity.hpp>
 #include <engine/graphics/include/rendering/assetmanager.hpp>
-#include <engine/graphics/include/rendering/debugrenderer.hpp>
 #include <engine/graphics/include/rendering/renderer.hpp>
 #include <engine/graphics/include/rendering/shader.hpp>
 #include <engine/graphics/include/rendering/mesh.hpp>
@@ -70,7 +69,6 @@ class App {
 private:
     Window m_window;
     Renderer m_renderer;
-    DebugRenderer m_debugrenderer;
     AssetManager m_assetmanager;
     LayerStack m_layerstack;
     Project m_project;

@@ -1,4 +1,5 @@
 #include <engine/physics/include/world.hpp>
+#include <engine/graphics/include/rendering/debugdrawbuffer.hpp>
 
 ConstraintHandler2D::ConstraintHandler2D(World& world): world(world) {}
 
@@ -31,6 +32,13 @@ CollisionManifold::CollisionManifold(): contacts(2) {}
 
 CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Collider2D& cB) const {
     using edge = std::array<glm::vec2, 2>;
+    struct clippededge {
+        std::array<glm::vec2, 2> points;
+        size_t count{0};
+        const bool empty() {
+            return count == 0;
+        }
+    };
     struct projection {
         projection(const Collider2D& c, const RigidBody2D& b, glm::vec2 normal) {
             auto shape = primitives::unitshapes[static_cast<size_t>(c.type)];
@@ -42,7 +50,7 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
                     max = dot;
             }
         }
-        float overlap(projection other) {
+        const float overlap(projection other) {
             return std::min(max - other.min, other.max - min);
         }
         float min{std::numeric_limits<float>::max()};
@@ -69,22 +77,39 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
 
         return incident;
     };
-    auto clip = [](glm::vec2 clippingedge, glm::vec2 referencepoint, edge& points) {
-        float s1 = glm::dot(clippingedge, points[0]) - glm::dot(clippingedge, referencepoint);
-        float s2 = glm::dot(clippingedge, points[1]) - glm::dot(clippingedge, referencepoint);
+    auto clip = [](glm::vec2 clippingedge, glm::vec2 referencepoint, clippededge input) {
+        if (input.empty())
+            return input;
 
-        if (s1 < 0 && s2 < 0)
-            return 1;
-        if (s1 >= 0 && s2 >= 0)
-            return 0;
+        if (input.count == 1) {
+            float s = glm::dot(clippingedge, input.points[0]) - glm::dot(clippingedge, referencepoint);
+
+            if (s >= 0.0f) {
+                return clippededge{{input.points[0]}, 1};
+            }
+
+            return clippededge{};
+        }
+
+        float s1 = glm::dot(clippingedge, input.points[0]) - glm::dot(clippingedge, referencepoint);
+        float s2 = glm::dot(clippingedge, input.points[1]) - glm::dot(clippingedge, referencepoint);
+        
+        bool inside0 = s1 >= 0;
+        bool inside1 = s2 >= 0;
+
+        if (inside0 && inside1)
+            return input;
+        if (!inside0 && !inside1) {
+            DebugPrint("Returned Clip");
+            return clippededge{};
+        }
 
         float t = s1 / (s1 - s2);
-        if (s2 >= 0)
-            points[0] = points[0] + t * (points[1] - points[0]);
-        else
-            points[1] = points[0] + t * (points[1] - points[0]);
+        glm::vec2 intersection = input.points[0] + t * (input.points[1] - input.points[0]);
         
-        return 0;
+        return inside0
+        ? clippededge{{input.points[0], intersection}, 2}
+        : clippededge{{intersection, input.points[1]}, 2};
     };
 
     const RigidBody2D& rbA = world.rigidbodies[cA.handle.id];
@@ -150,19 +175,26 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
         manifold.reference = cA.handle;
         manifold.incident = cB.handle;
     }
-
-    std::array<glm::vec2, 2> clippedpoints = incident;
     glm::vec2 refdirection = glm::normalize(reference[0] - reference[1]);
     
-    if (clip(refdirection, reference[0], clippedpoints) ||
-        clip(-refdirection, reference[1], clippedpoints))
-        return manifold;
+    // detected reference and incident points
+    for (auto& point : reference)
+        DebugDrawBuffer::AddPoint(point, color::red);
+    for (auto& point : incident)
+        DebugDrawBuffer::AddPoint(point, color::blue);
 
+    // Clipping
+    clippededge clipped = {incident, 2};
+    clipped = clip(refdirection, reference[0], clipped);
+    clipped = clip(-refdirection, reference[1], clipped);
+    if (clipped.empty())
+        return manifold;
+    
     float clippingedge2 = glm::dot(manifold.normal, reference[0]);
-    for (size_t i=0; i<clippedpoints.size(); ++i) {
-        float depth = glm::dot(manifold.normal, clippedpoints[i]) - clippingedge2;
-        if (depth > 0)
-            manifold.contacts.emplace_back(clippedpoints[i], depth);
+    for (size_t i=0; i<clipped.count; ++i) {
+        float depth = glm::dot(manifold.normal, clipped.points[i]) - clippingedge2;
+        if (depth < 0)
+            manifold.contacts.emplace_back(clipped.points[i], depth);
     }
 
     manifold.colliding = !manifold.contacts.empty();
@@ -190,8 +222,10 @@ void ConstraintHandler2D::HandleCollisions() {
             if (!test_aabb(world.colliders.dense[i], world.colliders.dense[j]))
                 continue;
             CollisionManifold manifold = test_sat(world.colliders.dense[i], world.colliders.dense[j]);
-            if (manifold.colliding)
+            if (manifold.colliding) {
+                DebugPrint("CollisionHandler", "Colliding!");
                 manifolds.emplace_back(std::move(manifold));
+            }
         }
     }
 

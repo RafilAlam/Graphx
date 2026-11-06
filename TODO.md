@@ -1,6 +1,6 @@
 ### WORKSPACE:
 - [ ] Collision Handling:
-  - [ ] Implement Sequential-Impulse Collision Resolving:
+  - [x] Implement Sequential-Impulse Collision Resolving:
     Using the collision manifold over many iterations in a frame, produce an impulse using effective mass and apply for both bodies. Allow them to converge to rest and abide by the pliant collision constraint.
   - [x] Implement SAT collision detection:
     For every edge/face on each object as a reference, SAT stamps both objects as projections and checks if there is an overlap. If there is, the objects are not colliding. If no overlap is found and references run out, there is a collision.

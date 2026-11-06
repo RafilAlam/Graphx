@@ -1,6 +1,5 @@
 #pragma once
 
-#include <engine/graphics/include/rendering/debugrenderer.hpp>
 #include <unordered_map>
 #include <cassert>
 #include <typeindex>

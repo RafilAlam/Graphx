@@ -8,11 +8,12 @@
 
 class Shader {
 public:
+    Shader() = default;
     Shader(std::string vertexsourcepath, std::string fragmentsourcepath);
     Shader(const char* vertexsource, const char* fragmentsource);
     void Init(const char* vertexsource, const char* fragmentsource);
     void Init(const char* vertexsource);
     unsigned int GetProgram() const;
 private:
-    unsigned int m_program;
+    unsigned int m_program{0};
 };

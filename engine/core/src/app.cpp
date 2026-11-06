@@ -1,4 +1,5 @@
 #include <engine/core/include/app.hpp>
+#include <engine/graphics/include/rendering/debugdrawbuffer.hpp>
 
 PhysicsLayer::PhysicsLayer(App& app): app(app) {}
 
@@ -28,9 +29,12 @@ void RenderingLayer::OnAttach() {
 }
 void RenderingLayer::OnDetach() {}
 void RenderingLayer::OnUpdate() {
+
     glClear(GL_COLOR_BUFFER_BIT);
     if (app.GetProject().GetActiveScene().rendering) {
-        app.GetRenderer().Draw(app.GetProject().GetActiveScene(), app.GetAssetManager());
+        Renderer& renderer = app.GetRenderer();
+        renderer.Draw(app.GetProject().GetActiveScene(), app.GetAssetManager());
+        renderer.DrawDebug();
         //app.m_debugrenderer.Draw();
         app.GetWindow().SwapBuffers();
     }
@@ -59,7 +63,7 @@ App::App(AppConfig config, std::string projectname)
    m_project(&m_assetmanager, projectname),
    m_layerstack(1)
 {
-    Services::Set<DebugRenderer>(m_debugrenderer);
+    DebugDrawBuffer::init();
     m_layerstack.PushLayer<PhysicsLayer>(*this);
     m_layerstack.PushLayer<RenderingLayer>(*this);
 }
