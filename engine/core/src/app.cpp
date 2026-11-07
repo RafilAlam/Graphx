@@ -34,7 +34,6 @@ void RenderingLayer::OnUpdate() {
         Renderer& renderer = app.GetRenderer();
         renderer.Draw(app.GetProject().GetActiveScene(), app.GetAssetManager());
         renderer.DrawDebug();
-        //app.m_debugrenderer.Draw();
         app.GetWindow().SwapBuffers();
     }
     

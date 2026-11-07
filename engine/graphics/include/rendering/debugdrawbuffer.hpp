@@ -66,6 +66,7 @@ class DebugDrawBuffer {
 public:
     static void AddPoint(const glm::vec2 position, const glm::vec3 color);
     static void AddLine(const glm::vec2 p0, const glm::vec2 p1, const glm::vec3 color);
+    static void AddArrow(const glm::vec2 position, const glm::vec2 normal, const glm::vec3 color);
     static void FlushPoints();
     static void FlushLines();
     static bool Empty();

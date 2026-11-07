@@ -90,6 +90,15 @@ void DebugDrawBuffer::AddLine(const glm::vec2 p0, const glm::vec2 p1, const glm:
     m_linevertices.emplace_back(glm::vec3{p1, 5.0f}, color);
 }
 
+void DebugDrawBuffer::AddArrow(const glm::vec2 position, const glm::vec2 normal, const glm::vec3 color) {
+    glm::vec3 endpoint = glm::vec3{position + normal, 5.0f};
+    glm::vec3 wingdisplacement = endpoint - glm::vec3{glm::normalize(normal) * 10.0f, 0.0f};
+    glm::vec3 perpendicular = glm::normalize(glm::vec3{-normal.y, normal.x, 0.0f}) * 10.0f;
+    AddLine(glm::vec3{position, 5.0f}, endpoint, color);
+    AddLine(endpoint, wingdisplacement + perpendicular, color);
+    AddLine(endpoint, wingdisplacement - perpendicular, color);
+}
+
 void DebugDrawBuffer::FlushPoints() {
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0]);
     glBufferSubData(GL_ARRAY_BUFFER, 0, m_pointvertices.size() * sizeof(DebugVertex), m_pointvertices.data());
