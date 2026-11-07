@@ -185,12 +185,8 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
     glm::vec2 refdirection = glm::normalize(reference[0] - reference[1]);
     
     // detected reference and incident points
-    for (auto& point : reference) {
-        DebugDrawBuffer::AddPoint(point, color::red);
-    }
-    for (auto& point : incident) {
-        DebugDrawBuffer::AddPoint(point, color::blue);
-    }
+    DebugDrawBuffer::AddLine(reference[0], reference[1], color::red);
+    DebugDrawBuffer::AddLine(incident[0], incident[1], color::blue);
 
     // Clipping
     clippededge clipped = {incident, 2};
@@ -213,12 +209,19 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
 void ConstraintHandler2D::solve_collision(CollisionManifold manifold) {
     RigidBody2D& rbA = world.rigidbodies[manifold.reference.id];
     RigidBody2D& rbB = world.rigidbodies[manifold.incident.id];
-    float restitution = 1.0f;
+    float restitution = 0.85f;
 
-    glm::vec2 vRel = rbB.linearvelocity - rbA.linearvelocity;
-    glm::vec2 vDelta = -(1 + restitution) * vRel;
+    float vRelAlongNormal = glm::dot(rbB.linearvelocity - rbA.linearvelocity, manifold.normal);
+    if (vRelAlongNormal > 0.0f)
+        return;
+
+    float vDelta = -(1.0f + restitution) * vRelAlongNormal;
     float K = rbA.properties.inversemass + rbB.properties.inversemass;
-    glm::vec2 impulse = vDelta / K;
+
+    if (K == 0.0f)
+        return;
+
+    glm::vec2 impulse = (vDelta / K) * manifold.normal;
 
     Debug::Print("CollisionSolver", "rbA: ", rbA.properties.inversemass, " rbB: ", rbB.properties.inversemass);
 
