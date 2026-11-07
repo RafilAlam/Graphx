@@ -216,6 +216,7 @@ void ConstraintHandler2D::solve_collision(CollisionManifold manifold) {
     RigidBody2D& rbA = world.rigidbodies[manifold.reference.id];
     RigidBody2D& rbB = world.rigidbodies[manifold.incident.id];
     float restitution = 0.85f;
+    float friction = 1.0f;
 
     for (const auto& contact : manifold.contacts) {
         glm::vec2 rA = contact.position - rbA.position;
@@ -224,19 +225,30 @@ void ConstraintHandler2D::solve_collision(CollisionManifold manifold) {
         glm::vec2 vAcontact = rbA.linearvelocity + crossfv2(rbA.angularvelocity, rA);
         glm::vec2 vBcontact = rbB.linearvelocity + crossfv2(rbB.angularvelocity, rB);
 
+        glm::vec2 tangent = {-manifold.normal.y, manifold.normal.x};
+
         float vRelAlongNormal = glm::dot(vBcontact - vAcontact, manifold.normal);
         if (vRelAlongNormal > 0.0f)
             continue;
 
-        float vDelta = -(1.0f + restitution) * vRelAlongNormal;
-        float K = rbA.properties.inversemass + rbB.properties.inversemass 
+        float normalvDelta = -(1.0f + restitution) * vRelAlongNormal;
+        float normalK = rbA.properties.inversemass + rbB.properties.inversemass 
                   + rbA.properties.inverseinertia * std::pow(cross2D(rA, manifold.normal), 2) 
                   + rbB.properties.inverseinertia * std::pow(cross2D(rB, manifold.normal), 2);
 
-        if (K == 0.0f)
+        if (normalK == 0.0f)
             continue;
 
-        glm::vec2 impulse = (vDelta / K) * manifold.normal;
+        float normalimpulse = std::max(0.0f, normalvDelta / normalK);
+
+        float vRelAlongTangent = glm::dot(vBcontact - vAcontact, tangent);
+        float tangentvDelta = -vRelAlongTangent;
+        float tangentK = rbA.properties.inversemass + rbB.properties.inversemass 
+                       + rbA.properties.inverseinertia * std::pow(cross2D(rA, tangent), 2) 
+                       + rbB.properties.inverseinertia * std::pow(cross2D(rB, tangent), 2);
+        float tangentimpulse = std::max(-friction*normalimpulse, std::min(friction*normalimpulse, tangentvDelta / tangentK));
+
+        glm::vec2 impulse = normalimpulse * manifold.normal + tangentimpulse * tangent;
 
         rbA.ApplyImpulseAtPosition(contact.position, -impulse);
         rbB.ApplyImpulseAtPosition(contact.position, impulse);
