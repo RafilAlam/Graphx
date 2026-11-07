@@ -17,7 +17,7 @@ Shader::Shader(const char* vertexsource, const char* fragmentsource) {
 }
 
 void Shader::Init(const char* vertexsource, const char* fragmentsource) {
-    DebugPrint("Shader", "Loading Shaders...");
+    Debug::Print("Shader", "Loading Shaders...");
 
     unsigned int vertexshader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexshader, 1, &vertexsource, NULL);
@@ -28,7 +28,7 @@ void Shader::Init(const char* vertexsource, const char* fragmentsource) {
     glGetShaderiv(vertexshader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(vertexshader, 512, NULL, infoLog);
-        DebugError("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" + std::string(infoLog));
+        Debug::Error("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" + std::string(infoLog));
     }
 
     unsigned int fragmentshader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -38,7 +38,7 @@ void Shader::Init(const char* vertexsource, const char* fragmentsource) {
     glGetShaderiv(fragmentshader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(fragmentshader, 512, NULL, infoLog);
-        DebugError("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" + std::string(infoLog));
+        Debug::Error("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" + std::string(infoLog));
     }
 
     m_program = glCreateProgram();
@@ -49,9 +49,9 @@ void Shader::Init(const char* vertexsource, const char* fragmentsource) {
     glGetProgramiv(m_program, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(m_program, 512, NULL, infoLog);
-        DebugError("ERROR::SHADER::PROGRAM::LINKING_FAILED\n" + std::string(infoLog));
+        Debug::Error("ERROR::SHADER::PROGRAM::LINKING_FAILED\n" + std::string(infoLog));
     }
-    DebugPrint("Shader", "Loaded Shaders!");
+    Debug::Print("Shader", "Loaded Shaders!");
 
     glUseProgram(m_program);
     glDeleteShader(vertexshader);
@@ -59,7 +59,7 @@ void Shader::Init(const char* vertexsource, const char* fragmentsource) {
 }
 
 void Shader::Init(const char* vertexsource) {
-    DebugPrint("Shader", "Loading Shaders...");
+    Debug::Print("Shader", "Loading Shaders...");
 
     unsigned int vertexshader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexshader, 1, &vertexsource, NULL);
@@ -70,7 +70,7 @@ void Shader::Init(const char* vertexsource) {
     glGetShaderiv(vertexshader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(vertexshader, 512, NULL, infoLog);
-        DebugError("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" + std::string(infoLog));
+        Debug::Error("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" + std::string(infoLog));
     }
 
     m_program = glCreateProgram();
@@ -80,9 +80,9 @@ void Shader::Init(const char* vertexsource) {
     glGetProgramiv(m_program, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(m_program, 512, NULL, infoLog);
-        DebugError("ERROR::SHADER::PROGRAM::LINKING_FAILED\n" + std::string(infoLog));
+        Debug::Error("ERROR::SHADER::PROGRAM::LINKING_FAILED\n" + std::string(infoLog));
     }
-    DebugPrint("Shader", "Loaded Shaders!");
+    Debug::Print("Shader", "Loaded Shaders!");
 
     glUseProgram(m_program);
     glDeleteShader(vertexshader);

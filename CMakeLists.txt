@@ -11,7 +11,7 @@ fetchcontent_declare(
   glfw
   GIT_REPOSITORY https://github.com/glfw/glfw
   GIT_TAG 3.4
-  GIT_SHALLOW ON
+  GIT_SHALLOW TRUE
 )
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -23,6 +23,7 @@ fetchcontent_declare(
   glm
   GIT_REPOSITORY https://github.com/g-truc/glm.git
   GIT_TAG 1.0.3
+  GIT_SHALLOW TRUE
 )
 fetchcontent_makeavailable(glm)
 
@@ -30,6 +31,7 @@ fetchcontent_declare(
   assimp
   GIT_REPOSITORY https://github.com/assimp/assimp.git
   GIT_TAG v6.0.5
+  GIT_SHALLOW TRUE
 )
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)

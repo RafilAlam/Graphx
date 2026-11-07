@@ -4,15 +4,50 @@ void DebugDrawBuffer::init()
 {
     m_coreshader = {corevshader, corefshader};
 
-    m_points.reserve(10000);
+    m_pointvertices.reserve(10000);
+    m_linevertices.reserve(10000);
     
     glPointSize(10.0f);
+    glLineWidth(5.0f);
 
-    glGenVertexArrays(1, &m_vertexarray);
-    glBindVertexArray(m_vertexarray);
+    glGenVertexArrays(2, m_arrays);
+    glGenBuffers(2, m_buffers);
 
-    glGenBuffers(1, &m_vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
+    // Initialise Point Buffer
+    glBindVertexArray(m_arrays[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0]);
+
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        100000 * sizeof(DebugVertex),
+        nullptr,
+        GL_DYNAMIC_DRAW
+    );
+
+    glVertexAttribPointer(
+        0,
+        3, 
+        GL_FLOAT, 
+        GL_FALSE, 
+        sizeof(DebugVertex), 
+        (void*)offsetof(DebugVertex, position)
+    );
+
+    glVertexAttribPointer(
+        1, 
+        3, 
+        GL_FLOAT, 
+        GL_FALSE, 
+        sizeof(DebugVertex), 
+        (void*)offsetof(DebugVertex, color)
+    );
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    // Initialise Line Buffer
+    glBindVertexArray(m_arrays[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[1]);
 
     glBufferData(
         GL_ARRAY_BUFFER,
@@ -43,19 +78,32 @@ void DebugDrawBuffer::init()
     glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void DebugDrawBuffer::AddPoint(const glm::vec2 position, const glm::vec3 color) {
-    m_points.emplace_back(glm::vec3{position, 5.0f}, color);
+    m_pointvertices.emplace_back(glm::vec3{position, 5.0f}, color);
 }
 
-void DebugDrawBuffer::Flush() {
-    glBufferSubData(GL_ARRAY_BUFFER, 0, m_points.size() * sizeof(DebugVertex), m_points.data());
-    m_points.clear();
+void DebugDrawBuffer::AddLine(const glm::vec2 p0, const glm::vec2 p1, const glm::vec3 color) {
+    m_linevertices.emplace_back(glm::vec3{p0, 5.0f}, color);
+    m_linevertices.emplace_back(glm::vec3{p1, 5.0f}, color);
+}
+
+void DebugDrawBuffer::FlushPoints() {
+    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, m_pointvertices.size() * sizeof(DebugVertex), m_pointvertices.data());
+    m_pointvertices.clear();
+}
+
+void DebugDrawBuffer::FlushLines() {
+    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[1]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, m_linevertices.size() * sizeof(DebugVertex), m_linevertices.data());
+    m_linevertices.clear();
 }
 
 bool DebugDrawBuffer::Empty() {
-    return m_points.empty();
+    return m_pointvertices.empty() && m_linevertices.empty();
 }
 
 /*void DebugDrawBuffer::DrawPoints() {
@@ -68,8 +116,8 @@ bool DebugDrawBuffer::Empty() {
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    glDrawArrays(GL_POINTS, 0, m_points.size());
-    m_points.clear();
+    glDrawArrays(GL_POINTS, 0, m_pointvertices.size());
+    m_pointvertices.clear();
 }
 
 void DebugDrawBuffer::Draw() {

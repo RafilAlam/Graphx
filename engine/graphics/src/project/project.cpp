@@ -26,12 +26,12 @@ Scene::Scene(AssetManager* assetmanager, std::string filepath): assetmanager(ass
                 yyjson_val* position = yyjson_obj_get(component, "position");
                 yyjson_val* half_extents = yyjson_obj_get(component, "half_extents");
                 transforms.emplace_back(ide, ide, position, half_extents);
-                DebugPrint("Scene: Entity[" + std::to_string(ide+1) + '/' + std::to_string(maxe) + ']', "Transform Added (" + std::to_string(idc+1) + '/' + std::to_string(maxc) + ')');
+                Debug::Print("Scene: Entity[" + std::to_string(ide+1) + '/' + std::to_string(maxe) + ']', "Transform Added (" + std::to_string(idc+1) + '/' + std::to_string(maxc) + ')');
             } else if (type == "meshrenderer") {
                 AssetHandle meshhandle = assetmanager->GetMesh(yyjson_get_str(yyjson_obj_get(component, "mesh")));
                 AssetHandle materialhandle = assetmanager->GetMaterial(yyjson_get_str(yyjson_obj_get(component, "material")));
                 meshrenderers.emplace_back(ide, meshhandle, materialhandle);
-                DebugPrint("Scene: Entity[" + std::to_string(ide+1) + '/' + std::to_string(maxe) + ']', "MeshRenderer Added (" + std::to_string(idc+1) + '/' + std::to_string(maxc) + ')');
+                Debug::Print("Scene: Entity[" + std::to_string(ide+1) + '/' + std::to_string(maxe) + ']', "MeshRenderer Added (" + std::to_string(idc+1) + '/' + std::to_string(maxc) + ')');
             } else if (type == "rigidbody") {
                 float mass = static_cast<float>(yyjson_get_num(yyjson_obj_get(component, "mass")));
                 float friction = static_cast<float>(yyjson_get_num(yyjson_obj_get(component, "friction")));
@@ -43,7 +43,7 @@ Scene::Scene(AssetManager* assetmanager, std::string filepath): assetmanager(ass
                 };
                 PhysicalProperties properties{mass, friction, restitution};
                 world.rigidbodies.emplace_back(ide, ide, transforms[ide].position, properties);
-                DebugPrint("World: Entity[" + std::to_string(ide+1) + '/' + std::to_string(maxe) + ']', "RigidBody Added (" + std::to_string(idc+1) + '/' + std::to_string(maxc) + ')');
+                Debug::Print("World: Entity[" + std::to_string(ide+1) + '/' + std::to_string(maxe) + ']', "RigidBody Added (" + std::to_string(idc+1) + '/' + std::to_string(maxc) + ')');
             } else if (type == "collider") {
                 yyjson_val* half_extents = yyjson_obj_get(component, "half_extents");
                 glm::vec2 sizevec{
@@ -67,7 +67,7 @@ Scene& Project::GetActiveScene() {
 }
 
 void Project::LoadProject(std::string projectname) {
-    DebugPrint("Project", "Loading Project: " + projectname);
+    Debug::Print("Project", "Loading Project: " + projectname);
     fs::path projectpath = fs::current_path() / "projects" / projectname;
     if (fs::exists(projectpath) && fs::is_directory(projectpath)) {
         for (const auto& entry : fs::directory_iterator(projectpath)) {
@@ -76,15 +76,15 @@ void Project::LoadProject(std::string projectname) {
             }
         }
     }
-    DebugPrint("Project", "Loaded");
+    Debug::Print("Project", "Loaded");
 }
 
 void Project::AddScene(std::string filepath) {
-    DebugPrint("Project", "Scene added: " + filepath);
+    Debug::Print("Project", "Scene added: " + filepath);
     Scene& scene = scenes.emplace_back(assetmanager, filepath);
     if (scene.activescene) {
         activescene = scenes.size() - 1;
-        DebugPrint("Project", "Active Scene set to " + filepath);
+        Debug::Print("Project", "Active Scene set to " + filepath);
     }
 }
 

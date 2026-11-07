@@ -27,6 +27,8 @@ public:
     void Draw(Scene& scene, AssetManager& assetmanager);
     void DrawDebug();
 private:
+    void draw_debug_points();
+    void draw_debug_lines();
     UniformBuffer m_materialbuffer;
     UniformBuffer m_objectbuffer;
 };

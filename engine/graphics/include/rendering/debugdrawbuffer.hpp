@@ -64,9 +64,10 @@ class DebugDrawBuffer {
     friend class App;
     friend class Renderer;
 public:
-    DebugDrawBuffer();
     static void AddPoint(const glm::vec2 position, const glm::vec3 color);
-    static void Flush();
+    static void AddLine(const glm::vec2 p0, const glm::vec2 p1, const glm::vec3 color);
+    static void FlushPoints();
+    static void FlushLines();
     static bool Empty();
 
     DebugDrawBuffer(const DebugDrawBuffer&) = delete;
@@ -74,7 +75,10 @@ public:
 private:
     static void init();
     static inline Shader m_coreshader;
-    static inline GLuint m_vertexbuffer;
-    static inline GLuint m_vertexarray;
-    static inline std::vector<DebugVertex> m_points;
+    
+    static inline GLuint m_buffers[2];
+    static inline GLuint m_arrays[2];
+
+    static inline std::vector<DebugVertex> m_pointvertices;
+    static inline std::vector<DebugVertex> m_linevertices;
 };

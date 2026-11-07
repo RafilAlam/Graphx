@@ -9,7 +9,7 @@ void RigidBody2D::ApplyForce(const glm::vec2& force) {
         return;
 
     m_forceaccumulator += force;
-    DebugPrint("RigidBody2D", std::to_string(force.x));
+    Debug::Print("RigidBody2D", std::to_string(force.x));
 }
 
 void RigidBody2D::ApplyImpulse(const glm::vec2& impulse) {

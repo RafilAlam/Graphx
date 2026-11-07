@@ -102,7 +102,7 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
         if (inside0 && inside1)
             return input;
         if (!inside0 && !inside1) {
-            DebugPrint("Returned Clip");
+            Debug::Print("Returned Clip");
             return clippededge{};
         }
 
@@ -138,7 +138,7 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
         if (overlap <= 0.0f)
             return manifold;
         if (overlap < minoverlap) {
-            DebugPrint("SAT", "A is REFERENCE");
+            Debug::Print("SAT", "A is REFERENCE");
             reference = {p0, p1};
             manifold.normal = normal;
             minoverlap = overlap;
@@ -163,7 +163,7 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
         if (overlap <= 0.0f)
             return manifold;
         if (overlap < minoverlap) {
-            DebugPrint("SAT", "B is REFERENCE");
+            Debug::Print("SAT", "B is REFERENCE");
             reference = {p0, p1};
             manifold.normal = normal;
             minoverlap = overlap;
@@ -177,13 +177,13 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
         incident = getIncidentEdge(sA, rbA, cA, manifold.normal);
         manifold.reference = cB.handle;
         manifold.incident = cA.handle;
-        DebugPrint("SAT", "A is INCIDENT");
+        Debug::Print("SAT", "A is INCIDENT");
     }
     else {
         incident = getIncidentEdge(sB, rbB, cB, manifold.normal);
         manifold.reference = cA.handle;
         manifold.incident = cB.handle;
-        DebugPrint("SAT", "B is INCIDENT");
+        Debug::Print("SAT", "B is INCIDENT");
     }
 
     glm::vec2 refdirection = glm::normalize(reference[0] - reference[1]);
@@ -234,9 +234,10 @@ void ConstraintHandler2D::HandleCollisions() {
         for (size_t j=i+1; j<world.colliders.dense.size(); ++j) {
             if (!test_aabb(world.colliders.dense[i], world.colliders.dense[j]))
                 continue;
+            Debug::Print("CollisionHandler", "AABB test passed.");
             CollisionManifold manifold = test_sat(world.colliders.dense[i], world.colliders.dense[j]);
             if (manifold.colliding) {
-                DebugPrint("CollisionHandler", "Colliding!");
+                Debug::Print("CollisionHandler", "Colliding!");
                 manifolds.emplace_back(std::move(manifold));
             }
         }

@@ -15,7 +15,7 @@ AssetRegistry::AssetRegistry() {
 
 void AssetRegistry::CacheAssetPaths(std::filesystem::path assetsPath) {
     if (!std::filesystem::exists(assetsPath) || !std::filesystem::is_directory(assetsPath)) {
-        DebugError("Invalid asset directory path.");
+        Debug::Error("Invalid asset directory path.");
         return;
     }
 
@@ -25,17 +25,17 @@ void AssetRegistry::CacheAssetPaths(std::filesystem::path assetsPath) {
             const auto& assetpath = entry.path();
             std::string assetext = assetpath.extension().string();
             if (!storeableExtensions.contains(assetext)) {
-                DebugPrint("AssetRegistry", "Ignored " + assetpath.string());
+                Debug::Print("AssetRegistry", "Ignored " + assetpath.string());
                 continue;
             }
             auto metapath = assetpath;
             metapath.replace_extension(assetext + ".gxmeta");
             UUIDv4::UUID internaluuid;
             if (std::filesystem::exists(metapath)) {
-                    DebugPrint("AssetRegistry", "Fetching UUID for " + assetpath.string());
+                    Debug::Print("AssetRegistry", "Fetching UUID for " + assetpath.string());
                     yyjson_doc* doc = yyjson_read_file(metapath.string().c_str(), 0, nullptr, nullptr);
                     if (!doc) {
-                        DebugError("Failed to parse: " + metapath.string());
+                        Debug::Error("Failed to parse: " + metapath.string());
                         continue;
                     }
 
@@ -43,7 +43,7 @@ void AssetRegistry::CacheAssetPaths(std::filesystem::path assetsPath) {
                     yyjson_val* uuid = yyjson_obj_get(root, "uuid");
 
                     if (!yyjson_is_str(uuid)) {
-                        DebugError("Missing or invalid UUID: " + metapath.string());
+                        Debug::Error("Missing or invalid UUID: " + metapath.string());
                         yyjson_doc_free(doc);
                         continue;
                     }
@@ -51,9 +51,9 @@ void AssetRegistry::CacheAssetPaths(std::filesystem::path assetsPath) {
                     internaluuid = UUIDv4::UUID::fromStrFactory(yyjson_get_str(uuid));
                     
                     yyjson_doc_free(doc);
-                    DebugPrint("AssetRegistry", "Fetched");
+                    Debug::Print("AssetRegistry", "Fetched");
             } else {
-                DebugPrint("AssetRegistry", "Generating .gxmeta for " + assetpath.string());
+                Debug::Print("AssetRegistry", "Generating .gxmeta for " + assetpath.string());
                 internaluuid = m_uuidGenerator.getUUID();
                 yyjson_mut_doc *doc = yyjson_mut_doc_new(NULL);
                 yyjson_mut_val *root = yyjson_mut_obj(doc);
@@ -67,9 +67,9 @@ void AssetRegistry::CacheAssetPaths(std::filesystem::path assetsPath) {
                 if (!success) {
                     std::cerr << "Failed to write JSON metafile. Error: " << err.msg << '\n';
                 }
-                DebugPrint("AssetRegistry", "Generated");
+                Debug::Print("AssetRegistry", "Generated");
             }
-            DebugPrint("AssetRegistry", "Loading " + assetpath.string());
+            Debug::Print("AssetRegistry", "Loading " + assetpath.string());
             UUID uuid = UUID(internaluuid);
             if (assetext == ".png" || assetext == ".jpg")
                 textureMap.emplace(uuid, assetpath);
@@ -87,7 +87,7 @@ void AssetRegistry::CacheAssetPaths(std::filesystem::path assetsPath) {
 
                 shaderMap.emplace(uuid, ShaderSources(assetpath, fassetpath));
             }
-            DebugPrint("AssetRegistry", "Loaded");
+            Debug::Print("AssetRegistry", "Loaded");
         }
     }
 }
@@ -97,7 +97,7 @@ AssetHandle AssetPool::LoadMesh(std::string filepath) {
     const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs);
     
     if (!scene || !scene->mMeshes)
-        DebugError("Failed to load mesh file: " + filepath);
+        Debug::Error("Failed to load mesh file: " + filepath);
 
     aiMesh* mesh = scene->mMeshes[0];
 
@@ -107,7 +107,7 @@ AssetHandle AssetPool::LoadMesh(std::string filepath) {
     for (unsigned int i=0; i<mesh->mNumVertices; i++) {
         const aiVector3d& vertex = mesh->mVertices[i];
         if (!mesh->HasNormals())
-            DebugError("Mesh has no normals. File: " + filepath);
+            Debug::Error("Mesh has no normals. File: " + filepath);
         const aiVector3d& normal = mesh->mNormals[i];
         glm::vec2 uv;
         if (mesh->HasTextureCoords(0)) {
@@ -134,7 +134,7 @@ AssetHandle AssetPool::LoadMesh(std::string filepath) {
     }
 
     std::string name = mesh->mName.C_Str();
-    DebugPrint("AssetPool", std::string("Mesh created by Asset Manager: " + name));
+    Debug::Print("AssetPool", std::string("Mesh created by Asset Manager: " + name));
     meshMap.emplace_back(vertices, faces);
     return AssetHandle{static_cast<uint32_t>(meshMap.size() - 1)};
 }

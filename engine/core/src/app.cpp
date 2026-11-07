@@ -29,7 +29,6 @@ void RenderingLayer::OnAttach() {
 }
 void RenderingLayer::OnDetach() {}
 void RenderingLayer::OnUpdate() {
-
     glClear(GL_COLOR_BUFFER_BIT);
     if (app.GetProject().GetActiveScene().rendering) {
         Renderer& renderer = app.GetRenderer();
@@ -69,13 +68,13 @@ App::App(AppConfig config, std::string projectname)
 }
 
 void App::Shutdown() {
-    DebugPrint("App", "Closing...");
+    Debug::Print("App", "Closing...");
     m_layerstack.Clear();
-    DebugPrint("App", "Closed.");
+    Debug::Print("App", "Closed.");
 }
 
 void App::Run() {
-    DebugPrint("App", "Running!");
+    Debug::Print("App", "Running!");
     while(!shouldclose)
         m_layerstack.Update();
     Shutdown();

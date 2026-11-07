@@ -38,19 +38,34 @@ void Renderer::Draw(Scene& scene, AssetManager& assetmanager) {
         if (mesh && material)
             Draw(assetmanager, *mesh, *material, transform);
         else {
-            DebugError("Mesh and/or Material corrupt!");
+            Debug::Error("Mesh and/or Material corrupt!");
         }
     }
 }
 
-void Renderer::DrawDebug() {
-    if (DebugDrawBuffer::Empty())
+void Renderer::draw_debug_points() {
+    if (DebugDrawBuffer::m_pointvertices.empty())
         return;
 
-    size_t numVertices = DebugDrawBuffer::m_points.size();
-    DebugDrawBuffer::Flush();
-    glBindVertexArray(DebugDrawBuffer::m_vertexarray);
-    glBindBuffer(GL_ARRAY_BUFFER, DebugDrawBuffer::m_vertexbuffer);
+    size_t numVertices = DebugDrawBuffer::m_pointvertices.size();
+    glBindVertexArray(DebugDrawBuffer::m_arrays[0]);
+    DebugDrawBuffer::FlushPoints();
+
+    glDrawArrays(GL_POINTS, 0, numVertices);
+}
+
+void Renderer::draw_debug_lines() {
+    if (DebugDrawBuffer::m_linevertices.empty())
+        return;
+
+    size_t numVertices = DebugDrawBuffer::m_linevertices.size();
+    glBindVertexArray(DebugDrawBuffer::m_arrays[1]);
+    DebugDrawBuffer::FlushLines();
+
+    glDrawArrays(GL_LINES, 0, numVertices);
+}
+
+void Renderer::DrawDebug() {
     glUseProgram(DebugDrawBuffer::m_coreshader.GetProgram());
 
     glm::mat4 view = glm::mat4(1.0f);
@@ -59,5 +74,6 @@ void Renderer::DrawDebug() {
     int transformLocation = glGetUniformLocation(DebugDrawBuffer::m_coreshader.GetProgram(), "Transform");
     glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(projection * view));
 
-    glDrawArrays(GL_POINTS, 0, numVertices);
+    draw_debug_points();
+    draw_debug_lines();
 }
