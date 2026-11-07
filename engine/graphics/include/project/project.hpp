@@ -45,11 +45,10 @@ public:
     bool activescene{false};
     bool simulatephysics{true};
     bool rendering{true};
+    float physicstimestep = 1/120.0f;
 
     void OnStart();
     void Update(float deltaTime);
-private:
-    float m_physicstimestep = 1/120.0f;
 };
 
 class Project {

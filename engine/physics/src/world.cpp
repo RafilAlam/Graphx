@@ -96,8 +96,8 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
         float s1 = glm::dot(clippingedge, input.points[0]) - glm::dot(clippingedge, referencepoint);
         float s2 = glm::dot(clippingedge, input.points[1]) - glm::dot(clippingedge, referencepoint);
         
-        bool inside0 = s1 >= 0;
-        bool inside1 = s2 >= 0;
+        bool inside0 = s1 <= 0;
+        bool inside1 = s2 <= 0;
 
         if (inside0 && inside1)
             return input;
@@ -138,7 +138,6 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
         if (overlap <= 0.0f)
             return manifold;
         if (overlap < minoverlap) {
-            Debug::Print("SAT", "A is REFERENCE");
             reference = {p0, p1};
             manifold.normal = normal;
             minoverlap = overlap;
@@ -163,7 +162,6 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
         if (overlap <= 0.0f)
             return manifold;
         if (overlap < minoverlap) {
-            Debug::Print("SAT", "B is REFERENCE");
             reference = {p0, p1};
             manifold.normal = normal;
             minoverlap = overlap;
@@ -177,13 +175,11 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
         incident = getIncidentEdge(sA, rbA, cA, manifold.normal);
         manifold.reference = cB.handle;
         manifold.incident = cA.handle;
-        Debug::Print("SAT", "A is INCIDENT");
     }
     else {
         incident = getIncidentEdge(sB, rbB, cB, manifold.normal);
         manifold.reference = cA.handle;
         manifold.incident = cB.handle;
-        Debug::Print("SAT", "B is INCIDENT");
     }
 
     glm::vec2 refdirection = glm::normalize(reference[0] - reference[1]);
@@ -224,8 +220,10 @@ void ConstraintHandler2D::solve_collision(CollisionManifold manifold) {
     float K = rbA.properties.inversemass + rbB.properties.inversemass;
     glm::vec2 impulse = vDelta / K;
 
-    rbA.ApplyImpulse(impulse);
-    rbB.ApplyImpulse(-impulse);
+    Debug::Print("CollisionSolver", "rbA: ", rbA.properties.inversemass, " rbB: ", rbB.properties.inversemass);
+
+    rbA.ApplyImpulse(-impulse);
+    rbB.ApplyImpulse(impulse);
 }
 
 void ConstraintHandler2D::HandleCollisions() {
@@ -234,7 +232,6 @@ void ConstraintHandler2D::HandleCollisions() {
         for (size_t j=i+1; j<world.colliders.dense.size(); ++j) {
             if (!test_aabb(world.colliders.dense[i], world.colliders.dense[j]))
                 continue;
-            Debug::Print("CollisionHandler", "AABB test passed.");
             CollisionManifold manifold = test_sat(world.colliders.dense[i], world.colliders.dense[j]);
             if (manifold.colliding) {
                 Debug::Print("CollisionHandler", "Colliding!");
@@ -266,8 +263,11 @@ void World::integrateposition(RigidBody2D& rigidbody, float dt) {
 
 void World::Simulate(float dt) {
     for (auto& rigidbody : rigidbodies.dense) {
+        if (rigidbody.properties.mass <= 0)
+            continue;
+
         integratevelocity(rigidbody, dt);
-        rigidbody.linearvelocity -= glm::vec2{0.0f, settings.gravity};
+        rigidbody.linearvelocity -= glm::vec2{0.0f, settings.gravity} * dt;
     }
     constrainthandler.HandleCollisions();
     for (auto& rigidbody : rigidbodies.dense) {

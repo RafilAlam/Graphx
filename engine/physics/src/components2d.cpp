@@ -1,6 +1,6 @@
 #include <engine/physics/include/components2d.hpp>
 
-PhysicalProperties::PhysicalProperties(float mass, float friction, float restitution): mass(mass), inversemass(1.0f/mass), friction(friction), restitution(restitution) {}
+PhysicalProperties::PhysicalProperties(float mass, float friction, float restitution): mass(mass), inversemass(mass == 0.0f ? 0.0f : 1.0f/mass), friction(friction), restitution(restitution) {}
 
 RigidBody2D::RigidBody2D(size_t id, glm::vec2 position, PhysicalProperties properties): properties(properties), position(position), handle(id) {}
 
@@ -17,6 +17,7 @@ void RigidBody2D::ApplyImpulse(const glm::vec2& impulse) {
         return;
 
     linearvelocity += impulse * properties.inversemass;
+    DebugDrawBuffer::AddArrow(position, impulse, color::green);
 }
 
 Collider2D::Collider2D(size_t id, glm::vec2 half_extents): handle(id), half_extents(half_extents) {};

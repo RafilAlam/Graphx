@@ -2,9 +2,8 @@
 
 #include <glm/glm.hpp>
 #include <engine/core/include/debug.hpp>
-#include <limits>
+#include <engine/graphics/include/rendering/debugdrawbuffer.hpp>
 #include <span>
-#include <string>
 // Defines components that make up an entity
 
 class World;

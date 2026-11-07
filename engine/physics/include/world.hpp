@@ -35,7 +35,7 @@ private:
 };
 
 struct WorldSettings {
-    float gravity{2.81f};
+    float gravity{19.81f};
 };
 
 class World {

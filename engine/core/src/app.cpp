@@ -12,13 +12,13 @@ void PhysicsLayer::OnDetach() {}
 // Simulates Physics & Updates Positions
 void PhysicsLayer::OnUpdate() {
     app.currentFrame = app.GetTime();
-    float dt = app.currentFrame - app.lastFrame;
     app.lastFrame = app.currentFrame;
     for (auto& scene : app.GetProject().scenes) {
-        scene.world.Simulate(dt);
+        scene.world.Simulate(scene.physicstimestep);
         for (auto& rigidbody : scene.world.rigidbodies.dense) {
             Transform& transform = scene.transforms[rigidbody.handle.id];
             transform.position = glm::vec3{rigidbody.position, transform.position.z};
+            DebugDrawBuffer::AddArrow(rigidbody.position, rigidbody.linearvelocity, color::blue);
         }
     }
 }
