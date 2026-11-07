@@ -41,7 +41,7 @@ Scene::Scene(AssetManager* assetmanager, std::string filepath): assetmanager(ass
                     static_cast<float>(yyjson_get_num(yyjson_obj_get(half_extents, "x"))),
                     static_cast<float>(yyjson_get_num(yyjson_obj_get(half_extents, "y")))
                 };
-                PhysicalProperties properties{mass, friction, restitution};
+                PhysicalProperties properties{mass, sizevec, friction, restitution};
                 world.rigidbodies.emplace_back(ide, ide, transforms[ide].position, properties);
                 Debug::Print("World: Entity[" + std::to_string(ide+1) + '/' + std::to_string(maxe) + ']', "RigidBody Added (" + std::to_string(idc+1) + '/' + std::to_string(maxc) + ')');
             } else if (type == "collider") {

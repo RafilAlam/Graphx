@@ -13,9 +13,11 @@ struct PhysicsHandle {
 };
 
 struct PhysicalProperties {
-    PhysicalProperties(float mass, float friction, float restitution);
+    PhysicalProperties(float mass, glm::vec2 half_extents, float friction, float restitution);
     float mass{1.0f};
     float inversemass{1.0f};
+    float inertia{1.0f};
+    float inverseinertia{1.0f};
     float friction{1.0f};
     float restitution{1.0f};
 };
@@ -28,10 +30,12 @@ struct RigidBody2D {
 
     glm::vec2 position{0.0f};
     glm::vec2 linearvelocity{0.0f};
+    float angularvelocity{0.0f};
     PhysicsHandle handle;
 
     void ApplyForce(const glm::vec2& force);
     void ApplyImpulse(const glm::vec2& impulse);
+    void ApplyImpulseAtPosition(const glm::vec2& impulseposition, const glm::vec2& impulse);
 private:
     glm::vec2 m_forceaccumulator{0.0f};
 };

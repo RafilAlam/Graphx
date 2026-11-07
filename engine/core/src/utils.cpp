@@ -17,7 +17,3 @@ std::string LoadTextFile(std::string path) {
 
     return contents;
 }
-
-float Cross2D(glm::vec3 a, glm::vec3 b) {
-    return a.x * b.y - a.y * b.x;
-}

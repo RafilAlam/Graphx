@@ -207,26 +207,40 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
 }
 
 void ConstraintHandler2D::solve_collision(CollisionManifold manifold) {
+    auto crossfv2 = [](float a, const glm::vec2& b) {
+        return glm::vec2(-a * b.y, a * b.x);
+    };
+    auto cross2D = [](const glm::vec2& a,  const glm::vec2& b) {
+        return (a.x * b.y) - (a.y * b.x);
+    };
     RigidBody2D& rbA = world.rigidbodies[manifold.reference.id];
     RigidBody2D& rbB = world.rigidbodies[manifold.incident.id];
     float restitution = 0.85f;
 
-    float vRelAlongNormal = glm::dot(rbB.linearvelocity - rbA.linearvelocity, manifold.normal);
-    if (vRelAlongNormal > 0.0f)
-        return;
+    for (const auto& contact : manifold.contacts) {
+        glm::vec2 rA = contact.position - rbA.position;
+        glm::vec2 rB = contact.position - rbB.position;
 
-    float vDelta = -(1.0f + restitution) * vRelAlongNormal;
-    float K = rbA.properties.inversemass + rbB.properties.inversemass;
+        glm::vec2 vAcontact = rbA.linearvelocity + crossfv2(rbA.angularvelocity, rA);
+        glm::vec2 vBcontact = rbB.linearvelocity + crossfv2(rbB.angularvelocity, rB);
 
-    if (K == 0.0f)
-        return;
+        float vRelAlongNormal = glm::dot(vBcontact - vAcontact, manifold.normal);
+        if (vRelAlongNormal > 0.0f)
+            continue;
 
-    glm::vec2 impulse = (vDelta / K) * manifold.normal;
+        float vDelta = -(1.0f + restitution) * vRelAlongNormal;
+        float K = rbA.properties.inversemass + rbB.properties.inversemass 
+                  + rbA.properties.inverseinertia * std::pow(cross2D(rA, manifold.normal), 2) 
+                  + rbB.properties.inverseinertia * std::pow(cross2D(rB, manifold.normal), 2);
 
-    Debug::Print("CollisionSolver", "rbA: ", rbA.properties.inversemass, " rbB: ", rbB.properties.inversemass);
+        if (K == 0.0f)
+            continue;
 
-    rbA.ApplyImpulse(-impulse);
-    rbB.ApplyImpulse(impulse);
+        glm::vec2 impulse = (vDelta / K) * manifold.normal;
+
+        rbA.ApplyImpulseAtPosition(contact.position, -impulse);
+        rbB.ApplyImpulseAtPosition(contact.position, impulse);
+    }
 }
 
 void ConstraintHandler2D::HandleCollisions() {
@@ -238,6 +252,8 @@ void ConstraintHandler2D::HandleCollisions() {
             CollisionManifold manifold = test_sat(world.colliders.dense[i], world.colliders.dense[j]);
             if (manifold.colliding) {
                 Debug::Print("CollisionHandler", "Colliding!");
+                DebugDrawBuffer::AddPoint(manifold.contacts[0].position, color::yellow);
+                DebugDrawBuffer::AddPoint(manifold.contacts[1].position, color::yellow);
                 manifolds.emplace_back(std::move(manifold));
             }
         }
