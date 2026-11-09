@@ -63,6 +63,15 @@ struct DebugVertex {
 class DebugDrawBuffer {
     friend class App;
     friend class Renderer;
+
+    static void init();
+    static inline Shader m_coreshader;
+    
+    static inline GLuint m_buffers[2];
+    static inline GLuint m_arrays[2];
+
+    static inline std::vector<DebugVertex> m_pointvertices;
+    static inline std::vector<DebugVertex> m_linevertices;
 public:
     static void AddPoint(const glm::vec2 position, const glm::vec3 color);
     static void AddLine(const glm::vec2 p0, const glm::vec2 p1, const glm::vec3 color);
@@ -73,13 +82,4 @@ public:
 
     DebugDrawBuffer(const DebugDrawBuffer&) = delete;
     DebugDrawBuffer& operator=(const DebugDrawBuffer&) = delete;
-private:
-    static void init();
-    static inline Shader m_coreshader;
-    
-    static inline GLuint m_buffers[2];
-    static inline GLuint m_arrays[2];
-
-    static inline std::vector<DebugVertex> m_pointvertices;
-    static inline std::vector<DebugVertex> m_linevertices;
 };

@@ -206,6 +206,14 @@ CollisionManifold ConstraintHandler2D::test_sat(const Collider2D& cA, const Coll
     return manifold;
 }
 
+float ConstraintHandler2D::combine_friction(float a, float b) {
+    return a * b;
+}
+
+float ConstraintHandler2D::combine_restitution(float a, float b) {
+    return std::max(a, b);
+}
+
 void ConstraintHandler2D::solve_collision(CollisionManifold manifold) {
     auto crossfv2 = [](float a, const glm::vec2& b) {
         return glm::vec2(-a * b.y, a * b.x);
@@ -215,8 +223,8 @@ void ConstraintHandler2D::solve_collision(CollisionManifold manifold) {
     };
     RigidBody2D& rbA = world.rigidbodies[manifold.reference.id];
     RigidBody2D& rbB = world.rigidbodies[manifold.incident.id];
-    float restitution = 0.85f;
-    float friction = 1.0f;
+    float restitution = combine_restitution(rbA.properties.restitution, rbB.properties.restitution);
+    float friction = combine_friction(rbA.properties.friction, rbB.properties.friction);
 
     for (const auto& contact : manifold.contacts) {
         glm::vec2 rA = contact.position - rbA.position;

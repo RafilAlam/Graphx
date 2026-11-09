@@ -23,15 +23,16 @@ struct CollisionManifold {
 };
 
 class ConstraintHandler2D {
-public:
-    ConstraintHandler2D(World& world);
-    void HandleCollisions();
-private:
     World& world;
     std::vector<CollisionManifold> manifolds;
     bool test_aabb(const Collider2D& cA, const Collider2D& cB) const;
     CollisionManifold test_sat(const Collider2D& cA, const Collider2D& cB) const;
+    float combine_friction(float a, float b);
+    float combine_restitution(float a, float b);
     void solve_collision(CollisionManifold manifold);
+public:
+    ConstraintHandler2D(World& world);
+    void HandleCollisions();
 };
 
 struct WorldSettings {
@@ -39,17 +40,13 @@ struct WorldSettings {
 };
 
 class World {
+    void integratevelocity(RigidBody2D& rigidbody, float dt);
+    void integrateposition(RigidBody2D& rigidbody, float dt);
 public:
     World();
     WorldSettings settings;
-
     sparseset<RigidBody2D> rigidbodies;
     sparseset<Collider2D> colliders;
-
     ConstraintHandler2D constrainthandler;
-
     void Simulate(float dt);
-private:
-    void integratevelocity(RigidBody2D& rigidbody, float dt);
-    void integrateposition(RigidBody2D& rigidbody, float dt);
 };

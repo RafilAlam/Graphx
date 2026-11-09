@@ -25,26 +25,25 @@ public:
 };
 
 class PhysicsLayer : public Layer {
+    App& app;
 public:
     PhysicsLayer(App& app);
     void OnAttach() override;
     void OnDetach() override;
     void OnUpdate() override;
-private:
-    App& app;
 };
 
 class RenderingLayer : public Layer {
+    App& app;
 public:
     RenderingLayer(App& app);
     void OnAttach() override;
     void OnDetach() override;
     void OnUpdate() override;
-private:
-    App& app;
 };
 
 class LayerStack {
+    std::vector<std::unique_ptr<Layer>> m_layers;
 public:
     LayerStack(size_t numLayers);
     template<typename T, typename... Args>
@@ -55,8 +54,6 @@ public:
     }
     void Clear();
     void Update();
-private:
-    std::vector<std::unique_ptr<Layer>> m_layers;
 };
 
 struct AppConfig {
@@ -66,7 +63,6 @@ struct AppConfig {
 };
 
 class App {
-private:
     Window m_window;
     Renderer m_renderer;
     AssetManager m_assetmanager;
