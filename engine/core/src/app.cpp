@@ -61,6 +61,7 @@ App::App(AppConfig config, std::string projectname)
    m_project(&m_assetmanager, projectname),
    m_layerstack(1)
 {
+    Input::RegisterWindow(m_window.GetHandle());
     DebugDrawBuffer::init();
     m_layerstack.PushLayer<PhysicsLayer>(*this);
     m_layerstack.PushLayer<RenderingLayer>(*this);

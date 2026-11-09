@@ -45,7 +45,7 @@ add_subdirectory(extern/uuid_v4)
 add_subdirectory(extern/glad)
 
 add_library(Graphx STATIC
- engine/core/src/app.cpp engine/core/src/window.cpp engine/core/src/debug.cpp engine/core/src/utils.cpp engine/graphics/src/stb_image.cpp
+ engine/core/src/app.cpp engine/core/src/window.cpp engine/core/src/input.cpp engine/core/src/debug.cpp engine/core/src/utils.cpp engine/graphics/src/stb_image.cpp
  engine/graphics/src/project/project.cpp engine/graphics/src/project/entity.cpp
  engine/graphics/src/rendering/renderer.cpp engine/graphics/src/rendering/debugdrawbuffer.cpp engine/graphics/src/rendering/uniformbuffer.cpp engine/graphics/src/rendering/assetmanager.cpp engine/graphics/src/rendering/material.cpp engine/graphics/src/rendering/texture.cpp engine/graphics/src/rendering/shader.cpp engine/graphics/src/rendering/mesh.cpp
  engine/physics/src/world.cpp engine/physics/src/components2D.cpp

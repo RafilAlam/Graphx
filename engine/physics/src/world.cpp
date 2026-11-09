@@ -271,7 +271,6 @@ void ConstraintHandler2D::HandleCollisions() {
                 continue;
             CollisionManifold manifold = test_sat(world.colliders.dense[i], world.colliders.dense[j]);
             if (manifold.colliding) {
-                Debug::Print("CollisionHandler", "Colliding!");
                 DebugDrawBuffer::AddPoint(manifold.contacts[0].position, color::yellow);
                 DebugDrawBuffer::AddPoint(manifold.contacts[1].position, color::yellow);
                 manifolds.emplace_back(std::move(manifold));
